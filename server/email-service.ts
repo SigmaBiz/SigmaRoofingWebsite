@@ -130,7 +130,7 @@ Contact them immediately to schedule their estimate!
       // Send email using SendGrid
       await this.mailService.send({
         to: this.config.notificationEmail,
-        from: 'leads@sigmaroofing.com', // This will be overridden by SendGrid's verified sender
+        from: this.config.notificationEmail, // Use the verified sender email
         subject: subject,
         text: textBody,
         html: htmlBody,

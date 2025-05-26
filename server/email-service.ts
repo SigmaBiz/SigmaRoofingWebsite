@@ -127,9 +127,14 @@ Lead ID: #${lead.id}
 Contact them immediately to schedule their estimate!
       `;
 
-      // Send email using SendGrid with verified sender
+      // Send email using SendGrid with verified sender - multiple recipients
+      const recipients = [
+        this.config.notificationEmail,
+        // Add more email addresses here as needed
+      ];
+      
       await this.mailService.send({
-        to: this.config.notificationEmail,
+        to: recipients,
         from: {
           email: 'aescalante@oksigma.com',
           name: 'Sigma Roofing Leads'

@@ -1,5 +1,4 @@
 import { google } from 'googleapis';
-import nodemailer from 'nodemailer';
 import { ContactRequest } from '../shared/schema';
 
 interface EmailServiceConfig {
@@ -8,17 +7,17 @@ interface EmailServiceConfig {
 }
 
 class EmailService {
-  private transporter: nodemailer.Transporter | null = null;
+  private gmail: any = null;
   private config: EmailServiceConfig;
 
   constructor(config: EmailServiceConfig) {
     this.config = config;
-    this.initializeTransporter();
+    this.initializeGmail();
   }
 
-  private async initializeTransporter() {
+  private async initializeGmail() {
     try {
-      console.log('Starting Gmail transporter initialization...');
+      console.log('Starting Gmail API initialization...');
       const serviceAccount = JSON.parse(this.config.serviceAccountKey);
       console.log('Service account email:', serviceAccount.client_email);
       
@@ -29,34 +28,20 @@ class EmailService {
         ['https://www.googleapis.com/auth/gmail.send']
       );
 
-      console.log('Getting access token...');
-      const accessToken = await oauth2Client.getAccessToken();
-      console.log('Access token obtained:', !!accessToken.token);
+      await oauth2Client.authorize();
+      console.log('Gmail API authorized successfully');
 
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        auth: {
-          type: 'OAuth2',
-          user: serviceAccount.client_email,
-          clientId: serviceAccount.client_id,
-          clientSecret: serviceAccount.client_secret,
-          refreshToken: undefined,
-          accessToken: accessToken.token,
-        },
-      });
-
-      console.log('Gmail transporter initialized successfully');
+      this.gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+      console.log('Gmail API client initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Gmail transporter:', error);
+      console.error('Failed to initialize Gmail API:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
     }
   }
 
   async sendLeadNotification(lead: ContactRequest): Promise<boolean> {
-    if (!this.transporter) {
-      console.error('Email transporter not initialized');
+    if (!this.gmail) {
+      console.error('Gmail API not initialized');
       return false;
     }
 

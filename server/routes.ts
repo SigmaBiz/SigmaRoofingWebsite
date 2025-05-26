@@ -46,6 +46,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Google Places Autocomplete for Oklahoma addresses
+  app.get("/api/address-suggestions", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      const apiKey = process.env.GOOGLE_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ success: false, message: "Google API key not configured" });
+      }
+
+      if (!query || query.length < 3) {
+        return res.json({ success: true, suggestions: [] });
+      }
+
+      // Google Places Autocomplete API with Oklahoma restriction
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=address&components=country:US|administrative_area:OK&key=${apiKey}`
+      );
+      
+      const data = await response.json();
+      
+      if (data.status === "OK") {
+        const suggestions = data.predictions?.slice(0, 5).map((pred: any) => ({
+          formatted_address: pred.description,
+          place_id: pred.place_id
+        })) || [];
+        
+        res.json({ 
+          success: true, 
+          suggestions: suggestions 
+        });
+      } else {
+        res.json({ success: true, suggestions: [] });
+      }
+      
+    } catch (error) {
+      console.error("Error fetching address suggestions:", error);
+      res.json({ success: true, suggestions: [] });
+    }
+  });
+
   // Google Business Profile reviews for BBAV Roofing LLC
   app.get("/api/reviews", async (req, res) => {
     try {

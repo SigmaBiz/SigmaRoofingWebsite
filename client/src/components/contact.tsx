@@ -112,30 +112,28 @@ export default function Contact() {
            text.length >= 10; // Minimum description length
   };
 
-  // Address validation and suggestions for Oklahoma only
+  // Google Places Autocomplete for Oklahoma addresses
   const searchOklahomaAddresses = async (query: string) => {
     if (query.length < 3) {
       setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
       return;
     }
 
     try {
-      // Using Google Places API to get Oklahoma addresses
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query + ' Oklahoma')}&types=address&components=country:US|administrative_area:OK&key=${import.meta.env.VITE_GOOGLE_API_KEY}`
-      );
+      // Call our backend API to get address suggestions
+      const response = await fetch(`/api/address-suggestions?q=${encodeURIComponent(query)}`);
       
       if (response.ok) {
         const data = await response.json();
-        const suggestions = data.predictions?.slice(0, 5).map((pred: any) => ({
-          formatted_address: pred.description,
-          place_id: pred.place_id
-        })) || [];
-        setAddressSuggestions(suggestions);
-        setShowAddressSuggestions(suggestions.length > 0);
+        if (data.success && data.suggestions) {
+          setAddressSuggestions(data.suggestions);
+          setShowAddressSuggestions(data.suggestions.length > 0);
+        }
       }
     } catch (error) {
       console.log('Address validation temporarily unavailable');
+      setShowAddressSuggestions(false);
     }
   };
 
@@ -439,22 +437,38 @@ export default function Contact() {
                     id="address"
                     value={formData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
-                    placeholder="123 Main Street, Oklahoma City, OK 73101"
+                    onFocus={() => {
+                      if (formData.address.length >= 3) {
+                        searchOklahomaAddresses(formData.address);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Delay hiding suggestions to allow clicking
+                      setTimeout(() => setShowAddressSuggestions(false), 200);
+                    }}
+                    placeholder="Start typing your address... (e.g., 123 Main Street)"
                     required
-                    className={`h-12 ${errors.address ? 'border-red-500' : ''}`}
+                    className={`h-12 ${errors.address ? 'border-red-500' : formData.address.toLowerCase().includes('ok') ? 'border-green-500' : ''}`}
                     autoComplete="off"
                   />
                   
                   {showAddressSuggestions && addressSuggestions.length > 0 && (
-                    <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-xl max-h-64 overflow-y-auto mt-1">
+                      <div className="px-3 py-2 text-xs text-gray-500 bg-gray-50 border-b">
+                        <MapPin className="w-3 h-3 inline mr-1" />
+                        Verified Oklahoma addresses
+                      </div>
                       {addressSuggestions.map((suggestion, index) => (
                         <button
                           key={index}
                           type="button"
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                          className="w-full text-left px-4 py-3 hover:bg-emerald-50 text-sm border-b border-gray-100 last:border-b-0 transition-colors"
                           onClick={() => handleAddressSelect(suggestion)}
                         >
-                          {suggestion.formatted_address}
+                          <div className="flex items-start">
+                            <MapPin className="w-4 h-4 text-emerald-600 mt-0.5 mr-2 flex-shrink-0" />
+                            <span className="text-gray-900">{suggestion.formatted_address}</span>
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -466,6 +480,13 @@ export default function Contact() {
                       {errors.address}
                     </p>
                   )}
+                  
+                  {formData.address.toLowerCase().includes('oklahoma') || formData.address.toLowerCase().includes('ok') ? (
+                    <p className="text-green-600 text-sm flex items-center">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      ✓ Oklahoma address verified
+                    </p>
+                  ) : null}
                 </div>
 
                 {/* Service Type Selection */}

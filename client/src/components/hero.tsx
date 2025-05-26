@@ -18,9 +18,13 @@ export default function Hero() {
             <span className="text-sigma-emerald">Brave the storm.</span>{" "}
             <span className="text-white">Serve with heart.</span>
           </h1>
-          <p className="text-lg lg:text-xl mb-8 leading-relaxed text-gray-200 max-w-2xl mx-auto lg:mx-0">
+          <p className="text-lg lg:text-xl mb-6 leading-relaxed text-gray-200 max-w-2xl mx-auto lg:mx-0">
             Quality craftsmanship and down-to-earth, responsive customer service is what we do. Whether you need 
             major repairs or minor fixes, we work with you to find the best solution for your home's specific needs.
+          </p>
+          <p className="text-base lg:text-lg mb-8 leading-relaxed text-gray-300 max-w-2xl mx-auto lg:mx-0 font-medium">
+            Schedule today for your on-site estimate or ask about our convenient digital estimates. Emergency storm 
+            repairs like tarping and damage assessments are available upon request. Book today!
           </p>
           <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6">
             <Button

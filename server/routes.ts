@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactRequestSchema } from "@shared/schema";
+import { emailService } from "./email-service";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -11,8 +12,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertContactRequestSchema.parse(req.body);
       const contactRequest = await storage.createContactRequest(validatedData);
       
-      // Lead saved successfully - email integration removed
-      console.log(`New lead received: ${contactRequest.firstName} ${contactRequest.lastName}`);
+      // Send email notification for new lead
+      try {
+        await emailService.sendLeadNotification(contactRequest);
+        console.log(`Email notification sent for lead: ${contactRequest.firstName} ${contactRequest.lastName}`);
+      } catch (emailError) {
+        console.error("Failed to send email notification:", emailError);
+        // Don't fail the request if email fails - lead is still saved
+      }
       
       res.json({ 
         success: true, 

@@ -87,7 +87,7 @@ export default function Testimonials() {
         <div className="text-center mb-16">
           <h2 className="font-bold text-4xl text-sigma-charcoal mb-4">What Our Customers Say</h2>
           <p className="text-xl text-sigma-light-gray max-w-2xl mx-auto">
-            Live reviews from satisfied customers who have experienced our professional roofing services.
+            Here are just some of our absolutely satisfied customers who have experienced our professional roofing services.
           </p>
           <div className="mt-4 flex items-center justify-center space-x-4">
             <div className="flex items-center">
@@ -96,10 +96,8 @@ export default function Testimonials() {
                   <Star key={i} className="fill-current" size={20} />
                 ))}
               </div>
-              <span className="ml-2 font-semibold text-sigma-charcoal">5.0</span>
+              <span className="ml-2 font-semibold text-sigma-charcoal">5.0 Star Rating</span>
             </div>
-            <span className="text-sigma-light-gray">•</span>
-            <span className="text-sigma-light-gray">{reviews.length} reviews</span>
             {isLoading && <span className="text-sigma-emerald ml-2">↻ Updating...</span>}
           </div>
         </div>

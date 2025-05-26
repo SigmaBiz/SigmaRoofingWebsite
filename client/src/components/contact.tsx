@@ -158,6 +158,7 @@ export default function Contact() {
                       <SelectItem value="storm-damage">Storm Damage</SelectItem>
                       <SelectItem value="inspection">Inspection</SelectItem>
                       <SelectItem value="gutter-services">Gutter Services</SelectItem>
+                      <SelectItem value="exterior-painting">Exterior Painting</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -190,7 +191,7 @@ export default function Contact() {
             <div>
               <h3 className="font-bold text-2xl mb-6">Get In Touch</h3>
               <p className="text-lg text-sigma-gray mb-8">
-                Contact Sigma Roofing LLC today for professional roofing services in Edmond and surrounding areas. We're here to help with all your roofing needs.
+                Contact Sigma Roofing LLC today for professional roofing and painting services in Edmond and surrounding areas. We're here to help with all your home improvement needs.
               </p>
             </div>
 

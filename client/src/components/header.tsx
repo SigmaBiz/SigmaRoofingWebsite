@@ -19,9 +19,11 @@ export default function Header() {
         <div className="flex justify-between items-center">
           {/* Company Logo and Name */}
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-sigma-gold rounded-lg flex items-center justify-center">
-              <Home className="text-white text-xl" />
-            </div>
+            <img 
+              src="/attached_assets/6EA9420A-1BE7-45AD-8484-C09DB8F162BF.PNG" 
+              alt="Sigma Roofing LLC Logo" 
+              className="w-12 h-12 object-contain"
+            />
             <div>
               <h1 className="font-bold text-xl text-sigma-dark">Sigma Roofing LLC</h1>
               <p className="text-sm text-sigma-gray">LIC#80006734</p>

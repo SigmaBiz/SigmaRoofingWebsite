@@ -9,10 +9,10 @@ const projects = [
     category: "Residential Project"
   },
   {
-    image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Commercial Flat Roof",
-    description: "TPO roofing system installation for a 10,000 sq ft commercial building with enhanced insulation.",
-    category: "Commercial Project"
+    image: "https://images.unsplash.com/photo-1562259949-e8e7689d7828?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    title: "Exterior House Painting",
+    description: "Complete exterior painting for a beautiful Edmond home. Premium paint with weather protection and curb appeal enhancement.",
+    category: "Painting Project"
   },
   {
     image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
@@ -33,10 +33,10 @@ const projects = [
     category: "Residential Project"
   },
   {
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Industrial Roofing",
-    description: "Large-scale industrial roof installation with specialized materials for harsh weather conditions.",
-    category: "Industrial Project"
+    image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+    title: "Gutter Installation",
+    description: "New seamless gutter system installation with leaf guards to protect foundation and landscaping.",
+    category: "Gutter Project"
   }
 ];
 

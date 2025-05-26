@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Home, Building, Wrench, Shield, Droplets, CloudRain, CheckCircle } from "lucide-react";
+import { Home, PaintBucket, Wrench, Shield, Droplets, CloudRain, CheckCircle } from "lucide-react";
 
 const services = [
   {
@@ -10,10 +10,10 @@ const services = [
     features: ["Asphalt Shingles", "Metal Roofing", "Tile Roofing", "Storm Damage Repair"]
   },
   {
-    icon: Building,
-    title: "Commercial Roofing",
-    description: "Professional commercial roofing solutions for businesses, warehouses, and industrial facilities.",
-    features: ["Flat Roofing Systems", "TPO & EPDM", "Built-Up Roofing", "Preventive Maintenance"]
+    icon: PaintBucket,
+    title: "Exterior Painting",
+    description: "Professional exterior painting services to protect and beautify your home with quality materials and expert craftsmanship.",
+    features: ["House Painting", "Trim & Siding", "Deck Staining", "Power Washing"]
   },
   {
     icon: Wrench,
@@ -46,9 +46,9 @@ export default function Services() {
     <section id="services" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="font-bold text-4xl text-sigma-dark mb-4">Our Roofing Services</h2>
+          <h2 className="font-bold text-4xl text-sigma-dark mb-4">Our Services</h2>
           <p className="text-xl text-sigma-gray max-w-2xl mx-auto">
-            From residential repairs to commercial installations, we provide comprehensive roofing solutions for all your needs.
+            From residential roofing to exterior painting, we provide comprehensive home improvement solutions for all your needs.
           </p>
         </div>
 

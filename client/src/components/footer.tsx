@@ -17,16 +17,18 @@ export default function Footer() {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-12 h-12 bg-sigma-gold rounded-lg flex items-center justify-center">
-                <Home className="text-white text-xl" />
-              </div>
+              <img 
+                src="/attached_assets/6EA9420A-1BE7-45AD-8484-C09DB8F162BF.PNG" 
+                alt="Sigma Roofing LLC Logo" 
+                className="w-12 h-12 object-contain"
+              />
               <div>
                 <h3 className="font-bold text-xl">Sigma Roofing LLC</h3>
                 <p className="text-sm text-gray-400">LIC#80006734</p>
               </div>
             </div>
             <p className="text-gray-300 mb-4">
-              Professional roofing services in Edmond, Oklahoma. Licensed, insured, and committed to quality workmanship.
+              Professional roofing and painting services in Edmond, Oklahoma. Licensed, insured, and committed to quality workmanship.
             </p>
             <div className="flex space-x-4">
               <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
@@ -46,7 +48,7 @@ export default function Footer() {
             <h3 className="font-bold text-lg mb-6">Our Services</h3>
             <ul className="space-y-3 text-gray-300">
               <li><button onClick={() => scrollToSection("services")} className="hover:text-sigma-gold transition-colors text-left">Residential Roofing</button></li>
-              <li><button onClick={() => scrollToSection("services")} className="hover:text-sigma-gold transition-colors text-left">Commercial Roofing</button></li>
+              <li><button onClick={() => scrollToSection("services")} className="hover:text-sigma-gold transition-colors text-left">Exterior Painting</button></li>
               <li><button onClick={() => scrollToSection("services")} className="hover:text-sigma-gold transition-colors text-left">Roof Repairs</button></li>
               <li><button onClick={() => scrollToSection("services")} className="hover:text-sigma-gold transition-colors text-left">Storm Damage</button></li>
               <li><button onClick={() => scrollToSection("services")} className="hover:text-sigma-gold transition-colors text-left">Roof Inspections</button></li>

@@ -18,8 +18,8 @@ export default function Hero() {
             <span className="text-sigma-gold">Edmond, OK</span>
           </h1>
           <p className="text-xl mb-8 leading-relaxed text-gray-200">
-            Trusted roofing contractor with over 15 years of experience. We provide quality 
-            residential and commercial roofing solutions with a lifetime warranty.
+            Trusted roofing and painting contractor with over 15 years of experience. We provide quality 
+            residential roofing, exterior painting, and home improvement solutions with comprehensive warranties.
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
             <Button

@@ -8,11 +8,13 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import Sitemap from "@/pages/sitemap";
 import NotFound from "@/pages/not-found";
+import AdminDashboard from "@/pages/admin";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/sitemap" component={Sitemap} />

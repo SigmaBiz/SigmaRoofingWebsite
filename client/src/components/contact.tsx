@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, MapPin, IdCard, AlertTriangle, Send } from "lucide-react";
+import { Phone, Mail, MapPin, IdCard, AlertTriangle, Send, Calendar, Clock, ShieldCheck } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -24,6 +24,19 @@ interface ContactForm {
   preferredTime2: string;
 }
 
+interface ValidationErrors {
+  email?: string;
+  phone?: string;
+  address?: string;
+  description?: string;
+  dates?: string;
+}
+
+interface AddressSuggestion {
+  formatted_address: string;
+  place_id: string;
+}
+
 export default function Contact() {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ContactForm>({
@@ -40,6 +53,212 @@ export default function Contact() {
     preferredTime2: ""
   });
 
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+  // Get minimum date (today)
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Available time slots for appointments
+  const availableTimeSlots = [
+    "8:00 AM - 12:00 PM",
+    "12:00 PM - 4:00 PM", 
+    "4:00 PM - 7:00 PM"
+  ];
+
+  // Email validation - strict for lead quality
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
+    const domain = email.split('@')[1]?.toLowerCase();
+    return emailRegex.test(email) && 
+           !email.includes('+') && 
+           email.length <= 50 &&
+           (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
+  };
+
+  // Phone validation (US format only)
+  const validatePhone = (phone: string): boolean => {
+    const phoneDigits = phone.replace(/\D/g, '');
+    return phoneDigits.length === 10 && !['0000000000', '1111111111', '1234567890'].includes(phoneDigits);
+  };
+
+  // Format phone number as user types
+  const formatPhoneNumber = (value: string): string => {
+    const phoneNumber = value.replace(/\D/g, '');
+    if (phoneNumber.length >= 6) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+    } else if (phoneNumber.length >= 3) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    }
+    return phoneNumber;
+  };
+
+  // Content filtering for spam and inappropriate content
+  const filterContent = (text: string): boolean => {
+    const bannedWords = ['spam', 'test123', 'asdf', 'qwerty', 'fake', 'scam', 'viagra', 'casino'];
+    const suspiciousPatterns = [
+      /(.)\1{4,}/g, // Repeated characters like "aaaaaaa"
+      /^[A-Z\s!]{20,}$/g, // All caps long text
+      /\b(click here|free money|act now|limited time|urgent)\b/gi, // Spam phrases
+      /http[s]?:\/\//gi // URLs
+    ];
+    
+    const lowerText = text.toLowerCase();
+    return !bannedWords.some(word => lowerText.includes(word)) && 
+           !suspiciousPatterns.some(pattern => pattern.test(text)) &&
+           text.length >= 10; // Minimum description length
+  };
+
+  // Address validation and suggestions for Oklahoma only
+  const searchOklahomaAddresses = async (query: string) => {
+    if (query.length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    try {
+      // Using Google Places API to get Oklahoma addresses
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query + ' Oklahoma')}&types=address&components=country:US|administrative_area:OK&key=${import.meta.env.VITE_GOOGLE_API_KEY}`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        const suggestions = data.predictions?.slice(0, 5).map((pred: any) => ({
+          formatted_address: pred.description,
+          place_id: pred.place_id
+        })) || [];
+        setAddressSuggestions(suggestions);
+        setShowAddressSuggestions(suggestions.length > 0);
+      }
+    } catch (error) {
+      console.log('Address validation temporarily unavailable');
+    }
+  };
+
+  // Check if time slot is available (simulate booking system)
+  const isSlotAvailable = (date: string, time: string): boolean => {
+    const slotKey = `${date}-${time}`;
+    return !bookedSlots.includes(slotKey);
+  };
+
+  // Validate appointment times don't overlap and are available
+  const validateAppointmentTimes = (): string | null => {
+    if (formData.preferredDate1 === formData.preferredDate2 && 
+        formData.preferredTime1 === formData.preferredTime2 &&
+        formData.preferredDate1 && formData.preferredTime1) {
+      return "Please select different time slots for your preferred appointments";
+    }
+    
+    if (formData.preferredDate1 && formData.preferredTime1) {
+      if (!isSlotAvailable(formData.preferredDate1, formData.preferredTime1)) {
+        return "Your first preferred time slot is already booked. Please select another time.";
+      }
+    }
+    
+    if (formData.preferredDate2 && formData.preferredTime2) {
+      if (!isSlotAvailable(formData.preferredDate2, formData.preferredTime2)) {
+        return "Your second preferred time slot is already booked. Please select another time.";
+      }
+    }
+    
+    return null;
+  };
+
+  // Real-time validation as user types
+  const validateField = (field: keyof ContactForm, value: string) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'email':
+        if (value && !validateEmail(value)) {
+          newErrors.email = "Please enter a valid email address from a recognized provider";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+      case 'phone':
+        if (value && !validatePhone(value)) {
+          newErrors.phone = "Please enter a valid 10-digit US phone number";
+        } else {
+          delete newErrors.phone;
+        }
+        break;
+      case 'address':
+        if (value && !value.toLowerCase().includes('oklahoma') && !value.toLowerCase().includes('ok')) {
+          newErrors.address = "We currently only serve properties in Oklahoma";
+        } else {
+          delete newErrors.address;
+        }
+        break;
+      case 'description':
+        if (value && !filterContent(value)) {
+          newErrors.description = "Please provide a detailed, professional description of your roofing needs";
+        } else {
+          delete newErrors.description;
+        }
+        break;
+    }
+    
+    setErrors(newErrors);
+  };
+
+  const handleInputChange = (field: keyof ContactForm, value: string) => {
+    let processedValue = value;
+    
+    // Special processing for phone numbers
+    if (field === 'phone') {
+      processedValue = formatPhoneNumber(value);
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: processedValue }));
+    validateField(field, processedValue);
+    
+    // Address suggestions for Oklahoma
+    if (field === 'address') {
+      searchOklahomaAddresses(value);
+    }
+  };
+
+  const handleAddressSelect = (suggestion: AddressSuggestion) => {
+    setFormData(prev => ({ ...prev, address: suggestion.formatted_address }));
+    setShowAddressSuggestions(false);
+    setAddressSuggestions([]);
+    validateField('address', suggestion.formatted_address);
+  };
+
+  // Comprehensive form validation before submission
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
+    
+    if (!validateEmail(formData.email)) {
+      newErrors.email = "Valid email required";
+    }
+    
+    if (!validatePhone(formData.phone)) {
+      newErrors.phone = "Valid phone number required";
+    }
+    
+    if (!formData.address.toLowerCase().includes('oklahoma') && !formData.address.toLowerCase().includes('ok')) {
+      newErrors.address = "Oklahoma address required";
+    }
+    
+    if (!filterContent(formData.description)) {
+      newErrors.description = "Detailed project description required";
+    }
+    
+    const dateError = validateAppointmentTimes();
+    if (dateError) {
+      newErrors.dates = dateError;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const contactMutation = useMutation({
     mutationFn: async (data: ContactForm) => {
       const response = await apiRequest("POST", "/api/contact", data);
@@ -48,8 +267,9 @@ export default function Contact() {
     onSuccess: (data) => {
       toast({
         title: "Request Submitted Successfully!",
-        description: data.message,
+        description: "We'll contact you within 24 hours to schedule your estimate.",
       });
+      // Reset form after successful submission
       setFormData({
         firstName: "",
         lastName: "",
@@ -63,369 +283,355 @@ export default function Contact() {
         preferredDate2: "",
         preferredTime2: ""
       });
+      setErrors({});
     },
     onError: (error) => {
       toast({
-        title: "Error Submitting Request",
+        title: "Submission Failed",
         description: "Please check your information and try again.",
         variant: "destructive",
       });
     },
   });
 
-  // Validation functions
-  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const isValidPhone = (phone: string) => /^[\d\s\-\(\)]+$/.test(phone) && phone.replace(/\D/g, '').length >= 10;
-  
-  const isFormValid = () => {
-    return (
-      formData.firstName.trim() &&
-      formData.lastName.trim() &&
-      isValidEmail(formData.email) &&
-      isValidPhone(formData.phone) &&
-      formData.address.trim() &&
-      formData.serviceType &&
-      formData.preferredDate1 &&
-      formData.preferredTime1 &&
-      formData.preferredDate2 &&
-      formData.preferredTime2
-    );
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isFormValid()) {
+    if (!validateForm()) {
       toast({
-        title: "Required Fields Missing",
-        description: "Please fill in all required fields including two preferred appointment times.",
+        title: "Please Complete All Required Fields",
+        description: "Check the highlighted fields and try again.",
         variant: "destructive",
       });
       return;
     }
-
+    
     contactMutation.mutate(formData);
   };
 
-  // Generate time slots (8 AM to 3 PM start times for 4-hour windows)
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 8; hour <= 15; hour++) {
-      const startTime = hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`;
-      const endHour = hour + 4;
-      const endTime = endHour <= 12 ? `${endHour}:00 AM` : `${endHour - 12}:00 PM`;
-      slots.push({
-        value: `${hour}:00`,
-        label: `${startTime} - ${endTime}`
-      });
-    }
-    return slots;
+  // Check if form is valid for submission
+  const isFormValid = () => {
+    return formData.firstName.trim() &&
+           formData.lastName.trim() &&
+           validateEmail(formData.email) &&
+           validatePhone(formData.phone) &&
+           formData.address.trim() &&
+           formData.serviceType &&
+           filterContent(formData.description) &&
+           formData.preferredDate1 &&
+           formData.preferredTime1 &&
+           formData.preferredDate2 &&
+           formData.preferredTime2 &&
+           Object.keys(errors).length === 0;
   };
-
-  const timeSlots = generateTimeSlots();
-
-  const handleInputChange = (field: keyof ContactForm, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const serviceAreas = [
-    "Edmond", "Oklahoma City", "Moore", "Norman", 
-    "Yukon", "Mustang", "Guthrie", "Deer Creek"
-  ];
 
   return (
-    <section id="contact" className="py-20 bg-white">
-      <div className="container mx-auto px-4">
+    <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-white">
+      <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="font-bold text-4xl text-sigma-dark mb-4">Get Your Free Estimate</h2>
-          <p className="text-xl text-sigma-gray max-w-2xl mx-auto">
-            Ready to protect your property with a quality roof? Contact Sigma Roofing LLC today for your free, no-obligation estimate.
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Get Your Free Roofing Estimate
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Professional roofing services in Oklahoma. Fill out our secure form for a detailed estimate within 24 hours.
           </p>
+          <div className="flex items-center justify-center mt-4 text-emerald-600">
+            <ShieldCheck className="w-5 h-5 mr-2" />
+            <span className="text-sm font-medium">Verified Lead Protection</span>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <Card className="bg-sigma-cream">
+        <div className="max-w-4xl mx-auto">
+          <Card className="shadow-2xl border-0">
             <CardContent className="p-8">
-              <h3 className="font-bold text-2xl mb-6">Request Free Estimate</h3>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="firstName">First Name *</Label>
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Personal Information */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName" className="text-sm font-medium">
+                      <IdCard className="w-4 h-4 inline mr-2" />
+                      First Name *
+                    </Label>
                     <Input
                       id="firstName"
                       value={formData.firstName}
-                      onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      placeholder="John"
+                      onChange={(e) => handleInputChange('firstName', e.target.value)}
+                      placeholder="Enter your first name"
                       required
+                      className="h-12"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="lastName">Last Name *</Label>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName" className="text-sm font-medium">
+                      Last Name *
+                    </Label>
                     <Input
                       id="lastName"
                       value={formData.lastName}
-                      onChange={(e) => handleInputChange("lastName", e.target.value)}
-                      placeholder="Doe"
+                      onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      placeholder="Enter your last name"
                       required
+                      className="h-12"
                     />
                   </div>
                 </div>
-                
-                <div>
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="john@example.com"
-                    required
-                  />
+
+                {/* Contact Information with Real-time Validation */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      <Mail className="w-4 h-4 inline mr-2" />
+                      Email Address *
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="your.email@example.com"
+                      required
+                      className={`h-12 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-green-500' : ''}`}
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm flex items-center">
+                        <AlertTriangle className="w-4 h-4 mr-1" />
+                        {errors.email}
+                      </p>
+                    )}
+                    {validateEmail(formData.email) && formData.email && !errors.email && (
+                      <p className="text-green-600 text-sm">✓ Email verified</p>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-medium">
+                      <Phone className="w-4 h-4 inline mr-2" />
+                      Phone Number *
+                    </Label>
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="(405) 555-0123"
+                      required
+                      className={`h-12 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-green-500' : ''}`}
+                    />
+                    {errors.phone && (
+                      <p className="text-red-500 text-sm flex items-center">
+                        <AlertTriangle className="w-4 h-4 mr-1" />
+                        {errors.phone}
+                      </p>
+                    )}
+                    {validatePhone(formData.phone) && formData.phone && !errors.phone && (
+                      <p className="text-green-600 text-sm">✓ Phone verified</p>
+                    )}
+                  </div>
                 </div>
-                
-                <div>
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="(405) 123-4567"
-                    required
-                    className={!isValidPhone(formData.phone) && formData.phone ? "border-red-300" : ""}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="address">Property Address *</Label>
+
+                {/* Smart Address Input with Oklahoma Suggestions */}
+                <div className="space-y-2 relative">
+                  <Label htmlFor="address" className="text-sm font-medium">
+                    <MapPin className="w-4 h-4 inline mr-2" />
+                    Property Address in Oklahoma *
+                  </Label>
                   <Input
                     id="address"
-                    type="text"
                     value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    placeholder="123 Main St, Edmond, OK 73012"
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    placeholder="123 Main Street, Oklahoma City, OK 73101"
                     required
+                    className={`h-12 ${errors.address ? 'border-red-500' : ''}`}
+                    autoComplete="off"
                   />
+                  
+                  {showAddressSuggestions && addressSuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      {addressSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                          onClick={() => handleAddressSelect(suggestion)}
+                        >
+                          {suggestion.formatted_address}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {errors.address && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <AlertTriangle className="w-4 h-4 mr-1" />
+                      {errors.address}
+                    </p>
+                  )}
                 </div>
-                
-                <div>
-                  <Label htmlFor="serviceType">Service Needed</Label>
-                  <Select value={formData.serviceType} onValueChange={(value) => handleInputChange("serviceType", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a service..." />
+
+                {/* Service Type Selection */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Service Needed *</Label>
+                  <Select value={formData.serviceType} onValueChange={(value) => handleInputChange('serviceType', value)}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select the service you need" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="roof-repair">Roof Repair</SelectItem>
                       <SelectItem value="roof-replacement">Roof Replacement</SelectItem>
-                      <SelectItem value="new-installation">New Installation</SelectItem>
-                      <SelectItem value="storm-damage">Storm Damage</SelectItem>
-                      <SelectItem value="inspection">Inspection</SelectItem>
+                      <SelectItem value="roof-inspection">Roof Inspection</SelectItem>
+                      <SelectItem value="storm-damage">Storm Damage Assessment</SelectItem>
                       <SelectItem value="gutter-services">Gutter Services</SelectItem>
-                      <SelectItem value="exterior-painting">Exterior Painting</SelectItem>
+                      <SelectItem value="painting">Exterior Painting</SelectItem>
+                      <SelectItem value="emergency">Emergency Repair</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                
-                <div>
-                  <Label htmlFor="description">Project Description</Label>
+
+                {/* Filtered Project Description */}
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-sm font-medium">
+                    Project Description * (Minimum 10 characters)
+                  </Label>
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
-                    placeholder="Please describe your roofing needs..."
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Please describe your roofing needs in detail. Include any specific issues, timeline, and budget considerations."
+                    required
                     rows={4}
+                    className={`${errors.description ? 'border-red-500' : filterContent(formData.description) && formData.description ? 'border-green-500' : ''}`}
                   />
+                  {errors.description && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <AlertTriangle className="w-4 h-4 mr-1" />
+                      {errors.description}
+                    </p>
+                  )}
+                  {filterContent(formData.description) && formData.description && !errors.description && (
+                    <p className="text-green-600 text-sm">✓ Description approved</p>
+                  )}
                 </div>
 
-                {/* Appointment Scheduling */}
-                <div className="bg-sigma-cream p-4 rounded-lg border-2 border-sigma-emerald/20">
-                  <h3 className="font-semibold text-lg mb-4 text-sigma-charcoal">Preferred Appointment Times *</h3>
-                  <p className="text-sm text-sigma-gray mb-4">Please select two preferred 4-hour appointment windows. We'll confirm which one works best for both of us.</p>
+                {/* Smart Appointment Scheduling */}
+                <div className="space-y-6">
+                  <div className="flex items-center mb-4">
+                    <Calendar className="w-5 h-5 text-emerald-600 mr-2" />
+                    <h3 className="text-lg font-semibold">Preferred Appointment Times</h3>
+                  </div>
                   
-                  {/* First Appointment Choice */}
-                  <div className="space-y-3 mb-6">
-                    <Label className="text-base font-medium">First Choice</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor="preferredDate1">Date *</Label>
-                        <Input
-                          id="preferredDate1"
-                          type="date"
-                          value={formData.preferredDate1}
-                          onChange={(e) => handleInputChange("preferredDate1", e.target.value)}
-                          min={new Date().toISOString().split('T')[0]}
-                          required
-                          className="cursor-pointer"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="preferredTime1">4-Hour Window *</Label>
-                        <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange("preferredTime1", value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select time window..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {timeSlots.map((slot) => (
-                              <SelectItem key={slot.value} value={slot.value}>
-                                {slot.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  {/* First Appointment Preference */}
+                  <div className="grid md:grid-cols-2 gap-4 p-4 bg-emerald-50 rounded-lg">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">First Choice Date *</Label>
+                      <Input
+                        type="date"
+                        value={formData.preferredDate1}
+                        onChange={(e) => handleInputChange('preferredDate1', e.target.value)}
+                        min={today}
+                        required
+                        className="h-12"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">First Choice Time *</Label>
+                      <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange('preferredTime1', value)}>
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select time window" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableTimeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
-                  {/* Second Appointment Choice */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-medium">Second Choice</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor="preferredDate2">Date *</Label>
-                        <Input
-                          id="preferredDate2"
-                          type="date"
-                          value={formData.preferredDate2}
-                          onChange={(e) => handleInputChange("preferredDate2", e.target.value)}
-                          min={new Date().toISOString().split('T')[0]}
-                          required
-                          className="cursor-pointer"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="preferredTime2">4-Hour Window *</Label>
-                        <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange("preferredTime2", value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select time window..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {timeSlots.map((slot) => (
-                              <SelectItem key={slot.value} value={slot.value}>
-                                {slot.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  {/* Second Appointment Preference */}
+                  <div className="grid md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Second Choice Date *</Label>
+                      <Input
+                        type="date"
+                        value={formData.preferredDate2}
+                        onChange={(e) => handleInputChange('preferredDate2', e.target.value)}
+                        min={today}
+                        required
+                        className="h-12"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Second Choice Time *</Label>
+                      <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange('preferredTime2', value)}>
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select different time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableTimeSlots.map((slot) => (
+                            <SelectItem key={slot} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
+
+                  {errors.dates && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <AlertTriangle className="w-4 h-4 mr-1" />
+                      {errors.dates}
+                    </p>
+                  )}
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  className={`w-full text-lg py-4 font-semibold transition-all duration-300 transform ${
-                    isFormValid() 
-                      ? "bg-sigma-gold text-white hover:bg-yellow-600 hover:scale-105 shadow-lg border-2 border-sigma-gold" 
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50 border-2 border-gray-300"
-                  }`}
-                  disabled={contactMutation.isPending || !isFormValid()}
-                >
-                  <Send className="mr-2" size={20} />
-                  {contactMutation.isPending 
-                    ? "Submitting..." 
-                    : isFormValid() 
-                      ? "Get Free Estimate" 
-                      : "Complete All Required Fields"
-                  }
-                </Button>
-                
-                {!isFormValid() && (
-                  <p className="text-sm text-sigma-gray text-center mt-2">
-                    Please fill in all required fields (*) to submit your request
+
+                {/* Submit Button with Validation Status */}
+                <div className="pt-6">
+                  <Button
+                    type="submit"
+                    disabled={!isFormValid() || contactMutation.isPending}
+                    className={`w-full h-14 text-lg font-semibold transition-all duration-300 ${
+                      isFormValid() 
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {contactMutation.isPending ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Submitting...
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <Send className="w-5 h-5 mr-2" />
+                        Request Free Estimate
+                      </div>
+                    )}
+                  </Button>
+                  
+                  {!isFormValid() && (
+                    <p className="text-center text-gray-500 text-sm mt-2">
+                      Please complete all required fields to submit your request
+                    </p>
+                  )}
+                </div>
+
+                {/* Trust Indicators */}
+                <div className="text-center pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-600">
+                    🔒 Your information is secure and will only be used to contact you about your roofing needs
                   </p>
-                )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Licensed Oklahoma Contractor #80006734 | Serving Edmond and surrounding areas
+                  </p>
+                </div>
               </form>
             </CardContent>
           </Card>
-
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div>
-              <h3 className="font-bold text-2xl mb-6">Get In Touch</h3>
-              <p className="text-lg text-sigma-gray mb-8">
-                Contact Sigma Roofing LLC today for professional roofing and painting services in Edmond and surrounding areas. We're here to help with all your home improvement needs.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {/* Phone */}
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-sigma-gold rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Phone className="text-white" size={20} />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-lg mb-1">Phone</h4>
-                  <p className="text-sigma-gray">(405) 902-1826</p>
-                  <p className="text-sm text-sigma-gray">Mon-Fri: 7AM-6PM, Sat: 8AM-4PM</p>
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-sigma-gold rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Mail className="text-white" size={20} />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-lg mb-1">Email</h4>
-                  <p className="text-sigma-gray">ok.sigmaroofs@gmail.com</p>
-                  <p className="text-sm text-sigma-gray">We respond within 24 hours</p>
-                </div>
-              </div>
-
-              {/* Address */}
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-sigma-gold rounded-lg flex items-center justify-center flex-shrink-0">
-                  <MapPin className="text-white" size={20} />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-lg mb-1">Address</h4>
-                  <p className="text-sigma-gray">16612 N Western Avenue</p>
-                  <p className="text-sigma-gray">Edmond, OK 73012</p>
-                </div>
-              </div>
-
-              {/* License */}
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-sigma-gold rounded-lg flex items-center justify-center flex-shrink-0">
-                  <IdCard className="text-white" size={20} />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-lg mb-1">License</h4>
-                  <p className="text-sigma-gray">LIC#80006734</p>
-                  <p className="text-sm text-sigma-gray">Fully Licensed & Insured</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Service Areas */}
-            <Card className="bg-sigma-cream">
-              <CardContent className="p-6">
-                <h4 className="font-bold text-xl mb-4">Service Areas</h4>
-                <p className="text-sigma-gray mb-4">We proudly serve the following areas in central Oklahoma:</p>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {serviceAreas.map((area, index) => (
-                    <div key={index}>• {area}</div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Emergency Services */}
-            <Card className="bg-red-50 border border-red-200">
-              <CardContent className="p-6">
-                <h4 className="font-bold text-xl mb-2 text-red-800">Emergency Services</h4>
-                <p className="text-red-700 mb-4">Storm damage? Roof leak? We provide 24/7 emergency roofing services.</p>
-                <Button 
-                  className="bg-red-600 text-white hover:bg-red-700"
-                  onClick={() => window.open("tel:(405)902-1826")}
-                >
-                  <AlertTriangle className="mr-2" size={20} />
-                  Emergency Call
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </section>

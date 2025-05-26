@@ -84,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const reviews = data.result.reviews || [];
-        const formattedReviews = reviews.slice(0, 6).map((review: any) => ({
+        const formattedReviews = reviews.map((review: any) => ({
           name: review.author_name,
           role: "Verified Customer", 
           rating: review.rating,
@@ -122,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const reviews = data.result.reviews || [];
-        const formattedReviews = reviews.slice(0, 6).map((review: any) => ({
+        const formattedReviews = reviews.map((review: any) => ({
           name: review.author_name,
           role: "Verified Customer",
           rating: review.rating,

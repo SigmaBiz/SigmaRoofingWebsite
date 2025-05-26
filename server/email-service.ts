@@ -18,7 +18,9 @@ class EmailService {
 
   private async initializeTransporter() {
     try {
+      console.log('Starting Gmail transporter initialization...');
       const serviceAccount = JSON.parse(this.config.serviceAccountKey);
+      console.log('Service account email:', serviceAccount.client_email);
       
       const oauth2Client = new google.auth.JWT(
         serviceAccount.client_email,
@@ -27,7 +29,9 @@ class EmailService {
         ['https://www.googleapis.com/auth/gmail.send']
       );
 
+      console.log('Getting access token...');
       const accessToken = await oauth2Client.getAccessToken();
+      console.log('Access token obtained:', !!accessToken.token);
 
       this.transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -46,6 +50,7 @@ class EmailService {
       console.log('Gmail transporter initialized successfully');
     } catch (error) {
       console.error('Failed to initialize Gmail transporter:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
     }
   }
 

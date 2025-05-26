@@ -3,48 +3,48 @@ import { CheckCircle } from "lucide-react";
 
 export default function About() {
   return (
-    <section id="about" className="py-20 bg-sigma-cream">
+    <section id="about" className="py-20 bg-sigma-emerald">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="font-bold text-4xl text-sigma-dark mb-6">About Sigma Roofing LLC</h2>
-            <p className="text-lg text-sigma-gray mb-6">
+            <h2 className="font-bold text-4xl text-white mb-6">About Sigma Roofing LLC</h2>
+            <p className="text-lg text-gray-200 mb-6">
               With over 15 years of experience serving the Edmond, Oklahoma area, Sigma Roofing LLC has built a reputation for quality workmanship, reliability, and customer satisfaction. We are a fully licensed and insured roofing contractor committed to protecting your most valuable investment.
             </p>
-            <p className="text-lg text-sigma-gray mb-8">
+            <p className="text-lg text-gray-200 mb-8">
               Our team of certified roofing professionals uses only the highest quality materials and follows industry best practices to ensure your roof stands the test of time. From minor repairs to complete roof replacements, we deliver exceptional results on every project.
             </p>
             
             <div className="grid grid-cols-2 gap-6 mb-8">
-              <Card>
+              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                 <CardContent className="text-center p-4">
-                  <div className="text-3xl font-bold text-sigma-gold mb-2">15+</div>
-                  <div className="text-sm text-sigma-gray">Years in Business</div>
+                  <div className="text-3xl font-bold text-white mb-2">15+</div>
+                  <div className="text-sm text-gray-200">Years in Business</div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                 <CardContent className="text-center p-4">
-                  <div className="text-3xl font-bold text-sigma-gold mb-2">A+</div>
-                  <div className="text-sm text-sigma-gray">BBB Rating</div>
+                  <div className="text-3xl font-bold text-white mb-2">A+</div>
+                  <div className="text-sm text-gray-200">BBB Rating</div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                 <CardContent className="text-center p-4">
-                  <div className="text-3xl font-bold text-sigma-gold mb-2">500+</div>
-                  <div className="text-sm text-sigma-gray">Happy Customers</div>
+                  <div className="text-3xl font-bold text-white mb-2">500+</div>
+                  <div className="text-sm text-gray-200">Happy Customers</div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
                 <CardContent className="text-center p-4">
-                  <div className="text-3xl font-bold text-sigma-gold mb-2">100%</div>
-                  <div className="text-sm text-sigma-gray">Licensed & Insured</div>
+                  <div className="text-3xl font-bold text-white mb-2">100%</div>
+                  <div className="text-sm text-gray-200">Licensed & Insured</div>
                 </CardContent>
               </Card>
             </div>
 
-            <Card>
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardContent className="p-6">
-                <h3 className="font-bold text-xl mb-4">Why Choose Sigma Roofing?</h3>
+                <h3 className="font-bold text-xl mb-4 text-white">Why Choose Sigma Roofing?</h3>
                 <ul className="space-y-3">
                   {[
                     "Licensed contractor (LIC#80006734) with full insurance coverage",
@@ -54,8 +54,8 @@ export default function About() {
                     "Emergency repair services available"
                   ].map((item, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle className="text-sigma-gold mr-3 mt-1" size={20} />
-                      <span>{item}</span>
+                      <CheckCircle className="text-white mr-3 mt-1" size={20} />
+                      <span className="text-gray-200">{item}</span>
                     </li>
                   ))}
                 </ul>

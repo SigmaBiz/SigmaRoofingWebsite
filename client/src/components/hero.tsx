@@ -14,8 +14,9 @@ export default function Hero() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl text-white text-center lg:text-left">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">
-            Professional Roofing Services in{" "}
-            <span className="text-sigma-emerald">Edmond, OK</span>
+            <span className="text-white">Stand firm.</span>{" "}
+            <span className="text-sigma-emerald">Brave the storm.</span>{" "}
+            <span className="text-white">Serve with heart.</span>
           </h1>
           <p className="text-lg lg:text-xl mb-8 leading-relaxed text-gray-200 max-w-2xl mx-auto lg:mx-0">
             Trusted roofing and painting contractor with over 15 years of experience. We provide quality 

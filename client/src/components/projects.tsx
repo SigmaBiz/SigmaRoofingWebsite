@@ -42,29 +42,29 @@ const projects = [
 
 export default function Projects() {
   return (
-    <section id="projects" className="py-20 bg-white">
+    <section id="projects" className="py-20 bg-sigma-charcoal">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="font-bold text-4xl text-sigma-dark mb-4">Recent Projects</h2>
-          <p className="text-xl text-sigma-gray max-w-2xl mx-auto">
+          <h2 className="font-bold text-4xl text-white mb-4">Recent Projects</h2>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Take a look at some of our recent roofing projects in the Edmond area. Each project showcases our commitment to quality and attention to detail.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
-            <Card key={index} className="bg-sigma-cream overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={index} className="bg-white overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border-t-4 border-t-sigma-emerald">
               <img 
                 src={project.image} 
                 alt={project.title} 
                 className="w-full h-48 object-cover" 
               />
               <CardContent className="p-6">
-                <h3 className="font-bold text-xl mb-2">{project.title}</h3>
-                <p className="text-sigma-gray mb-4">{project.description}</p>
+                <h3 className="font-bold text-xl mb-2 text-sigma-charcoal">{project.title}</h3>
+                <p className="text-sigma-light-gray mb-4">{project.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-sigma-gold font-semibold">{project.category}</span>
-                  <Button variant="link" className="text-sigma-gold p-0 h-auto">
+                  <span className="text-sm text-sigma-emerald font-semibold bg-sigma-emerald/10 px-3 py-1 rounded-full">{project.category}</span>
+                  <Button variant="link" className="text-sigma-emerald p-0 h-auto hover:text-emerald-600">
                     View Details →
                   </Button>
                 </div>
@@ -74,7 +74,7 @@ export default function Projects() {
         </div>
 
         <div className="text-center mt-12">
-          <Button className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4">
+          <Button className="bg-sigma-emerald text-white hover:bg-emerald-600 text-lg px-8 py-4 shadow-lg">
             View All Projects
           </Button>
         </div>

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Home, Facebook, Linkedin } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
+import { Link } from "wouter";
 
 export default function Footer() {
   const scrollToSection = (sectionId: string) => {
@@ -97,9 +98,9 @@ export default function Footer() {
               © 2024 Sigma Roofing LLC. All rights reserved. Licensed Contractor LIC#80006734
             </p>
             <div className="flex space-x-6 text-sm text-gray-400">
-              <button className="hover:text-sigma-gold transition-colors">Privacy Policy</button>
-              <button className="hover:text-sigma-gold transition-colors">Terms of Service</button>
-              <button className="hover:text-sigma-gold transition-colors">Sitemap</button>
+              <Link href="/privacy-policy" className="hover:text-sigma-gold transition-colors">Privacy Policy</Link>
+              <Link href="/terms-of-service" className="hover:text-sigma-gold transition-colors">Terms of Service</Link>
+              <Link href="/sitemap" className="hover:text-sigma-gold transition-colors">Sitemap</Link>
             </div>
           </div>
         </div>

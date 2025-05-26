@@ -67,17 +67,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const data = await response.json();
       
+      console.log(`Address search for "${query}":`, data);
+      
       if (data.status === "OK") {
         const suggestions = data.predictions?.slice(0, 5).map((pred: any) => ({
           formatted_address: pred.description,
           place_id: pred.place_id
         })) || [];
         
+        console.log(`Found ${suggestions.length} suggestions`);
+        
         res.json({ 
           success: true, 
           suggestions: suggestions 
         });
       } else {
+        console.log('Places API error:', data.status, data.error_message);
         res.json({ success: true, suggestions: [] });
       }
       

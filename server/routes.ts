@@ -42,8 +42,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Google API key not configured" });
       }
 
-      // Use the Business Profile ID for BBAV Roofing LLC
-      const placeId = "1900262016449220573";
+      // Search for BBAV ROOFING LLC by exact business name
+      const searchResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=BBAV%20ROOFING%20LLC&inputtype=textquery&fields=place_id,name&key=${apiKey}`
+      );
+
+      if (!searchResponse.ok) {
+        throw new Error("Failed to search for business");
+      }
+
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.candidates || searchData.candidates.length === 0) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const placeId = searchData.candidates[0].place_id;
 
       // Get place details including reviews
       const detailsResponse = await fetch(

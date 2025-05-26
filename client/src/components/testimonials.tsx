@@ -1,8 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-// Authentic BBAV Roofing LLC customer reviews
-const reviews = [
+interface Review {
+  name: string;
+  role: string;
+  rating: number;
+  review: string;
+  date: string;
+  initials: string;
+}
+
+// Fallback reviews in case API is unavailable
+const fallbackReviews = [
   {
     name: "Jenna Goodner",
     role: "Verified Customer",
@@ -45,7 +55,47 @@ const reviews = [
   }
 ];
 
+// Function to fetch reviews directly from Google Places API
+const fetchGoogleReviews = async (): Promise<Review[]> => {
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || "YOUR_API_KEY_HERE";
+  const placeId = "ChIJ3-aw31sdsocRvkrmmxIT0Tc"; // Your BBAV Roofing LLC place ID
+  
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,rating,user_ratings_total,name&key=${apiKey}`
+    );
+    
+    const data = await response.json();
+    
+    if (data.status === "OK" && data.result.reviews) {
+      return data.result.reviews.slice(0, 6).map((review: any) => ({
+        name: review.author_name,
+        role: "Verified Customer",
+        rating: review.rating,
+        review: review.text,
+        date: review.relative_time_description,
+        initials: review.author_name
+          .split(' ')
+          .map((n: string) => n[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2)
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching Google reviews:", error);
+  }
+  
+  return fallbackReviews;
+};
+
 export default function Testimonials() {
+  const { data: reviews = fallbackReviews, isLoading } = useQuery<Review[]>({
+    queryKey: ["google-reviews"],
+    queryFn: fetchGoogleReviews,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    refetchInterval: 1000 * 60 * 60, // Refetch every hour
+  });
 
   return (
     <section className="py-20 bg-white">

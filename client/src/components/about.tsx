@@ -65,12 +65,12 @@ export default function About() {
 
           <div className="space-y-6">
             <img 
-              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+              src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
               alt="Professional roofing team at work" 
               className="rounded-lg shadow-lg w-full h-auto" 
             />
             <img 
-              src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
+              src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
               alt="Beautiful residential home with new roof" 
               className="rounded-lg shadow-lg w-full h-auto" 
             />

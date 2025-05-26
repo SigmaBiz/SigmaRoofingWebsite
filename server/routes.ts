@@ -42,9 +42,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Google API key not configured" });
       }
 
-      // Search for Sigma Roofing LLC in Edmond, OK
+      // Search for BBAV Roofing LLC in Edmond, OK
       const searchResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Sigma%20Roofing%20LLC%20Edmond%20Oklahoma&inputtype=textquery&fields=place_id&key=${apiKey}`
+        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=BBAV%20Roofing%20LLC%20Edmond%20Oklahoma&inputtype=textquery&fields=place_id&key=${apiKey}`
       );
 
       if (!searchResponse.ok) {

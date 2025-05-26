@@ -145,18 +145,37 @@ Lead ID: #${lead.id}
 Contact them immediately to schedule their estimate!
       `;
 
-      await this.transporter.sendMail({
-        from: `"Sigma Roofing Leads" <${JSON.parse(this.config.serviceAccountKey).client_email}>`,
-        to: this.config.notificationEmail,
-        subject: subject,
-        text: textBody,
-        html: htmlBody,
+      // Create email message in RFC 2822 format
+      const serviceAccount = JSON.parse(this.config.serviceAccountKey);
+      const emailMessage = [
+        `From: "Sigma Roofing Leads" <${serviceAccount.client_email}>`,
+        `To: ${this.config.notificationEmail}`,
+        `Subject: ${subject}`,
+        `Content-Type: text/html; charset=utf-8`,
+        ``,
+        htmlBody
+      ].join('\n');
+
+      // Encode email message in base64url format
+      const encodedMessage = Buffer.from(emailMessage)
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+      // Send email using Gmail API
+      await this.gmail.users.messages.send({
+        userId: 'me',
+        requestBody: {
+          raw: encodedMessage,
+        },
       });
 
       console.log(`Lead notification email sent successfully for: ${lead.firstName} ${lead.lastName}`);
       return true;
     } catch (error) {
       console.error('Failed to send lead notification email:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       return false;
     }
   }

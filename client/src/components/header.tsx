@@ -25,8 +25,8 @@ export default function Header() {
               className="w-12 h-12 object-contain"
             />
             <div>
-              <h1 className="font-bold text-xl text-sigma-dark">Sigma Roofing LLC</h1>
-              <p className="text-sm text-sigma-gray">LIC#80006734</p>
+              <h1 className="font-bold text-xl text-sigma-charcoal">Sigma Roofing LLC</h1>
+              <p className="text-sm text-sigma-light-gray">LIC#80006734</p>
             </div>
           </div>
 
@@ -34,31 +34,31 @@ export default function Header() {
           <nav className="hidden md:flex space-x-8">
             <button
               onClick={() => scrollToSection("home")}
-              className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors"
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
             >
               Home
             </button>
             <button
               onClick={() => scrollToSection("services")}
-              className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors"
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
             >
               Services
             </button>
             <button
               onClick={() => scrollToSection("about")}
-              className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors"
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
             >
               About
             </button>
             <button
               onClick={() => scrollToSection("projects")}
-              className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors"
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
             >
               Projects
             </button>
             <button
               onClick={() => scrollToSection("contact")}
-              className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors"
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
             >
               Contact
             </button>
@@ -67,12 +67,12 @@ export default function Header() {
           {/* Contact Info */}
           <div className="hidden lg:flex items-center space-x-6">
             <div className="text-right">
-              <p className="font-semibold text-sigma-dark">(405) 902-1826</p>
-              <p className="text-sm text-sigma-gray">Free Estimates</p>
+              <p className="font-semibold text-sigma-charcoal">(405) 902-1826</p>
+              <p className="text-sm text-sigma-light-gray">Free Estimates</p>
             </div>
             <Button 
               onClick={() => scrollToSection("contact")}
-              className="bg-sigma-gold text-white hover:bg-yellow-600"
+              className="bg-sigma-emerald text-white hover:bg-emerald-600"
             >
               Get Quote
             </Button>
@@ -80,7 +80,7 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-sigma-dark"
+            className="md:hidden text-sigma-charcoal"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="text-xl" /> : <Menu className="text-xl" />}

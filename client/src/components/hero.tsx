@@ -15,7 +15,7 @@ export default function Hero() {
         <div className="max-w-3xl text-white text-center lg:text-left">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">
             Professional Roofing Services in{" "}
-            <span className="text-sigma-gold">Edmond, OK</span>
+            <span className="text-sigma-emerald">Edmond, OK</span>
           </h1>
           <p className="text-lg lg:text-xl mb-8 leading-relaxed text-gray-200 max-w-2xl mx-auto lg:mx-0">
             Trusted roofing and painting contractor with over 15 years of experience. We provide quality 
@@ -24,7 +24,7 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6">
             <Button
               size="lg"
-              className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform min-w-[200px]"
+              className="bg-sigma-emerald text-white hover:bg-emerald-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform min-w-[200px]"
               onClick={() => window.open("tel:(405)902-1826")}
             >
               <Phone className="mr-2 h-5 w-5" />
@@ -32,7 +32,7 @@ export default function Hero() {
             </Button>
             <Button
               size="lg"
-              className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform min-w-[200px]"
+              className="bg-sigma-emerald text-white hover:bg-emerald-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform min-w-[200px]"
               onClick={scrollToContact}
             >
               Free Estimate

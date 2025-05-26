@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 98%; /* #FAFAFA - Sigma Cream */
-  --foreground: 210 22% 22%; /* #2D3748 - Sigma Dark */
+  --background: 0 0% 100%; /* White */
+  --foreground: 0 0% 20%; /* Charcoal */
   --muted: 0 0% 96%;
-  --muted-foreground: 218 11% 33%; /* #4A5568 - Sigma Gray */
+  --muted-foreground: 0 0% 45%; /* Medium Charcoal */
   --popover: 0 0% 100%;
-  --popover-foreground: 210 22% 22%;
+  --popover-foreground: 0 0% 20%;
   --card: 0 0% 100%;
-  --card-foreground: 210 22% 22%;
+  --card-foreground: 0 0% 20%;
   --border: 220 13% 91%;
   --input: 220 13% 91%;
-  --primary: 43 74% 52%; /* #D4AF37 - Sigma Gold */
+  --primary: 158 64% 52%; /* Emerald Green */
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 96%;
-  --secondary-foreground: 210 22% 22%;
+  --secondary-foreground: 0 0% 20%;
   --accent: 0 0% 96%;
-  --accent-foreground: 210 22% 22%;
+  --accent-foreground: 0 0% 20%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --ring: 43 74% 52%;
+  --ring: 158 64% 52%;
   --radius: 0.5rem;
 }
 
@@ -63,40 +63,40 @@
 }
 
 /* Custom styles for roofing website */
-.sigma-gold {
-  color: #D4AF37;
+.sigma-emerald {
+  color: #10b981;
 }
 
-.sigma-cream {
-  color: #FAFAFA;
+.sigma-white {
+  color: #ffffff;
 }
 
-.sigma-dark {
-  color: #2D3748;
+.sigma-charcoal {
+  color: #333333;
 }
 
-.sigma-gray {
-  color: #4A5568;
+.sigma-light-gray {
+  color: #6b7280;
 }
 
-.bg-sigma-gold {
-  background-color: #D4AF37;
+.bg-sigma-emerald {
+  background-color: #10b981;
 }
 
-.bg-sigma-cream {
-  background-color: #FAFAFA;
+.bg-sigma-white {
+  background-color: #ffffff;
 }
 
-.bg-sigma-dark {
-  background-color: #2D3748;
+.bg-sigma-charcoal {
+  background-color: #333333;
 }
 
-.bg-sigma-gray {
-  background-color: #4A5568;
+.bg-sigma-light-gray {
+  background-color: #f9fafb;
 }
 
-.border-sigma-gold {
-  border-color: #D4AF37;
+.border-sigma-emerald {
+  border-color: #10b981;
 }
 
 .hero-bg {

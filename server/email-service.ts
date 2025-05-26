@@ -30,13 +30,15 @@ class EmailService {
       const accessToken = await oauth2Client.getAccessToken();
 
       this.transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
         auth: {
           type: 'OAuth2',
           user: serviceAccount.client_email,
           clientId: serviceAccount.client_id,
           clientSecret: serviceAccount.client_secret,
-          refreshToken: serviceAccount.refresh_token,
+          refreshToken: undefined,
           accessToken: accessToken.token,
         },
       });

@@ -55,37 +55,21 @@ const fallbackReviews = [
   }
 ];
 
-// Function to fetch reviews directly from Google Places API
+// Function to fetch reviews via our backend API (bypasses CORS)
 const fetchGoogleReviews = async (): Promise<Review[]> => {
-  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || "YOUR_API_KEY_HERE";
-  const placeId = "ChIJ3-aw31sdsocRvkrmmxIT0Tc"; // Your BBAV Roofing LLC place ID
-  
   try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,rating,user_ratings_total,name&key=${apiKey}`
-    );
-    
+    // Use our backend API that has the Google API key configured
+    const response = await fetch('/api/reviews');
     const data = await response.json();
     
-    if (data.status === "OK" && data.result.reviews) {
-      return data.result.reviews.slice(0, 6).map((review: any) => ({
-        name: review.author_name,
-        role: "Verified Customer",
-        rating: review.rating,
-        review: review.text,
-        date: review.relative_time_description,
-        initials: review.author_name
-          .split(' ')
-          .map((n: string) => n[0])
-          .join('')
-          .toUpperCase()
-          .slice(0, 2)
-      }));
+    if (data.success && data.reviews) {
+      return data.reviews;
     }
   } catch (error) {
     console.error("Error fetching Google reviews:", error);
   }
   
+  // Return fallback reviews if API fails
   return fallbackReviews;
 };
 
@@ -103,7 +87,7 @@ export default function Testimonials() {
         <div className="text-center mb-16">
           <h2 className="font-bold text-4xl text-sigma-charcoal mb-4">What Our Customers Say</h2>
           <p className="text-xl text-sigma-light-gray max-w-2xl mx-auto">
-            Authentic reviews from satisfied customers who have experienced our professional roofing services.
+            Live reviews from satisfied customers who have experienced our professional roofing services.
           </p>
           <div className="mt-4 flex items-center justify-center space-x-4">
             <div className="flex items-center">
@@ -115,7 +99,8 @@ export default function Testimonials() {
               <span className="ml-2 font-semibold text-sigma-charcoal">5.0</span>
             </div>
             <span className="text-sigma-light-gray">•</span>
-            <span className="text-sigma-light-gray">9 reviews</span>
+            <span className="text-sigma-light-gray">{reviews.length} reviews</span>
+            {isLoading && <span className="text-sigma-emerald ml-2">↻ Updating...</span>}
           </div>
         </div>
 

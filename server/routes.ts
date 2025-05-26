@@ -34,6 +34,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Google Business reviews
+  app.get("/api/google-reviews", async (req, res) => {
+    try {
+      const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "Google API key not configured" });
+      }
+
+      // Search for Sigma Roofing LLC in Edmond, OK
+      const searchResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Sigma%20Roofing%20LLC%20Edmond%20Oklahoma&inputtype=textquery&fields=place_id&key=${apiKey}`
+      );
+
+      if (!searchResponse.ok) {
+        throw new Error("Failed to search for business");
+      }
+
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.candidates || searchData.candidates.length === 0) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const placeId = searchData.candidates[0].place_id;
+
+      // Get place details including reviews
+      const detailsResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`
+      );
+
+      if (!detailsResponse.ok) {
+        throw new Error("Failed to fetch reviews");
+      }
+
+      const detailsData = await detailsResponse.json();
+      
+      if (!detailsData.result || !detailsData.result.reviews) {
+        return res.json([]);
+      }
+
+      // Filter for 5-star reviews only and return top 4
+      const fiveStarReviews = detailsData.result.reviews
+        .filter((review: any) => review.rating === 5)
+        .slice(0, 4);
+
+      res.json(fiveStarReviews);
+    } catch (error) {
+      console.error("Error fetching Google reviews:", error);
+      res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

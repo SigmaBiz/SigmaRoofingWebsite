@@ -42,31 +42,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Google API key not configured" });
       }
 
-      // Search for your roofing business at the specific address
-      const searchResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=roofing%2016612%20N%20Western%20Ave%20Edmond%20OK&inputtype=textquery&fields=place_id,name&key=${apiKey}`
-      );
-
-      if (!searchResponse.ok) {
-        throw new Error("Failed to search for business");
-      }
-
-      const searchData = await searchResponse.json();
-      
-      if (!searchData.candidates || searchData.candidates.length === 0) {
-        return res.status(404).json({ error: "Business not found" });
-      }
-
-      // Find the roofing business from the results
-      const roofingBusiness = searchData.candidates.find((candidate: any) => 
-        candidate.name && candidate.name.toLowerCase().includes('roofing')
-      );
-
-      if (!roofingBusiness) {
-        return res.status(404).json({ error: "Roofing business not found" });
-      }
-
-      const placeId = roofingBusiness.place_id;
+      // Use the Business Profile ID for BBAV Roofing LLC
+      const placeId = "1900262016449220573";
 
       // Get place details including reviews
       const detailsResponse = await fetch(

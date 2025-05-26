@@ -127,10 +127,13 @@ Lead ID: #${lead.id}
 Contact them immediately to schedule their estimate!
       `;
 
-      // Send email using SendGrid
+      // Send email using SendGrid with verified sender
       await this.mailService.send({
         to: this.config.notificationEmail,
-        from: this.config.notificationEmail, // Use the verified sender email
+        from: {
+          email: 'ok.sigmaroofs@gmail.com',
+          name: 'Sigma Roofing Leads'
+        },
         subject: subject,
         text: textBody,
         html: htmlBody,

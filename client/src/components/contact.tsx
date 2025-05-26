@@ -15,8 +15,13 @@ interface ContactForm {
   lastName: string;
   email: string;
   phone: string;
+  address: string;
   serviceType: string;
   description: string;
+  preferredDate1: string;
+  preferredTime1: string;
+  preferredDate2: string;
+  preferredTime2: string;
 }
 
 export default function Contact() {
@@ -26,8 +31,13 @@ export default function Contact() {
     lastName: "",
     email: "",
     phone: "",
+    address: "",
     serviceType: "",
-    description: ""
+    description: "",
+    preferredDate1: "",
+    preferredTime1: "",
+    preferredDate2: "",
+    preferredTime2: ""
   });
 
   const contactMutation = useMutation({
@@ -45,8 +55,13 @@ export default function Contact() {
         lastName: "",
         email: "",
         phone: "",
+        address: "",
         serviceType: "",
-        description: ""
+        description: "",
+        preferredDate1: "",
+        preferredTime1: "",
+        preferredDate2: "",
+        preferredTime2: ""
       });
     },
     onError: (error) => {
@@ -58,13 +73,32 @@ export default function Contact() {
     },
   });
 
+  // Validation functions
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidPhone = (phone: string) => /^[\d\s\-\(\)]+$/.test(phone) && phone.replace(/\D/g, '').length >= 10;
+  
+  const isFormValid = () => {
+    return (
+      formData.firstName.trim() &&
+      formData.lastName.trim() &&
+      isValidEmail(formData.email) &&
+      isValidPhone(formData.phone) &&
+      formData.address.trim() &&
+      formData.serviceType &&
+      formData.preferredDate1 &&
+      formData.preferredTime1 &&
+      formData.preferredDate2 &&
+      formData.preferredTime2
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
+    if (!isFormValid()) {
       toast({
         title: "Required Fields Missing",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields including two preferred appointment times.",
         variant: "destructive",
       });
       return;
@@ -72,6 +106,23 @@ export default function Contact() {
 
     contactMutation.mutate(formData);
   };
+
+  // Generate time slots (8 AM to 3 PM start times for 4-hour windows)
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 8; hour <= 15; hour++) {
+      const startTime = hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`;
+      const endHour = hour + 4;
+      const endTime = endHour <= 12 ? `${endHour}:00 AM` : `${endHour - 12}:00 PM`;
+      slots.push({
+        value: `${hour}:00`,
+        label: `${startTime} - ${endTime}`
+      });
+    }
+    return slots;
+  };
+
+  const timeSlots = generateTimeSlots();
 
   const handleInputChange = (field: keyof ContactForm, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -142,6 +193,19 @@ export default function Contact() {
                     onChange={(e) => handleInputChange("phone", e.target.value)}
                     placeholder="(405) 123-4567"
                     required
+                    className={!isValidPhone(formData.phone) && formData.phone ? "border-red-300" : ""}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="address">Property Address *</Label>
+                  <Input
+                    id="address"
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    placeholder="123 Main St, Edmond, OK 73012"
+                    required
                   />
                 </div>
                 
@@ -173,15 +237,104 @@ export default function Contact() {
                     rows={4}
                   />
                 </div>
+
+                {/* Appointment Scheduling */}
+                <div className="bg-sigma-cream p-4 rounded-lg border-2 border-sigma-emerald/20">
+                  <h3 className="font-semibold text-lg mb-4 text-sigma-charcoal">Preferred Appointment Times *</h3>
+                  <p className="text-sm text-sigma-gray mb-4">Please select two preferred 4-hour appointment windows. We'll confirm which one works best for both of us.</p>
+                  
+                  {/* First Appointment Choice */}
+                  <div className="space-y-3 mb-6">
+                    <Label className="text-base font-medium">First Choice</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="preferredDate1">Date *</Label>
+                        <Input
+                          id="preferredDate1"
+                          type="date"
+                          value={formData.preferredDate1}
+                          onChange={(e) => handleInputChange("preferredDate1", e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          required
+                          className="cursor-pointer"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="preferredTime1">4-Hour Window *</Label>
+                        <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange("preferredTime1", value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select time window..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeSlots.map((slot) => (
+                              <SelectItem key={slot.value} value={slot.value}>
+                                {slot.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Second Appointment Choice */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Second Choice</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="preferredDate2">Date *</Label>
+                        <Input
+                          id="preferredDate2"
+                          type="date"
+                          value={formData.preferredDate2}
+                          onChange={(e) => handleInputChange("preferredDate2", e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          required
+                          className="cursor-pointer"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="preferredTime2">4-Hour Window *</Label>
+                        <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange("preferredTime2", value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select time window..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeSlots.map((slot) => (
+                              <SelectItem key={slot.value} value={slot.value}>
+                                {slot.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-sigma-gold text-white hover:bg-yellow-600 text-lg py-4"
-                  disabled={contactMutation.isPending}
+                  className={`w-full text-lg py-4 font-semibold transition-all duration-300 transform ${
+                    isFormValid() 
+                      ? "bg-sigma-gold text-white hover:bg-yellow-600 hover:scale-105 shadow-lg border-2 border-sigma-gold" 
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50 border-2 border-gray-300"
+                  }`}
+                  disabled={contactMutation.isPending || !isFormValid()}
                 >
                   <Send className="mr-2" size={20} />
-                  {contactMutation.isPending ? "Submitting..." : "Get Free Estimate"}
+                  {contactMutation.isPending 
+                    ? "Submitting..." 
+                    : isFormValid() 
+                      ? "Get Free Estimate" 
+                      : "Complete All Required Fields"
+                  }
                 </Button>
+                
+                {!isFormValid() && (
+                  <p className="text-sm text-sigma-gray text-center mt-2">
+                    Please fill in all required fields (*) to submit your request
+                  </p>
+                )}
               </form>
             </CardContent>
           </Card>

@@ -56,6 +56,14 @@ class EmailService {
     try {
       const subject = `🏠 New Roofing Lead: ${lead.firstName} ${lead.lastName} - ${lead.serviceType}`;
       
+      const formatTimeSlot = (time: string) => {
+        const hour = parseInt(time.split(':')[0]);
+        const startTime = hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`;
+        const endHour = hour + 4;
+        const endTime = endHour <= 12 ? `${endHour}:00 AM` : `${endHour - 12}:00 PM`;
+        return `${startTime} - ${endTime}`;
+      };
+      
       const htmlBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #10b981, #047857); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
@@ -81,10 +89,28 @@ class EmailService {
                   <td style="padding: 8px 0; color: #111827;"><a href="mailto:${lead.email}" style="color: #10b981; text-decoration: none;">${lead.email}</a></td>
                 </tr>
                 <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #374151;">Address:</td>
+                  <td style="padding: 8px 0; color: #111827;">${lead.address}</td>
+                </tr>
+                <tr>
                   <td style="padding: 8px 0; font-weight: bold; color: #374151;">Service:</td>
                   <td style="padding: 8px 0; color: #111827;">${lead.serviceType}</td>
                 </tr>
               </table>
+            </div>
+
+            <h3 style="color: #047857; margin-bottom: 10px;">📅 Preferred Appointment Times</h3>
+            <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+              <div style="margin-bottom: 15px;">
+                <strong style="color: #374151;">First Choice:</strong><br>
+                <span style="color: #10b981; font-weight: bold;">${new Date(lead.preferredDate1).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span><br>
+                <span style="color: #111827;">${formatTimeSlot(lead.preferredTime1)}</span>
+              </div>
+              <div>
+                <strong style="color: #374151;">Second Choice:</strong><br>
+                <span style="color: #10b981; font-weight: bold;">${new Date(lead.preferredDate2).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span><br>
+                <span style="color: #111827;">${formatTimeSlot(lead.preferredTime2)}</span>
+              </div>
             </div>
             
             ${lead.description ? `

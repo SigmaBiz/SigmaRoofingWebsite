@@ -24,7 +24,7 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6">
             <Button
               size="lg"
-              className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform"
+              className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform min-w-[200px]"
               onClick={() => window.open("tel:(405)902-1826")}
             >
               <Phone className="mr-2 h-5 w-5" />
@@ -32,7 +32,7 @@ export default function Hero() {
             </Button>
             <Button
               size="lg"
-              className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform"
+              className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform min-w-[200px]"
               onClick={scrollToContact}
             >
               Free Estimate
@@ -40,17 +40,29 @@ export default function Hero() {
           </div>
           
           <div className="mt-12 grid grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-sigma-gold">LOCAL</div>
-              <div className="text-sm text-gray-300">Edmond Based</div>
+            <div className="flex flex-col items-center">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
+                alt="Oklahoma Flag" 
+                className="w-16 h-12 mb-2 rounded shadow-lg"
+              />
+              <div className="text-sm text-gray-300 font-semibold">Operated</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-sigma-gold">OKLAHOMA</div>
-              <div className="text-sm text-gray-300">Founded</div>
+            <div className="flex flex-col items-center">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
+                alt="Oklahoma Flag" 
+                className="w-16 h-12 mb-2 rounded shadow-lg"
+              />
+              <div className="text-sm text-gray-300 font-semibold">Founded</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-sigma-gold">LICENSED</div>
-              <div className="text-sm text-gray-300">& Insured</div>
+            <div className="flex flex-col items-center">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
+                alt="Oklahoma Flag" 
+                className="w-16 h-12 mb-2 rounded shadow-lg"
+              />
+              <div className="text-sm text-gray-300 font-semibold">Licensed & Insured</div>
             </div>
           </div>
         </div>

@@ -1,50 +1,32 @@
-import { google } from 'googleapis';
+import { MailService } from '@sendgrid/mail';
 import { ContactRequest } from '../shared/schema';
 
 interface EmailServiceConfig {
-  serviceAccountKey: string;
+  sendGridApiKey: string;
   notificationEmail: string;
 }
 
 class EmailService {
-  private gmail: any = null;
+  private mailService: MailService;
   private config: EmailServiceConfig;
 
   constructor(config: EmailServiceConfig) {
     this.config = config;
-    this.initializeGmail();
+    this.mailService = new MailService();
+    this.initializeSendGrid();
   }
 
-  private async initializeGmail() {
+  private initializeSendGrid() {
     try {
-      console.log('Starting Gmail API initialization...');
-      const serviceAccount = JSON.parse(this.config.serviceAccountKey);
-      console.log('Service account email:', serviceAccount.client_email);
-      
-      const oauth2Client = new google.auth.JWT(
-        serviceAccount.client_email,
-        undefined,
-        serviceAccount.private_key,
-        ['https://www.googleapis.com/auth/gmail.send']
-      );
-
-      await oauth2Client.authorize();
-      console.log('Gmail API authorized successfully');
-
-      this.gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-      console.log('Gmail API client initialized successfully');
+      console.log('Initializing SendGrid email service...');
+      this.mailService.setApiKey(this.config.sendGridApiKey);
+      console.log('SendGrid initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Gmail API:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+      console.error('Failed to initialize SendGrid:', error);
     }
   }
 
   async sendLeadNotification(lead: ContactRequest): Promise<boolean> {
-    if (!this.gmail) {
-      console.error('Gmail API not initialized');
-      return false;
-    }
-
     try {
       const subject = `🏠 New Roofing Lead: ${lead.firstName} ${lead.lastName} - ${lead.serviceType}`;
       
@@ -145,30 +127,13 @@ Lead ID: #${lead.id}
 Contact them immediately to schedule their estimate!
       `;
 
-      // Create email message in RFC 2822 format
-      const serviceAccount = JSON.parse(this.config.serviceAccountKey);
-      const emailMessage = [
-        `From: "Sigma Roofing Leads" <${serviceAccount.client_email}>`,
-        `To: ${this.config.notificationEmail}`,
-        `Subject: ${subject}`,
-        `Content-Type: text/html; charset=utf-8`,
-        ``,
-        htmlBody
-      ].join('\n');
-
-      // Encode email message in base64url format
-      const encodedMessage = Buffer.from(emailMessage)
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
-
-      // Send email using Gmail API
-      await this.gmail.users.messages.send({
-        userId: 'me',
-        requestBody: {
-          raw: encodedMessage,
-        },
+      // Send email using SendGrid
+      await this.mailService.send({
+        to: this.config.notificationEmail,
+        from: 'leads@sigmaroofing.com', // This will be overridden by SendGrid's verified sender
+        subject: subject,
+        text: textBody,
+        html: htmlBody,
       });
 
       console.log(`Lead notification email sent successfully for: ${lead.firstName} ${lead.lastName}`);
@@ -183,7 +148,7 @@ Contact them immediately to schedule their estimate!
 
 // Create and export the email service instance
 const emailService = new EmailService({
-  serviceAccountKey: process.env.GOOGLE_SERVICE_ACCOUNT_KEY || '',
+  sendGridApiKey: process.env.SENDGRID_API_KEY || '',
   notificationEmail: process.env.NOTIFICATION_EMAIL || '',
 });
 

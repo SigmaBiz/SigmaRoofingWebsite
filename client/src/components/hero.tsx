@@ -19,8 +19,8 @@ export default function Hero() {
             <span className="text-white">Serve with heart.</span>
           </h1>
           <p className="text-lg lg:text-xl mb-8 leading-relaxed text-gray-200 max-w-2xl mx-auto lg:mx-0">
-            Trusted roofing and painting contractor with over 15 years of experience. We provide quality 
-            residential roofing, exterior painting, and home improvement solutions with comprehensive warranties.
+            Quality craftsmanship and down-to-earth, responsive customer service is what we do. Whether you need 
+            major repairs or minor fixes, we work with you to find the best solution for your home's specific needs.
           </p>
           <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6">
             <Button

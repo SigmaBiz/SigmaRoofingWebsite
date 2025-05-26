@@ -32,8 +32,7 @@ export default function Hero() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-sigma-dark text-lg px-8 py-4"
+              className="bg-sigma-gold text-white hover:bg-yellow-600 text-lg px-8 py-4"
               onClick={scrollToContact}
             >
               Free Estimate

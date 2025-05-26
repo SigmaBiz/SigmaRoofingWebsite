@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 98%; /* #FAFAFA - Sigma Cream */
+  --foreground: 210 22% 22%; /* #2D3748 - Sigma Dark */
+  --muted: 0 0% 96%;
+  --muted-foreground: 218 11% 33%; /* #4A5568 - Sigma Gray */
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 22% 22%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 22% 22%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --primary: 43 74% 52%; /* #D4AF37 - Sigma Gold */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 210 22% 22%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 210 22% 22%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 43 74% 52%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 84% 5%;
+  --foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --popover: 222 84% 5%;
+  --popover-foreground: 210 40% 98%;
+  --card: 222 84% 5%;
+  --card-foreground: 210 40% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --primary: 43 74% 52%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 43 74% 52%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Custom styles for roofing website */
+.sigma-gold {
+  color: #D4AF37;
+}
+
+.sigma-cream {
+  color: #FAFAFA;
+}
+
+.sigma-dark {
+  color: #2D3748;
+}
+
+.sigma-gray {
+  color: #4A5568;
+}
+
+.bg-sigma-gold {
+  background-color: #D4AF37;
+}
+
+.bg-sigma-cream {
+  background-color: #FAFAFA;
+}
+
+.bg-sigma-dark {
+  background-color: #2D3748;
+}
+
+.bg-sigma-gray {
+  background-color: #4A5568;
+}
+
+.border-sigma-gold {
+  border-color: #D4AF37;
+}
+
+.hero-bg {
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+@media (max-width: 768px) {
+  .hero-bg {
+    background-attachment: scroll;
+  }
+}

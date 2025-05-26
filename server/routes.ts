@@ -37,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Google Business Profile reviews for BBAV Roofing LLC
   app.get("/api/reviews", async (req, res) => {
     try {
-      const apiKey = process.env.GOOGLE_BUSINESS_API_KEY;
+      const apiKey = process.env.GOOGLE_API_KEY;
       console.log("API Key present:", !!apiKey);
       
       if (!apiKey) {

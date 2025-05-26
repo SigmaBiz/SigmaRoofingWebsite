@@ -131,7 +131,7 @@ Contact them immediately to schedule their estimate!
       await this.mailService.send({
         to: this.config.notificationEmail,
         from: {
-          email: 'ok.sigmaroofs@gmail.com',
+          email: 'aescalante@oksigma.com',
           name: 'Sigma Roofing Leads'
         },
         subject: subject,

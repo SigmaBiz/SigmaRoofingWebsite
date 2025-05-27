@@ -61,7 +61,7 @@ export default function Hero() {
             Schedule today for your on-site estimate or ask about our convenient digital estimates. Emergency storm 
             repairs like tarping and damage assessments are available upon request. Book today!
           </p>
-          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-12 max-w-3xl mx-auto">
+          <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 max-w-3xl mx-auto">
             <Button
               size="lg"
               className="bg-sigma-emerald text-white hover:bg-emerald-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform w-full sm:w-64"
@@ -79,7 +79,7 @@ export default function Hero() {
             </Button>
           </div>
           
-          <div className="mt-12 grid grid-cols-3 gap-8 text-center max-w-3xl mx-auto">
+          <div className="mt-12 flex justify-between items-center max-w-3xl mx-auto">
             <div className="flex flex-col items-center">
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 

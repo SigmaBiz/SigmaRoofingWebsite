@@ -170,7 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const protocol = req.get('x-forwarded-proto') || 'https';
 
       // Exchange code for access token
-      console.log('Token exchange - Client ID:', process.env.OAUTH_2_0_CLIENT_IDS);
+      console.log('Token exchange - Client ID:', process.env.GOOGLE_CLIENT_ID);
       console.log('Token exchange - Has Client Secret:', !!process.env.GOOGLE_CLIENT_SECRET);
       console.log('Token exchange - Code received:', !!code);
       

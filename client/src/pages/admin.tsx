@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Plus, Eye, Image, Home, Wrench, Users, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import CloudinaryPhotoManager from "@/components/cloudinary-photo-manager";
 
 interface ProjectForm {
@@ -85,15 +87,29 @@ export default function Admin() {
 
   const [imagePreview, setImagePreview] = useState<string>("");
 
+  // Load images from API
+  const { data: savedImages, isLoading } = useQuery({
+    queryKey: ['/api/website-images'],
+    staleTime: 1000 * 60 * 5 // 5 minutes
+  });
+
   // Load saved images when component mounts
   useEffect(() => {
-    // Load website images
-    Object.keys(websiteImages).forEach(key => {
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        setWebsiteImages(prev => ({ ...prev, [key]: saved }));
-      }
-    });
+    // Load from API first
+    if (savedImages && savedImages.images) {
+      setWebsiteImages(prev => ({
+        ...prev,
+        ...savedImages.images
+      }));
+    } else {
+      // Load website images from localStorage as fallback
+      Object.keys(websiteImages).forEach(key => {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          setWebsiteImages(prev => ({ ...prev, [key]: saved }));
+        }
+      });
+    }
 
     // Load all project data
     Object.keys(allProjects).forEach(projectKey => {
@@ -107,7 +123,7 @@ export default function Admin() {
         }
       }
     });
-  }, []);
+  }, [savedImages]);
 
   // Update form data when current project changes
   useEffect(() => {

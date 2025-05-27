@@ -139,8 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `scope=${encodeURIComponent(scopes)}&` +
         `access_type=offline&` +
         `prompt=consent&` +
-        `include_granted_scopes=false&` +
-        `approval_prompt=force&` +
+        `include_granted_scopes=true&` +
         `state=${Date.now()}`;
 
       res.setHeader('Cache-Control', 'no-cache');

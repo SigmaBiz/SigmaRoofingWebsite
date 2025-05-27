@@ -92,6 +92,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Google Business Profile photos for project gallery
+  app.get("/api/business-photos", async (req, res) => {
+    try {
+      const apiKey = process.env.GOOGLE_API_KEY;
+      console.log("API Key present:", !!apiKey);
+      
+      if (!apiKey) {
+        return res.status(500).json({ success: false, message: "Google API key not configured" });
+      }
+
+      const businessName = "BBAV ROOFING LLC";
+      const businessAddress = "16612 N Western Avenue Edmond OK";
+      const searchQuery = `${businessName} ${businessAddress}`;
+      
+      console.log("Searching for:", searchQuery);
+      
+      // First, find the place
+      const findResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name&key=${apiKey}`
+      );
+      
+      const findData = await findResponse.json();
+      console.log("Search response:", findData);
+      
+      if (findData.status !== "OK" || !findData.candidates?.length) {
+        return res.json({ success: false, message: "Business not found" });
+      }
+      
+      const placeId = findData.candidates[0].place_id;
+      console.log("Found place ID:", placeId);
+      
+      // Get place details including photos
+      const detailsResponse = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,photos&key=${apiKey}`
+      );
+      
+      const detailsData = await detailsResponse.json();
+      console.log("Place details response:", detailsData);
+      
+      if (detailsData.status === "OK" && detailsData.result?.photos) {
+        const photos = detailsData.result.photos.slice(0, 6).map((photo: any, index: number) => ({
+          id: index + 1,
+          title: `Roofing Project ${index + 1}`,
+          description: "Professional roofing work completed by Sigma Roofing LLC",
+          imageUrl: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${photo.photo_reference}&key=${apiKey}`,
+          category: index % 2 === 0 ? "Residential" : "Commercial"
+        }));
+        
+        res.json({ 
+          success: true, 
+          photos: photos 
+        });
+      } else {
+        res.json({ success: false, message: "No photos found" });
+      }
+      
+    } catch (error) {
+      console.error("Error fetching business photos:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch photos" });
+    }
+  });
+
   // Google Business Profile reviews for BBAV Roofing LLC
   app.get("/api/reviews", async (req, res) => {
     try {

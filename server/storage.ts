@@ -25,8 +25,10 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.contactRequests = new Map();
+    this.projects = new Map();
     this.currentUserId = 1;
     this.currentContactId = 1;
+    this.currentProjectId = 1;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -61,6 +63,41 @@ export class MemStorage implements IStorage {
     return Array.from(this.contactRequests.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const id = this.currentProjectId++;
+    const newProject: Project = {
+      ...project,
+      id,
+      createdAt: new Date(),
+    };
+    this.projects.set(id, newProject);
+    return newProject;
+  }
+
+  async getProjects(): Promise<Project[]> {
+    return Array.from(this.projects.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }
+
+  async deleteProject(id: number): Promise<boolean> {
+    return this.projects.delete(id);
+  }
+
+  async getWebsiteImages(): Promise<WebsiteImages | undefined> {
+    return this.websiteImages;
+  }
+
+  async updateWebsiteImages(images: InsertWebsiteImages): Promise<WebsiteImages> {
+    const updatedImages: WebsiteImages = {
+      ...images,
+      id: 1,
+      updatedAt: new Date(),
+    };
+    this.websiteImages = updatedImages;
+    return updatedImages;
   }
 }
 

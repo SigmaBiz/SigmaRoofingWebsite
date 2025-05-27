@@ -26,8 +26,14 @@ export default function CloudinaryPhotoManager() {
         formData.append('upload_preset', 'sigma_roofing'); // We'll create this preset
         formData.append('folder', 'sigma-roofing/projects');
 
+        // Get cloud name from environment variables
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+        if (!cloudName) {
+          throw new Error('Cloudinary cloud name not configured');
+        }
+
         const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME || 'demo'}/image/upload`,
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
           {
             method: 'POST',
             body: formData,

@@ -92,8 +92,22 @@ export class MemStorage implements IStorage {
 
   async updateWebsiteImages(images: InsertWebsiteImages): Promise<WebsiteImages> {
     const updatedImages: WebsiteImages = {
-      ...images,
       id: 1,
+      heroBackground: images.heroBackground || null,
+      heroFeatureImage: images.heroFeatureImage || null,
+      residentialRoofingImage: images.residentialRoofingImage || null,
+      roofRepairImage: images.roofRepairImage || null,
+      roofInspectionImage: images.roofInspectionImage || null,
+      gutterServiceImage: images.gutterServiceImage || null,
+      stormDamageImage: images.stormDamageImage || null,
+      paintingServiceImage: images.paintingServiceImage || null,
+      teamPhoto: images.teamPhoto || null,
+      companyLogo: images.companyLogo || null,
+      processStep1Image: images.processStep1Image || null,
+      processStep2Image: images.processStep2Image || null,
+      processStep3Image: images.processStep3Image || null,
+      processStep4Image: images.processStep4Image || null,
+      testimonialBackground: images.testimonialBackground || null,
       updatedAt: new Date(),
     };
     this.websiteImages = updatedImages;

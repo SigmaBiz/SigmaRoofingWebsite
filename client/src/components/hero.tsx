@@ -81,30 +81,39 @@ export default function Hero() {
           
           <div className="mt-12 grid grid-cols-3 gap-8 text-center max-w-3xl mx-auto">
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 shadow-lg border border-white/20">
-                <svg viewBox="0 0 100 100" className="w-10 h-10 text-sigma-emerald fill-current">
-                  <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.2"/>
-                  <text x="50" y="58" textAnchor="middle" className="text-xs font-bold fill-white">OK</text>
-                </svg>
-              </div>
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
+                alt="Oklahoma Flag" 
+                className="w-16 h-12 mb-2 rounded shadow-lg"
+                style={{
+                  filter: 'hue-rotate(180deg) saturate(0) brightness(1.2) contrast(1.5)',
+                  mixBlendMode: 'multiply'
+                }}
+              />
               <div className="text-sm text-gray-300 font-semibold">Operated</div>
             </div>
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 shadow-lg border border-white/20">
-                <svg viewBox="0 0 100 100" className="w-10 h-10 text-sigma-emerald fill-current">
-                  <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.2"/>
-                  <text x="50" y="58" textAnchor="middle" className="text-xs font-bold fill-white">OK</text>
-                </svg>
-              </div>
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
+                alt="Oklahoma Flag" 
+                className="w-16 h-12 mb-2 rounded shadow-lg"
+                style={{
+                  filter: 'hue-rotate(180deg) saturate(0) brightness(1.2) contrast(1.5)',
+                  mixBlendMode: 'multiply'
+                }}
+              />
               <div className="text-sm text-gray-300 font-semibold">Founded</div>
             </div>
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mb-2 shadow-lg border border-white/20">
-                <svg viewBox="0 0 100 100" className="w-10 h-10 text-sigma-emerald fill-current">
-                  <circle cx="50" cy="50" r="45" fill="currentColor" opacity="0.2"/>
-                  <text x="50" y="58" textAnchor="middle" className="text-xs font-bold fill-white">OK</text>
-                </svg>
-              </div>
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
+                alt="Oklahoma Flag" 
+                className="w-16 h-12 mb-2 rounded shadow-lg"
+                style={{
+                  filter: 'hue-rotate(180deg) saturate(0) brightness(1.2) contrast(1.5)',
+                  mixBlendMode: 'multiply'
+                }}
+              />
               <div className="text-sm text-gray-300 font-semibold">Licensed & Insured</div>
             </div>
           </div>

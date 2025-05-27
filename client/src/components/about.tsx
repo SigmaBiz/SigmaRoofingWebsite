@@ -1,16 +1,39 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function About() {
   const [teamPhoto, setTeamPhoto] = useState("");
+  const [companyLogo, setCompanyLogo] = useState("");
+
+  // Load images from admin panel
+  const { data: websiteImages } = useQuery({
+    queryKey: ['/api/website-images'],
+    staleTime: 1000 * 60 * 5 // 5 minutes
+  });
 
   useEffect(() => {
-    const savedTeamPhoto = localStorage.getItem('teamPhoto');
-    if (savedTeamPhoto) {
-      setTeamPhoto(savedTeamPhoto);
+    // Load from admin panel first, then fall back to localStorage
+    if (websiteImages && websiteImages.images) {
+      if (websiteImages.images.teamPhoto) {
+        setTeamPhoto(websiteImages.images.teamPhoto);
+      }
+      if (websiteImages.images.companyLogo) {
+        setCompanyLogo(websiteImages.images.companyLogo);
+      }
+    } else {
+      // Fallback to localStorage
+      const savedTeamPhoto = localStorage.getItem('teamPhoto');
+      const savedCompanyLogo = localStorage.getItem('companyLogo');
+      if (savedTeamPhoto) {
+        setTeamPhoto(savedTeamPhoto);
+      }
+      if (savedCompanyLogo) {
+        setCompanyLogo(savedCompanyLogo);
+      }
     }
-  }, []);
+  }, [websiteImages]);
   return (
     <section id="about" className="py-20 bg-sigma-emerald">
       <div className="container mx-auto px-4">

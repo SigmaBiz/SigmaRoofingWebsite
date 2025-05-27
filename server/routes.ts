@@ -128,14 +128,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get the domain from the request headers
       const host = req.get('host');
-      const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-      const redirectUri = `${protocol}://${host}/api/google-photos/callback`;
+      const redirectUri = `https://${host}/api/google-photos/callback`;
       
-      console.log('=== AUTH URL GENERATION ===');
-      console.log('Current host:', host);
-      console.log('Protocol:', protocol);
       console.log('Redirect URI:', redirectUri);
-      console.log('==========================');
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${clientId}&` +
@@ -145,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `access_type=offline&` +
         `prompt=consent`;
 
-      res.json({ authUrl, redirectUri });
+      res.json({ authUrl, redirectUri, timestamp: Date.now() });
       
     } catch (error) {
       console.error("Error generating auth URL:", error);

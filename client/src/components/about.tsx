@@ -70,13 +70,11 @@ export default function About() {
             {/* Company Logo */}
             {companyLogo && (
               <div className="space-y-2">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg h-64 flex items-center justify-center p-6">
-                  <img 
-                    src={companyLogo} 
-                    alt="Sigma Roofing Company Logo" 
-                    className="max-h-full max-w-full object-contain" 
-                  />
-                </div>
+                <img 
+                  src={companyLogo} 
+                  alt="Sigma Roofing Company Logo" 
+                  className="rounded-lg shadow-lg w-full h-64 object-cover" 
+                />
                 <p className="text-center text-gray-200 text-sm">Company Logo</p>
               </div>
             )}

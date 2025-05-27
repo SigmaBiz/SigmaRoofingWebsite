@@ -96,12 +96,12 @@ export default function Admin() {
   // Load saved images when component mounts
   useEffect(() => {
     // Load from API first
-    if (savedImages && savedImages.images) {
+    if (savedImages?.success && savedImages?.images) {
       setWebsiteImages(prev => ({
         ...prev,
         ...savedImages.images
       }));
-    } else {
+    } else if (!isLoading) {
       // Load website images from localStorage as fallback
       Object.keys(websiteImages).forEach(key => {
         const saved = localStorage.getItem(key);

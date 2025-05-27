@@ -15,7 +15,7 @@ export default function About() {
 
   useEffect(() => {
     // Load from admin panel first, then fall back to localStorage
-    if (websiteImages && websiteImages.images) {
+    if (websiteImages?.success && websiteImages?.images) {
       if (websiteImages.images.teamPhoto) {
         setTeamPhoto(websiteImages.images.teamPhoto);
       }
@@ -100,13 +100,13 @@ export default function About() {
               <img 
                 src={teamPhoto} 
                 alt="Sigma Roofing team" 
-                className="rounded-lg shadow-lg w-full h-auto" 
+                className="rounded-lg shadow-lg w-full h-64 lg:h-80 object-cover" 
               />
             ) : (
               <img 
                 src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
                 alt="Professional roofing team at work" 
-                className="rounded-lg shadow-lg w-full h-auto" 
+                className="rounded-lg shadow-lg w-full h-64 lg:h-80 object-cover" 
               />
             )}
             

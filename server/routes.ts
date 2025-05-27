@@ -237,11 +237,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testData = await testResponse.json();
       console.log('Test API response:', JSON.stringify(testData, null, 2));
 
-      // Get recent photos from the library (no album filter)
-      const photosResponse = await fetch('https://photoslibrary.googleapis.com/v1/mediaItems?pageSize=50', {
+      // Get recent photos from the library using POST method with request body
+      const photosResponse = await fetch('https://photoslibrary.googleapis.com/v1/mediaItems:search', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          pageSize: 10
+        })
       });
 
       const photosData = await photosResponse.json();

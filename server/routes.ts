@@ -105,8 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'https://www.googleapis.com/auth/photoslibrary.readonly'
       ].join(' ');
 
-      // Construct the proper redirect URI
-      const redirectUri = `https://a145bc5b-ba9d-4923-b8ec-25e9065c31f8-00-1m4gjgvkqb0yz.riker.replit.dev/api/google-photos/callback`;
+      // Use the simpler Replit production domain format
+      const redirectUri = `https://workspace.oksigmaroofs.repl.co/api/google-photos/callback`;
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${clientId}&` +
@@ -144,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: `https://a145bc5b-ba9d-4923-b8ec-25e9065c31f8-00-1m4gjgvkqb0yz.riker.replit.dev/api/google-photos/callback`
+          redirect_uri: `https://workspace.oksigmaroofs.repl.co/api/google-photos/callback`
         })
       });
 

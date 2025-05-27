@@ -1,23 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, Phone } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [companyLogo, setCompanyLogo] = useState("");
-
-  // Load company logo from admin panel
-  const { data: websiteImages } = useQuery({
-    queryKey: ['/api/website-images'],
-    staleTime: 1000 * 60 * 5 // 5 minutes
-  });
-
-  useEffect(() => {
-    if (websiteImages && websiteImages.images && websiteImages.images.companyLogo) {
-      setCompanyLogo(websiteImages.images.companyLogo);
-    }
-  }, [websiteImages]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -33,17 +19,11 @@ export default function Header() {
         <div className="flex justify-between items-center">
           {/* Company Logo and Name */}
           <div className="flex items-center space-x-3">
-            {companyLogo ? (
-              <img 
-                src={companyLogo} 
-                alt="Sigma Roofing LLC Logo" 
-                className="w-12 h-12 object-contain"
-              />
-            ) : (
-              <div className="w-12 h-12 bg-sigma-emerald rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-            )}
+            <img 
+              src="/sigma-logo.png" 
+              alt="Sigma Roofing LLC Logo" 
+              className="w-12 h-12 object-contain"
+            />
             <div>
               <h1 className="font-bold text-xl text-sigma-charcoal">Sigma Roofing LLC</h1>
               <p className="text-sm text-sigma-light-gray">LIC#80006734</p>

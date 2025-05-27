@@ -140,7 +140,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `access_type=offline&` +
         `prompt=consent&` +
         `include_granted_scopes=false&` +
-        `approval_prompt=force&` +
         `state=${Date.now()}`;
 
       res.setHeader('Cache-Control', 'no-cache');

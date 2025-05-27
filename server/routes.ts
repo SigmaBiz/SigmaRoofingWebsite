@@ -123,7 +123,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const scopes = [
-        'https://www.googleapis.com/auth/photoslibrary.readonly'
+        'https://www.googleapis.com/auth/photoslibrary.readonly',
+        'https://www.googleapis.com/auth/photoslibrary.sharing'
       ].join(' ');
 
       // Get the domain from the request headers

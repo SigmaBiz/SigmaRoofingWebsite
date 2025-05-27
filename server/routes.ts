@@ -105,8 +105,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'https://www.googleapis.com/auth/photoslibrary.readonly'
       ].join(' ');
 
-      // Use the simpler Replit production domain format
-      const redirectUri = `https://workspace.oksigmaroofs.repl.co/api/google-photos/callback`;
+      // Get the domain from the request headers
+      const host = req.get('host');
+      const protocol = req.get('x-forwarded-proto') || 'https';
+      const redirectUri = `${protocol}://${host}/api/google-photos/callback`;
+      
+      console.log('Current host:', host);
+      console.log('Redirect URI:', redirectUri);
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${clientId}&` +
@@ -133,6 +138,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).send("Authorization code not provided");
       }
 
+      // Get the domain from the request headers
+      const host = req.get('host');
+      const protocol = req.get('x-forwarded-proto') || 'https';
+
       // Exchange code for access token
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -144,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: `https://workspace.oksigmaroofs.repl.co/api/google-photos/callback`
+          redirect_uri: `${protocol}://${host}/api/google-photos/callback`
         })
       });
 

@@ -123,8 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const scopes = [
-        'https://www.googleapis.com/auth/photoslibrary.readonly',
-        'https://www.googleapis.com/auth/photoslibrary.sharing'
+        'https://www.googleapis.com/auth/photoslibrary.readonly'
       ].join(' ');
 
       // Get the domain from the request headers
@@ -139,7 +138,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `response_type=code&` +
         `scope=${encodeURIComponent(scopes)}&` +
         `access_type=offline&` +
-        `prompt=consent`;
+        `prompt=consent&` +
+        `include_granted_scopes=true`;
 
       res.setHeader('Cache-Control', 'no-cache');
       res.json({ authUrl, redirectUri, timestamp: Date.now() });

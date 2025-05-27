@@ -223,7 +223,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const photosData = await photosResponse.json();
       
+      console.log('Photos API Status:', photosResponse.status);
       console.log('All photos API response:', JSON.stringify(photosData, null, 2));
+      
+      // Check if we got an error response
+      if (!photosResponse.ok) {
+        console.error('Photos API Error:', photosData);
+        return res.json({ 
+          success: false, 
+          message: `API Error: ${photosData.error?.message || 'Unknown error'}`,
+          statusCode: photosResponse.status,
+          debug: photosData 
+        });
+      }
       
       if (photosData.mediaItems) {
         const photos = photosData.mediaItems.slice(0, 10).map((item: any, index: number) => ({

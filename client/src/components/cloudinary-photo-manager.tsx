@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Image as ImageIcon } from 'lucide-react';
+import { Upload, Image as ImageIcon, Copy, Check } from 'lucide-react';
 
 export default function CloudinaryPhotoManager() {
   const [uploading, setUploading] = useState(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +69,26 @@ export default function CloudinaryPhotoManager() {
     }
   };
 
+  const copyToClipboard = async (url: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedIndex(index);
+      toast({
+        title: "URL Copied!",
+        description: "The Cloudinary URL has been copied to your clipboard. You can now paste it in the Website Images or Project Gallery tabs.",
+      });
+      
+      // Reset the copied state after 2 seconds
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Please manually copy the URL from the text field below.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -118,14 +139,51 @@ export default function CloudinaryPhotoManager() {
             <CardTitle>Recently Uploaded ({uploadedPhotos.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="space-y-4">
               {uploadedPhotos.map((photoUrl, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={photoUrl.replace('/upload/', '/upload/w_300,h_200,c_fill/')}
-                    alt={`Project photo ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg border"
-                  />
+                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-start gap-4">
+                    <img
+                      src={photoUrl.replace('/upload/', '/upload/w_200,h_150,c_fill/')}
+                      alt={`Project photo ${index + 1}`}
+                      className="w-32 h-24 object-cover rounded border"
+                    />
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700">
+                          Photo {index + 1} - Cloudinary URL:
+                        </Label>
+                        <div className="mt-1 flex gap-2">
+                          <Input
+                            value={photoUrl}
+                            readOnly
+                            className="font-mono text-xs"
+                          />
+                          <Button
+                            onClick={() => copyToClipboard(photoUrl, index)}
+                            variant="outline"
+                            size="sm"
+                            className="flex-shrink-0"
+                          >
+                            {copiedIndex === index ? (
+                              <>
+                                <Check className="w-4 h-4 mr-1" />
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-4 h-4 mr-1" />
+                                Copy URL
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Copy this URL and paste it into the Website Images tab or Project Gallery tab
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

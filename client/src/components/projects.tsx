@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -50,6 +51,9 @@ const staticProjects = [
 ];
 
 export default function Projects() {
+  const [adminProjects, setAdminProjects] = useState<any[]>([]);
+  const [useAdminProjects, setUseAdminProjects] = useState(false);
+
   // Fetch real photos from Google Business Profile
   const { data: businessPhotosData, isLoading: photosLoading } = useQuery({
     queryKey: ['/api/business-photos'],
@@ -57,9 +61,31 @@ export default function Projects() {
     staleTime: 1000 * 60 * 30, // Cache for 30 minutes
   });
 
-  // Use Google Business photos if available, otherwise use static projects
-  const projects = (businessPhotosData as any)?.success ? (businessPhotosData as any).photos : staticProjects;
-  const showingLivePhotos = (businessPhotosData as any)?.success;
+  useEffect(() => {
+    // Check if admin has uploaded custom projects
+    const savedProjects = localStorage.getItem('adminProjects');
+    if (savedProjects) {
+      try {
+        const parsedProjects = JSON.parse(savedProjects);
+        if (parsedProjects.length > 0) {
+          setAdminProjects(parsedProjects);
+          setUseAdminProjects(true);
+        }
+      } catch (error) {
+        console.log('No admin projects found');
+      }
+    }
+  }, []);
+
+  // Prioritize admin projects, then Google Business photos, then static projects
+  const projects = useAdminProjects 
+    ? adminProjects 
+    : (businessPhotosData as any)?.success 
+      ? (businessPhotosData as any).photos 
+      : staticProjects;
+  
+  const showingLivePhotos = !useAdminProjects && (businessPhotosData as any)?.success;
+  const showingAdminProjects = useAdminProjects;
 
   // Ensure projects is always an array
   const projectsArray = Array.isArray(projects) ? projects : staticProjects;
@@ -70,12 +96,20 @@ export default function Projects() {
         <div className="text-center mb-16">
           <h2 className="font-bold text-4xl text-white mb-4">Recent Projects</h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            {showingLivePhotos 
-              ? "Live photos from our Google Business profile showcasing our latest roofing work in the Edmond area."
-              : "Take a look at some of our recent roofing projects in the Edmond area. Each project showcases our commitment to quality and attention to detail."
+            {showingAdminProjects 
+              ? "Custom project gallery showcasing our latest roofing work managed through your admin panel."
+              : showingLivePhotos 
+                ? "Live photos from our Google Business profile showcasing our latest roofing work in the Edmond area."
+                : "Take a look at some of our recent roofing projects in the Edmond area. Each project showcases our commitment to quality and attention to detail."
             }
           </p>
-          {showingLivePhotos && (
+          {showingAdminProjects && (
+            <div className="mt-4 inline-flex items-center px-3 py-1 bg-sigma-emerald text-white text-sm rounded-full">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></div>
+              Admin Managed Gallery
+            </div>
+          )}
+          {showingLivePhotos && !showingAdminProjects && (
             <div className="mt-4 inline-flex items-center px-3 py-1 bg-emerald-600 text-white text-sm rounded-full">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></div>
               Live from Google Business Profile

@@ -9,7 +9,7 @@ const services = [
     title: "Residential Roofing",
     description: "Complete residential roofing services including new installations, repairs, and maintenance for all roof types.",
     features: ["Asphalt Shingles", "Metal Roofing", "Tile Roofing", "Storm Damage Repair"],
-    imageKey: "roofRepairImage"
+    imageKey: "heroFeatureImage"
   },
   {
     icon: PaintBucket,

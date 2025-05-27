@@ -549,29 +549,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple website images storage (for testing hero background)
-  let heroBackgroundUrl = "";
-
   // Get website images
-  app.get("/api/website-images", (req, res) => {
-    res.json({
-      success: true,
-      images: {
-        heroBackground: heroBackgroundUrl
-      }
-    });
+  app.get("/api/website-images", async (req, res) => {
+    try {
+      const images = await storage.getWebsiteImages();
+      res.json({
+        success: true,
+        images: images || {}
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to get website images"
+      });
+    }
   });
 
   // Update website images
-  app.post("/api/website-images", (req, res) => {
-    const { heroBackground } = req.body;
-    if (heroBackground) {
-      heroBackgroundUrl = heroBackground;
+  app.post("/api/website-images", async (req, res) => {
+    try {
+      const updatedImages = await storage.updateWebsiteImages(req.body);
+      res.json({
+        success: true,
+        message: "Website images updated successfully!",
+        images: updatedImages
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to update website images"
+      });
     }
-    res.json({
-      success: true,
-      message: "Hero background updated successfully!"
-    });
   });
 
   const httpServer = createServer(app);

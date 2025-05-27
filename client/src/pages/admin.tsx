@@ -197,17 +197,30 @@ export default function Admin() {
 
   const handleSaveWebsiteImages = async () => {
     try {
-      // Save all website images to localStorage
-      Object.entries(websiteImages).forEach(([key, value]) => {
-        if (value) {
-          localStorage.setItem(key, value);
-        }
+      // Save to both backend API and localStorage for compatibility
+      const response = await fetch('/api/website-images', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(websiteImages),
       });
-      
-      toast({
-        title: "Website Images Updated!",
-        description: "All your website images have been updated. Refresh your main website to see the changes!",
-      });
+
+      if (response.ok) {
+        // Also save to localStorage as backup
+        Object.entries(websiteImages).forEach(([key, value]) => {
+          if (value) {
+            localStorage.setItem(key, value);
+          }
+        });
+        
+        toast({
+          title: "Website Images Updated!",
+          description: "All your website images have been updated and are now live on your website!",
+        });
+      } else {
+        throw new Error('Failed to update images');
+      }
     } catch (error) {
       toast({
         title: "Update Failed",

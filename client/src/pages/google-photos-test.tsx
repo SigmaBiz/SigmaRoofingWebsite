@@ -29,8 +29,8 @@ export default function GooglePhotosTest() {
       }
       
       if (data.authUrl) {
-        // Open OAuth window
-        const authWindow = window.open(data.authUrl, 'google-auth', 'width=500,height=600');
+        // Open OAuth window in a way that bypasses cache
+        const authWindow = window.open(data.authUrl, '_blank', 'width=500,height=600,scrollbars=yes,resizable=yes');
         
         // Listen for auth completion
         const handleMessage = (event: MessageEvent) => {

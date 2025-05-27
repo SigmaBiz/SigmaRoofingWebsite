@@ -3,26 +3,26 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%; /* White */
-  --foreground: 0 0% 20%; /* Charcoal */
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%; /* Medium Charcoal */
+  --background: 210 11% 98%; /* Light blue-gray */
+  --foreground: 210 11% 15%; /* Deep charcoal */
+  --muted: 210 11% 94%;
+  --muted-foreground: 210 11% 40%; /* Medium gray-blue */
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 20%;
+  --popover-foreground: 210 11% 15%;
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 20%;
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --primary: 158 64% 52%; /* Emerald Green */
+  --card-foreground: 210 11% 15%;
+  --border: 210 11% 88%;
+  --input: 210 11% 91%;
+  --primary: 158 64% 52%; /* Vibrant emerald */
   --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 20%;
-  --accent: 0 0% 96%;
-  --accent-foreground: 0 0% 20%;
+  --secondary: 210 40% 92%; /* Light blue accent */
+  --secondary-foreground: 210 11% 15%;
+  --accent: 45 100% 95%; /* Warm accent */
+  --accent-foreground: 210 11% 15%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
   --ring: 158 64% 52%;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 }
 
 .dark {

@@ -132,16 +132,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Redirect URI:', redirectUri);
       
-      // Add timestamp to force fresh auth and prevent caching
-      const timestamp = Date.now();
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=code&` +
-        `scope=${encodeURIComponent(scopes)}&` +
-        `access_type=offline&` +
-        `prompt=consent&` +
-        `state=${timestamp}`;
+      // Use Google's recommended OAuth 2.0 flow
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: 'code',
+        scope: scopes,
+        access_type: 'offline',
+        prompt: 'consent',
+        state: Date.now().toString()
+      });
+      
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 
       res.setHeader('Cache-Control', 'no-cache');
       res.json({ authUrl, redirectUri, timestamp: Date.now() });

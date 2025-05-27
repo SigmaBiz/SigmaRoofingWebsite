@@ -21,7 +21,6 @@ interface ProjectForm {
 interface WebsiteImages {
   // Hero Section
   heroBackground: string;
-  heroFeatureImage: string;
   
   // Services Section
   residentialRoofingImage: string;
@@ -69,7 +68,6 @@ export default function Admin() {
 
   const [websiteImages, setWebsiteImages] = useState<WebsiteImages>({
     heroBackground: "",
-    heroFeatureImage: "",
     residentialRoofingImage: "",
     roofRepairImage: "",
     roofInspectionImage: "",
@@ -311,12 +309,6 @@ export default function Admin() {
                     field="heroBackground"
                     description="Main background image for your homepage hero section"
                     currentValue={websiteImages.heroBackground}
-                  />
-                  <ImageUploadField
-                    label="Hero Feature Image"
-                    field="heroFeatureImage"
-                    description="Featured roofing project image next to your main message"
-                    currentValue={websiteImages.heroFeatureImage}
                   />
                 </CardContent>
               </Card>

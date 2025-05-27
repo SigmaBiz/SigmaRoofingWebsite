@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function Hero() {
   const [heroBackground, setHeroBackground] = useState("");
-  const [heroFeatureImage, setHeroFeatureImage] = useState("");
 
   // Load images from admin panel
   const { data: websiteImages } = useQuery({
@@ -15,25 +14,15 @@ export default function Hero() {
 
   useEffect(() => {
     // Load from admin panel first, then fall back to localStorage
-    if (websiteImages) {
-      console.log('Website images from admin:', websiteImages);
-      if (websiteImages.heroBackground) {
-        setHeroBackground(websiteImages.heroBackground);
-      }
-      if (websiteImages.heroFeatureImage) {
-        setHeroFeatureImage(websiteImages.heroFeatureImage);
-        console.log('Setting hero feature image:', websiteImages.heroFeatureImage);
+    if (websiteImages && websiteImages.images) {
+      if (websiteImages.images.heroBackground) {
+        setHeroBackground(websiteImages.images.heroBackground);
       }
     } else {
       // Fallback to localStorage
       const savedHeroBackground = localStorage.getItem('heroBackground');
-      const savedHeroFeatureImage = localStorage.getItem('heroFeatureImage');
       if (savedHeroBackground) {
         setHeroBackground(savedHeroBackground);
-      }
-      if (savedHeroFeatureImage) {
-        setHeroFeatureImage(savedHeroFeatureImage);
-        console.log('Setting hero feature image from localStorage:', savedHeroFeatureImage);
       }
     }
   }, [websiteImages]);
@@ -58,8 +47,7 @@ export default function Hero() {
     >
       {!heroBackground && <div className="hero-bg absolute inset-0" />}
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          <div className="text-white text-center lg:text-left">
+        <div className="max-w-3xl text-white text-center lg:text-left">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">
             <span className="text-white">Stand firm.</span>{" "}
             <span className="text-sigma-emerald">Brave the storm.</span>{" "}
@@ -116,26 +104,6 @@ export default function Hero() {
               />
               <div className="text-sm text-gray-300 font-semibold">Licensed & Insured</div>
             </div>
-          </div>
-          </div>
-          
-          {/* Hero Feature Image */}
-          <div className="hidden lg:flex justify-center items-center">
-            {heroFeatureImage ? (
-              <img 
-                src={heroFeatureImage} 
-                alt="Sigma Roofing Feature" 
-                className="max-w-full h-auto rounded-lg shadow-2xl"
-                style={{ maxHeight: '600px' }}
-                onError={(e) => {
-                  console.log('Hero feature image failed to load:', heroFeatureImage);
-                }}
-              />
-            ) : (
-              <div className="text-white/50 text-center p-8">
-                <p>Feature image will appear here when added in admin panel</p>
-              </div>
-            )}
           </div>
         </div>
       </div>

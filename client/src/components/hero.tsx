@@ -79,7 +79,7 @@ export default function Hero() {
             </Button>
           </div>
           
-          <div className="mt-12 flex justify-between items-center max-w-3xl mx-auto">
+          <div className="mt-16 flex justify-between items-center max-w-3xl mx-auto">
             <div className="flex flex-col items-center">
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 

@@ -1,4 +1,4 @@
-import { users, contactRequests, type User, type InsertUser, type ContactRequest, type InsertContactRequest } from "@shared/schema";
+import { users, contactRequests, projects, type User, type InsertUser, type ContactRequest, type InsertContactRequest, type Project, type InsertProject } from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -6,6 +6,9 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   createContactRequest(request: InsertContactRequest): Promise<ContactRequest>;
   getContactRequests(): Promise<ContactRequest[]>;
+  createProject(project: InsertProject): Promise<Project>;
+  getProjects(): Promise<Project[]>;
+  deleteProject(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

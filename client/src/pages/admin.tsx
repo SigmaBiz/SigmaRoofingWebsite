@@ -230,6 +230,9 @@ export default function Admin() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Firebase Photo Manager */}
+        <FirebasePhotoManager />
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ export default function GooglePhotosTest() {
   const [isLoading, setIsLoading] = useState(false);
   const [photos, setPhotos] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [redirectUri, setRedirectUri] = useState<string>("");
 
   const initiateGoogleAuth = async () => {
     setIsLoading(true);
@@ -19,6 +20,7 @@ export default function GooglePhotosTest() {
       
       // Show the user the redirect URI that needs to be added
       if (data.redirectUri) {
+        setRedirectUri(data.redirectUri);
         toast({
           title: "Add this to Google Cloud Console",
           description: `Redirect URI: ${data.redirectUri}`,
@@ -188,6 +190,28 @@ export default function GooglePhotosTest() {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Redirect URI Display */}
+        {redirectUri && (
+          <Card className="mt-8 bg-yellow-50 border-yellow-200">
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-yellow-900 mb-3">🔧 Google Cloud Console Setup Required</h3>
+              <div className="bg-white p-4 rounded border text-sm font-mono break-all mb-3">
+                {redirectUri}
+              </div>
+              <p className="text-yellow-800 text-sm mb-2">
+                <strong>Add this redirect URI to your Google Cloud Console:</strong>
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-yellow-800 text-sm">
+                <li>Go to Google Cloud Console → APIs & Services → Credentials</li>
+                <li>Click on your OAuth 2.0 Client ID</li>
+                <li>Under "Authorized redirect URIs", add the URL above</li>
+                <li>Save the changes</li>
+                <li>Try connecting again</li>
+              </ol>
             </CardContent>
           </Card>
         )}

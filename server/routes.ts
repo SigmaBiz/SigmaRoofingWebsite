@@ -62,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Google Places Autocomplete API with Oklahoma restriction
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&types=address&components=country:us|administrative_area:oklahoma&key=${apiKey}`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query + ' Oklahoma')}&types=address&key=${apiKey}`
       );
       
       const data = await response.json();

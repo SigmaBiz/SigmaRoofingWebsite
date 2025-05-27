@@ -46,6 +46,7 @@ interface WebsiteImages {
 
 export default function Admin() {
   const { toast } = useToast();
+  const [currentProject, setCurrentProject] = useState<string>("project1");
   const [formData, setFormData] = useState<ProjectForm>({
     title: "",
     description: "",
@@ -54,14 +55,14 @@ export default function Admin() {
     location: ""
   });
 
-  // Project Gallery Images (6 slots)
-  const [projectImages, setProjectImages] = useState({
-    project1: "",
-    project2: "",
-    project3: "",
-    project4: "",
-    project5: "",
-    project6: ""
+  // Store all 6 projects' data
+  const [allProjects, setAllProjects] = useState<{[key: string]: ProjectForm}>({
+    project1: { title: "", description: "", imageUrl: "", category: "", location: "" },
+    project2: { title: "", description: "", imageUrl: "", category: "", location: "" },
+    project3: { title: "", description: "", imageUrl: "", category: "", location: "" },
+    project4: { title: "", description: "", imageUrl: "", category: "", location: "" },
+    project5: { title: "", description: "", imageUrl: "", category: "", location: "" },
+    project6: { title: "", description: "", imageUrl: "", category: "", location: "" }
   });
   const [duplicateWarnings, setDuplicateWarnings] = useState<{[key: string]: boolean}>({});
 
@@ -94,14 +95,25 @@ export default function Admin() {
       }
     });
 
-    // Load project images
-    Object.keys(projectImages).forEach(key => {
-      const saved = localStorage.getItem(`projectGallery_${key}`);
+    // Load all project data
+    Object.keys(allProjects).forEach(projectKey => {
+      const saved = localStorage.getItem(`project_${projectKey}`);
       if (saved) {
-        setProjectImages(prev => ({ ...prev, [key]: saved }));
+        try {
+          const projectData = JSON.parse(saved);
+          setAllProjects(prev => ({ ...prev, [projectKey]: projectData }));
+        } catch (error) {
+          console.log('Error loading project data:', projectKey);
+        }
       }
     });
   }, []);
+
+  // Update form data when current project changes
+  useEffect(() => {
+    setFormData(allProjects[currentProject]);
+    setImagePreview(allProjects[currentProject].imageUrl);
+  }, [currentProject, allProjects]);
 
   const categories = [
     "Residential",
@@ -116,9 +128,17 @@ export default function Admin() {
   const handleInputChange = (field: keyof ProjectForm, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
+    // Update the current project in allProjects
+    setAllProjects(prev => ({
+      ...prev,
+      [currentProject]: { ...prev[currentProject], [field]: value }
+    }));
+    
     // Update image preview when URL changes
     if (field === 'imageUrl') {
       setImagePreview(value);
+      // Check for duplicates
+      checkForDuplicates(value);
     }
   };
 
@@ -127,57 +147,49 @@ export default function Admin() {
   };
 
   // Check for duplicate project images
-  const checkForDuplicates = (newUrl: string, currentProject: string) => {
-    const urls = Object.values(projectImages);
-    const isDuplicate = urls.some((url, index) => {
-      const projectKey = Object.keys(projectImages)[index];
-      return url === newUrl && projectKey !== currentProject && url !== "";
-    });
-    return isDuplicate;
-  };
-
-  const handleProjectImageChange = (project: string, value: string) => {
-    const isDuplicate = checkForDuplicates(value, project);
-    
-    setDuplicateWarnings(prev => ({ ...prev, [project]: isDuplicate }));
-    
-    if (!isDuplicate) {
-      setProjectImages(prev => ({ ...prev, [project]: value }));
+  const checkForDuplicates = (newUrl: string) => {
+    if (!newUrl) {
+      setDuplicateWarnings(prev => ({ ...prev, [currentProject]: false }));
+      return;
     }
+
+    const isDuplicate = Object.entries(allProjects).some(([projectKey, project]) => {
+      return project.imageUrl === newUrl && projectKey !== currentProject;
+    });
+    
+    setDuplicateWarnings(prev => ({ ...prev, [currentProject]: isDuplicate }));
   };
 
-  const saveProjectImages = () => {
-    // Only save if no duplicates exist
-    const hasDuplicates = Object.values(duplicateWarnings).some(warning => warning);
-    if (hasDuplicates) {
+  const saveCurrentProject = () => {
+    // Check for duplicates
+    const isDuplicate = duplicateWarnings[currentProject];
+    if (isDuplicate) {
       toast({
-        title: "Cannot Save - Duplicate Images",
-        description: "Please fix duplicate images before saving.",
+        title: "Cannot Save - Duplicate Image",
+        description: "This image is already used in another project. Please choose a different image.",
         variant: "destructive",
       });
       return;
     }
 
-    // Save each project image individually
-    Object.entries(projectImages).forEach(([key, url]) => {
-      localStorage.setItem(`projectGallery_${key}`, url);
-    });
-
-    // Convert to array format for the Projects component
-    const projectArray = Object.entries(projectImages)
-      .filter(([_, url]) => url !== "")
-      .map(([key, url], index) => ({
-        image: url,
-        title: `Project ${index + 1}`,
-        description: `Custom project managed through admin panel`,
-        category: "Admin Project"
+    // Save the current project
+    localStorage.setItem(`project_${currentProject}`, JSON.stringify(formData));
+    
+    // Update the project gallery for the website
+    const projectArray = Object.entries(allProjects)
+      .filter(([_, project]) => project.imageUrl !== "")
+      .map(([_, project], index) => ({
+        image: project.imageUrl,
+        title: project.title || `Project ${index + 1}`,
+        description: project.description || `Custom project managed through admin panel`,
+        category: project.category || "Admin Project"
       }));
 
     localStorage.setItem('adminProjects', JSON.stringify(projectArray));
     
     toast({
-      title: "Project Gallery Updated!",
-      description: "Your project images are now live on the website.",
+      title: "Project Saved!",
+      description: `${currentProject.replace('project', 'Project ')} has been saved and is now live on your website.`,
     });
   };
 
@@ -205,40 +217,7 @@ export default function Admin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.title || !formData.description || !formData.imageUrl || !formData.category) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Here you would save to your storage system
-      toast({
-        title: "Project Added Successfully!",
-        description: "Your new project will appear on the website immediately.",
-      });
-      
-      // Reset form
-      setFormData({
-        title: "",
-        description: "",
-        imageUrl: "",
-        category: "",
-        location: ""
-      });
-      setImagePreview("");
-      
-    } catch (error) {
-      toast({
-        title: "Upload Failed",
-        description: "Please try again or check your internet connection.",
-        variant: "destructive",
-      });
-    }
+    saveCurrentProject();
   };
 
   const ImageUploadField = ({ 
@@ -465,48 +444,135 @@ export default function Admin() {
               </CardHeader>
               <CardContent className="p-8">
                 <div className="space-y-6">
-                  <p className="text-gray-600 mb-6">
-                    Upload your best 6 project photos. Each slot gets its own image - no duplicates allowed!
-                  </p>
+                  {/* Project Selector */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Select Project to Edit
+                    </Label>
+                    <Select value={currentProject} onValueChange={setCurrentProject}>
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Choose which project to edit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="project1">Project 1</SelectItem>
+                        <SelectItem value="project2">Project 2</SelectItem>
+                        <SelectItem value="project3">Project 3</SelectItem>
+                        <SelectItem value="project4">Project 4</SelectItem>
+                        <SelectItem value="project5">Project 5</SelectItem>
+                        <SelectItem value="project6">Project 6</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500">
+                      Editing: {currentProject.replace('project', 'Project ')} - Changes will save to this slot
+                    </p>
+                  </div>
 
-                  {/* 6 Project Image Slots */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {Object.entries(projectImages).map(([projectKey, imageUrl], index) => (
-                      <div key={projectKey} className="space-y-3">
-                        <Label className="text-sm font-medium">
-                          Project {index + 1} Image
-                        </Label>
-                        <Input
-                          value={imageUrl}
-                          onChange={(e) => handleProjectImageChange(projectKey, e.target.value)}
-                          placeholder="Paste Cloudinary URL here..."
-                          className={`h-12 ${duplicateWarnings[projectKey] ? 'border-red-500' : ''}`}
+                  {/* Image URL Input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="imageUrl" className="text-sm font-medium">
+                      <Upload className="w-4 h-4 inline mr-2" />
+                      Image URL *
+                    </Label>
+                    <Input
+                      id="imageUrl"
+                      value={formData.imageUrl}
+                      onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+                      placeholder="Paste Cloudinary URL from Photo Manager tab"
+                      className={`h-12 ${duplicateWarnings[currentProject] ? 'border-red-500' : ''}`}
+                    />
+                    {duplicateWarnings[currentProject] && (
+                      <p className="text-red-500 text-xs">⚠️ This image is already used in another project. Please choose a different image.</p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Upload photos using the Photo Manager tab, then paste the URL here
+                    </p>
+                  </div>
+
+                  {/* Image Preview */}
+                  {imagePreview && !duplicateWarnings[currentProject] && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Preview
+                      </Label>
+                      <div className="border rounded-lg overflow-hidden">
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="w-full h-48 object-cover"
+                          onError={() => setImagePreview("")}
                         />
-                        {duplicateWarnings[projectKey] && (
-                          <p className="text-red-500 text-xs">⚠️ This image is already used in another slot. Please choose a different image.</p>
-                        )}
-                        {imageUrl && !duplicateWarnings[projectKey] && (
-                          <div className="mt-2">
-                            <img 
-                              src={imageUrl} 
-                              alt={`Project ${index + 1}`}
-                              className="w-full h-32 object-cover rounded border"
-                              onError={() => handleProjectImageChange(projectKey, "")}
-                            />
-                          </div>
-                        )}
                       </div>
-                    ))}
+                    </div>
+                  )}
+
+                  {/* Project Details */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-sm font-medium">
+                        Project Title *
+                      </Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => handleInputChange('title', e.target.value)}
+                        placeholder="e.g., Modern Family Home Roof Replacement"
+                        className="h-12"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="location" className="text-sm font-medium">
+                        Location
+                      </Label>
+                      <Input
+                        id="location"
+                        value={formData.location}
+                        onChange={(e) => handleInputChange('location', e.target.value)}
+                        placeholder="e.g., Edmond, OK"
+                        className="h-12"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Project Category *</Label>
+                    <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select project category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-medium">
+                      Project Description *
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Describe the project details, materials used, challenges overcome, etc."
+                      rows={4}
+                    />
                   </div>
 
                   {/* Save Button */}
-                  <div className="flex justify-center mt-8">
+                  <div className="pt-4">
                     <Button
-                      onClick={saveProjectImages}
-                      className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-semibold"
+                      onClick={saveCurrentProject}
+                      className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-semibold"
                     >
-                      <Upload className="w-5 h-5 mr-2" />
-                      Update Project Gallery
+                      <Plus className="w-5 h-5 mr-2" />
+                      Save {currentProject.replace('project', 'Project ')}
                     </Button>
                   </div>
                 </div>

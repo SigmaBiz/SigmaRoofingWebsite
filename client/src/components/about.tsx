@@ -48,28 +48,36 @@ export default function About() {
             </p>
           </div>
 
-          <div className="space-y-6">
-            {teamPhoto ? (
-              <img 
-                src={teamPhoto} 
-                alt="Sigma Roofing team" 
-                className="rounded-lg shadow-lg w-full h-64 lg:h-80 object-cover" 
-              />
-            ) : (
-              <img 
-                src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-                alt="Professional roofing team at work" 
-                className="rounded-lg shadow-lg w-full h-64 lg:h-80 object-cover" 
-              />
-            )}
-            
-            {companyLogo && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Team Photo */}
+            <div className="space-y-2">
+              {teamPhoto ? (
                 <img 
-                  src={companyLogo} 
-                  alt="Sigma Roofing Company Logo" 
-                  className="mx-auto h-20 w-auto object-contain" 
+                  src={teamPhoto} 
+                  alt="Sigma Roofing team" 
+                  className="rounded-lg shadow-lg w-full h-64 object-cover" 
                 />
+              ) : (
+                <img 
+                  src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                  alt="Professional roofing team at work" 
+                  className="rounded-lg shadow-lg w-full h-64 object-cover" 
+                />
+              )}
+              <p className="text-center text-gray-200 text-sm">Our Professional Team</p>
+            </div>
+            
+            {/* Company Logo */}
+            {companyLogo && (
+              <div className="space-y-2">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg h-64 flex items-center justify-center p-6">
+                  <img 
+                    src={companyLogo} 
+                    alt="Sigma Roofing Company Logo" 
+                    className="max-h-full max-w-full object-contain" 
+                  />
+                </div>
+                <p className="text-center text-gray-200 text-sm">Company Logo</p>
               </div>
             )}
           </div>

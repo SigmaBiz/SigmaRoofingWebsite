@@ -62,3 +62,31 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Website images schema
+export const websiteImages = pgTable("website_images", {
+  id: serial("id").primaryKey(),
+  heroBackground: text("hero_background"),
+  heroFeatureImage: text("hero_feature_image"),
+  roofRepairImage: text("roof_repair_image"),
+  roofInspectionImage: text("roof_inspection_image"),
+  gutterServiceImage: text("gutter_service_image"),
+  stormDamageImage: text("storm_damage_image"),
+  paintingServiceImage: text("painting_service_image"),
+  teamPhoto: text("team_photo"),
+  companyLogo: text("company_logo"),
+  processStep1Image: text("process_step1_image"),
+  processStep2Image: text("process_step2_image"),
+  processStep3Image: text("process_step3_image"),
+  processStep4Image: text("process_step4_image"),
+  testimonialBackground: text("testimonial_background"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertWebsiteImagesSchema = createInsertSchema(websiteImages).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertWebsiteImages = z.infer<typeof insertWebsiteImagesSchema>;
+export type WebsiteImages = typeof websiteImages.$inferSelect;

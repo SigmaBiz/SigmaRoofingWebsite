@@ -549,7 +549,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
   // Simple website images storage (for testing hero background)
   let heroBackgroundUrl = "";
 
@@ -575,5 +574,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  const httpServer = createServer(app);
   return httpServer;
 }

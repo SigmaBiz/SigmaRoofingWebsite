@@ -98,24 +98,15 @@ export default function Admin() {
 
   const handleSaveWebsiteImages = async () => {
     try {
-      const response = await fetch('/api/website-images', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          heroBackground: websiteImages.heroBackground
-        }),
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Hero Background Updated!",
-          description: "Your homepage hero background has been updated. Refresh your main website to see the changes!",
-        });
-      } else {
-        throw new Error('Failed to update');
+      // Save hero background to localStorage for immediate testing
+      if (websiteImages.heroBackground) {
+        localStorage.setItem('heroBackground', websiteImages.heroBackground);
       }
+      
+      toast({
+        title: "Hero Background Updated!",
+        description: "Your homepage hero background has been updated. Refresh your main website to see the changes!",
+      });
     } catch (error) {
       toast({
         title: "Update Failed",

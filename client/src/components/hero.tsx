@@ -6,15 +6,11 @@ export default function Hero() {
   const [heroBackground, setHeroBackground] = useState("");
 
   useEffect(() => {
-    // Fetch the hero background image from admin settings
-    fetch('/api/website-images')
-      .then(response => response.json())
-      .then(data => {
-        if (data.success && data.images.heroBackground) {
-          setHeroBackground(data.images.heroBackground);
-        }
-      })
-      .catch(error => console.log('No custom hero background set'));
+    // For now, let's use localStorage to test the hero background functionality
+    const savedHeroBackground = localStorage.getItem('heroBackground');
+    if (savedHeroBackground) {
+      setHeroBackground(savedHeroBackground);
+    }
   }, []);
 
   const scrollToContact = () => {

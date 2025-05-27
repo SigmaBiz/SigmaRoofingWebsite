@@ -75,6 +75,38 @@ export default function Projects() {
         console.log('No admin projects found');
       }
     }
+
+    // Also check individual project storage
+    let hasAnyProjects = false;
+    const projectKeys = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6'];
+    const customProjects: any[] = [];
+
+    projectKeys.forEach((key) => {
+      const savedProject = localStorage.getItem(`project_${key}`);
+      if (savedProject) {
+        try {
+          const projectData = JSON.parse(savedProject);
+          if (projectData.imageUrl) {
+            customProjects.push({
+              image: projectData.imageUrl,
+              title: projectData.title || `Project ${customProjects.length + 1}`,
+              description: projectData.description || 'Custom project managed through admin panel',
+              category: projectData.category || 'Admin Project'
+            });
+            hasAnyProjects = true;
+          }
+        } catch (error) {
+          console.log('Error loading project:', key);
+        }
+      }
+    });
+
+    if (hasAnyProjects) {
+      setAdminProjects(customProjects);
+      setUseAdminProjects(true);
+      // Update the adminProjects cache too
+      localStorage.setItem('adminProjects', JSON.stringify(customProjects));
+    }
   }, []);
 
   // Prioritize admin projects, then Google Business photos, then static projects

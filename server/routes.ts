@@ -105,9 +105,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'https://www.googleapis.com/auth/photoslibrary.readonly'
       ].join(' ');
 
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000';
+      const redirectUri = `${baseUrl}/api/google-photos/callback`;
+      
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000')}/api/google-photos/callback&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `response_type=code&` +
         `scope=${encodeURIComponent(scopes)}&` +
         `access_type=offline&` +
@@ -141,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/api/google-photos/callback`
+          redirect_uri: `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000'}/api/google-photos/callback`
         })
       });
 

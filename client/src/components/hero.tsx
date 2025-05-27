@@ -47,21 +47,21 @@ export default function Hero() {
     >
       {!heroBackground && <div className="hero-bg absolute inset-0" />}
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl text-white text-center lg:text-left">
+        <div className="max-w-4xl mx-auto text-white text-center">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">
             <span className="text-white">Stand firm.</span>{" "}
             <span className="text-sigma-emerald">Brave the storm.</span>{" "}
             <span className="text-white">Serve with heart.</span>
           </h1>
-          <p className="text-lg lg:text-xl mb-6 leading-relaxed text-gray-200 max-w-2xl mx-auto lg:mx-0">
+          <p className="text-lg lg:text-xl mb-6 leading-relaxed text-gray-200 max-w-3xl mx-auto">
             Quality craftsmanship and down-to-earth, responsive customer service is what we do. Whether you need 
             major repairs or minor fixes, we work with you to find the best solution for your home's specific needs.
           </p>
-          <p className="text-base lg:text-lg mb-8 leading-relaxed text-gray-300 max-w-2xl mx-auto lg:mx-0 font-medium">
+          <p className="text-base lg:text-lg mb-8 leading-relaxed text-gray-300 max-w-3xl mx-auto font-medium">
             Schedule today for your on-site estimate or ask about our convenient digital estimates. Emergency storm 
             repairs like tarping and damage assessments are available upon request. Book today!
           </p>
-          <div className="flex flex-col sm:flex-row justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-6">
+          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
             <Button
               size="lg"
               className="bg-sigma-emerald text-white hover:bg-emerald-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform min-w-[200px]"

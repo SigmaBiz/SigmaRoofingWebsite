@@ -8,6 +8,7 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import Sitemap from "@/pages/sitemap";
 import Admin from "@/pages/admin";
+import GooglePhotosTest from "@/pages/google-photos-test";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/sitemap" component={Sitemap} />
       <Route path="/admin" component={Admin} />
+      <Route path="/google-photos-test" component={GooglePhotosTest} />
       <Route component={NotFound} />
     </Switch>
   );

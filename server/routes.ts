@@ -222,17 +222,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const albumsData = await albumsResponse.json();
       
+      console.log('Albums API response:', JSON.stringify(albumsData, null, 2));
+      
       if (!albumsData.albums) {
-        return res.json({ success: false, message: "No albums found" });
+        return res.json({ 
+          success: false, 
+          message: "No albums found",
+          debug: albumsData 
+        });
       }
 
-      // Find the specific album
+      console.log('Available albums:', albumsData.albums.map((a: any) => a.title));
+
+      // Find the specific album (case insensitive)
       const targetAlbum = albumsData.albums.find((album: any) => 
         album.title.toLowerCase().includes(albumName.toLowerCase())
       );
 
       if (!targetAlbum) {
-        return res.json({ success: false, message: `Album "${albumName}" not found` });
+        return res.json({ 
+          success: false, 
+          message: `Album "${albumName}" not found. Available albums: ${albumsData.albums.map((a: any) => a.title).join(', ')}`,
+          availableAlbums: albumsData.albums.map((a: any) => a.title)
+        });
       }
 
       // Get photos from the album

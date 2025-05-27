@@ -92,6 +92,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Google Photos integration for Home Page folder
+  app.get("/api/google-photos/:albumName", async (req, res) => {
+    try {
+      const { albumName } = req.params;
+      const clientId = process.env.OAUTH_2_0_CLIENT_IDS;
+      
+      if (!clientId) {
+        return res.status(500).json({ success: false, message: "OAuth Client ID not configured" });
+      }
+
+      // For now, return structure for Google Photos integration
+      // This will need OAuth flow to access user's Google Photos
+      res.json({ 
+        success: false, 
+        message: "Google Photos integration requires OAuth authentication",
+        requiresAuth: true,
+        clientId: clientId
+      });
+      
+    } catch (error) {
+      console.error("Error accessing Google Photos:", error);
+      res.status(500).json({ success: false, message: "Failed to access Google Photos" });
+    }
+  });
+
   // Google Business Profile photos for project gallery
   app.get("/api/business-photos", async (req, res) => {
     try {

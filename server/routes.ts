@@ -138,8 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `response_type=code&` +
         `scope=${encodeURIComponent(scopes)}&` +
         `access_type=offline&` +
-        `prompt=consent&` +
-        `include_granted_scopes=true`;
+        `prompt=consent`;
 
       res.setHeader('Cache-Control', 'no-cache');
       res.json({ authUrl, redirectUri, timestamp: Date.now() });

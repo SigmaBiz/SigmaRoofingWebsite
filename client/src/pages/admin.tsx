@@ -158,6 +158,11 @@ export default function Admin() {
       return;
     }
 
+    // Save each project image individually
+    Object.entries(projectImages).forEach(([key, url]) => {
+      localStorage.setItem(`projectGallery_${key}`, url);
+    });
+
     // Convert to array format for the Projects component
     const projectArray = Object.entries(projectImages)
       .filter(([_, url]) => url !== "")
@@ -455,119 +460,56 @@ export default function Admin() {
               <CardHeader className="bg-emerald-600 text-white">
                 <CardTitle className="flex items-center">
                   <Plus className="w-5 h-5 mr-2" />
-                  Add New Project
+                  Project Gallery (6 Slots)
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Image URL Input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="imageUrl" className="text-sm font-medium">
-                      <Upload className="w-4 h-4 inline mr-2" />
-                      Image URL *
-                    </Label>
-                    <Input
-                      id="imageUrl"
-                      value={formData.imageUrl}
-                      onChange={(e) => handleInputChange('imageUrl', e.target.value)}
-                      placeholder="Paste Cloudinary URL from Photo Manager tab"
-                      required
-                      className="h-12"
-                    />
-                    <p className="text-xs text-gray-500">
-                      Upload photos using the Photo Manager tab, then paste the URL here
-                    </p>
-                  </div>
+                <div className="space-y-6">
+                  <p className="text-gray-600 mb-6">
+                    Upload your best 6 project photos. Each slot gets its own image - no duplicates allowed!
+                  </p>
 
-                  {/* Image Preview */}
-                  {imagePreview && (
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium flex items-center">
-                        <Eye className="w-4 h-4 mr-2" />
-                        Preview
-                      </Label>
-                      <div className="border rounded-lg overflow-hidden">
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
-                          className="w-full h-48 object-cover"
-                          onError={() => setImagePreview("")}
+                  {/* 6 Project Image Slots */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {Object.entries(projectImages).map(([projectKey, imageUrl], index) => (
+                      <div key={projectKey} className="space-y-3">
+                        <Label className="text-sm font-medium">
+                          Project {index + 1} Image
+                        </Label>
+                        <Input
+                          value={imageUrl}
+                          onChange={(e) => handleProjectImageChange(projectKey, e.target.value)}
+                          placeholder="Paste Cloudinary URL here..."
+                          className={`h-12 ${duplicateWarnings[projectKey] ? 'border-red-500' : ''}`}
                         />
+                        {duplicateWarnings[projectKey] && (
+                          <p className="text-red-500 text-xs">⚠️ This image is already used in another slot. Please choose a different image.</p>
+                        )}
+                        {imageUrl && !duplicateWarnings[projectKey] && (
+                          <div className="mt-2">
+                            <img 
+                              src={imageUrl} 
+                              alt={`Project ${index + 1}`}
+                              className="w-full h-32 object-cover rounded border"
+                              onError={() => handleProjectImageChange(projectKey, "")}
+                            />
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
-
-                  {/* Project Details */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="title" className="text-sm font-medium">
-                        Project Title *
-                      </Label>
-                      <Input
-                        id="title"
-                        value={formData.title}
-                        onChange={(e) => handleInputChange('title', e.target.value)}
-                        placeholder="e.g., Modern Family Home Roof Replacement"
-                        required
-                        className="h-12"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="location" className="text-sm font-medium">
-                        Location
-                      </Label>
-                      <Input
-                        id="location"
-                        value={formData.location}
-                        onChange={(e) => handleInputChange('location', e.target.value)}
-                        placeholder="e.g., Edmond, OK"
-                        className="h-12"
-                      />
-                    </div>
+                    ))}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Project Category *</Label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                      <SelectTrigger className="h-12">
-                        <SelectValue placeholder="Select project category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-medium">
-                      Project Description *
-                    </Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
-                      placeholder="Describe the project details, materials used, challenges overcome, etc."
-                      required
-                      rows={4}
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-4">
+                  {/* Save Button */}
+                  <div className="flex justify-center mt-8">
                     <Button
-                      type="submit"
-                      className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-semibold"
+                      onClick={saveProjectImages}
+                      className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-semibold"
                     >
-                      <Plus className="w-5 h-5 mr-2" />
-                      Add Project to Gallery
+                      <Upload className="w-5 h-5 mr-2" />
+                      Update Project Gallery
                     </Button>
                   </div>
-                </form>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

@@ -116,7 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Google Photos OAuth authentication URL
   app.get("/api/google-photos/auth-url", async (req, res) => {
     try {
-      const clientId = process.env.OAUTH_2_0_CLIENT_IDS;
+      const clientId = process.env.GOOGLE_CLIENT_ID;
       
       if (!clientId) {
         return res.status(500).json({ success: false, message: "OAuth Client ID not configured" });
@@ -180,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          client_id: process.env.OAUTH_2_0_CLIENT_IDS!,
+          client_id: process.env.GOOGLE_CLIENT_ID!,
           client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
           code: code as string,
           grant_type: 'authorization_code',

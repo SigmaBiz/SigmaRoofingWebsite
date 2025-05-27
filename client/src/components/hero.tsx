@@ -1,22 +1,42 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Hero() {
   const [heroBackground, setHeroBackground] = useState("");
   const [heroFeatureImage, setHeroFeatureImage] = useState("");
 
+  // Load images from admin panel
+  const { data: websiteImages } = useQuery({
+    queryKey: ['/api/website-images'],
+    staleTime: 1000 * 60 * 5 // 5 minutes
+  });
+
   useEffect(() => {
-    // Load both hero images from localStorage
-    const savedHeroBackground = localStorage.getItem('heroBackground');
-    const savedHeroFeatureImage = localStorage.getItem('heroFeatureImage');
-    if (savedHeroBackground) {
-      setHeroBackground(savedHeroBackground);
+    // Load from admin panel first, then fall back to localStorage
+    if (websiteImages) {
+      console.log('Website images from admin:', websiteImages);
+      if (websiteImages.heroBackground) {
+        setHeroBackground(websiteImages.heroBackground);
+      }
+      if (websiteImages.heroFeatureImage) {
+        setHeroFeatureImage(websiteImages.heroFeatureImage);
+        console.log('Setting hero feature image:', websiteImages.heroFeatureImage);
+      }
+    } else {
+      // Fallback to localStorage
+      const savedHeroBackground = localStorage.getItem('heroBackground');
+      const savedHeroFeatureImage = localStorage.getItem('heroFeatureImage');
+      if (savedHeroBackground) {
+        setHeroBackground(savedHeroBackground);
+      }
+      if (savedHeroFeatureImage) {
+        setHeroFeatureImage(savedHeroFeatureImage);
+        console.log('Setting hero feature image from localStorage:', savedHeroFeatureImage);
+      }
     }
-    if (savedHeroFeatureImage) {
-      setHeroFeatureImage(savedHeroFeatureImage);
-    }
-  }, []);
+  }, [websiteImages]);
 
   const scrollToContact = () => {
     const element = document.getElementById("contact");
@@ -100,16 +120,23 @@ export default function Hero() {
           </div>
           
           {/* Hero Feature Image */}
-          {heroFeatureImage && (
-            <div className="hidden lg:flex justify-center items-center">
+          <div className="hidden lg:flex justify-center items-center">
+            {heroFeatureImage ? (
               <img 
                 src={heroFeatureImage} 
                 alt="Sigma Roofing Feature" 
                 className="max-w-full h-auto rounded-lg shadow-2xl"
                 style={{ maxHeight: '600px' }}
+                onError={(e) => {
+                  console.log('Hero feature image failed to load:', heroFeatureImage);
+                }}
               />
-            </div>
-          )}
+            ) : (
+              <div className="text-white/50 text-center p-8">
+                <p>Feature image will appear here when added in admin panel</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

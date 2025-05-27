@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, Plus, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import FirebasePhotoManager from "@/components/firebase-photo-manager";
 
 interface ProjectForm {
   title: string;

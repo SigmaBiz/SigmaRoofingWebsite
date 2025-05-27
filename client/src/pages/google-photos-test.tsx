@@ -17,6 +17,15 @@ export default function GooglePhotosTest() {
       const response = await fetch('/api/google-photos/auth-url');
       const data = await response.json();
       
+      // Show the user the redirect URI that needs to be added
+      if (data.redirectUri) {
+        toast({
+          title: "Add this to Google Cloud Console",
+          description: `Redirect URI: ${data.redirectUri}`,
+          duration: 10000,
+        });
+      }
+      
       if (data.authUrl) {
         // Open OAuth window
         const authWindow = window.open(data.authUrl, 'google-auth', 'width=500,height=600');

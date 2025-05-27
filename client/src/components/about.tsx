@@ -1,7 +1,16 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 
 export default function About() {
+  const [teamPhoto, setTeamPhoto] = useState("");
+
+  useEffect(() => {
+    const savedTeamPhoto = localStorage.getItem('teamPhoto');
+    if (savedTeamPhoto) {
+      setTeamPhoto(savedTeamPhoto);
+    }
+  }, []);
   return (
     <section id="about" className="py-20 bg-sigma-emerald">
       <div className="container mx-auto px-4">
@@ -64,11 +73,19 @@ export default function About() {
           </div>
 
           <div className="space-y-6">
-            <img 
-              src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-              alt="Professional roofing team at work" 
-              className="rounded-lg shadow-lg w-full h-auto" 
-            />
+            {teamPhoto ? (
+              <img 
+                src={teamPhoto} 
+                alt="Sigma Roofing team" 
+                className="rounded-lg shadow-lg w-full h-auto" 
+              />
+            ) : (
+              <img 
+                src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                alt="Professional roofing team at work" 
+                className="rounded-lg shadow-lg w-full h-auto" 
+              />
+            )}
             <img 
               src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
               alt="Beautiful residential home with new roof" 

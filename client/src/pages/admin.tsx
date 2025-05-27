@@ -98,14 +98,16 @@ export default function Admin() {
 
   const handleSaveWebsiteImages = async () => {
     try {
-      // Save hero background to localStorage for immediate testing
-      if (websiteImages.heroBackground) {
-        localStorage.setItem('heroBackground', websiteImages.heroBackground);
-      }
+      // Save all website images to localStorage
+      Object.entries(websiteImages).forEach(([key, value]) => {
+        if (value) {
+          localStorage.setItem(key, value);
+        }
+      });
       
       toast({
-        title: "Hero Background Updated!",
-        description: "Your homepage hero background has been updated. Refresh your main website to see the changes!",
+        title: "Website Images Updated!",
+        description: "All your website images have been updated. Refresh your main website to see the changes!",
       });
     } catch (error) {
       toast({

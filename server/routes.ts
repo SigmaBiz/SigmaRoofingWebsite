@@ -92,6 +92,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to check current domain
+  app.get("/api/debug-domain", (req, res) => {
+    const host = req.get('host');
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+    const fullUrl = `${protocol}://${host}`;
+    
+    console.log('=== DOMAIN DEBUG ===');
+    console.log('Host:', host);
+    console.log('Protocol:', protocol);
+    console.log('Full URL:', fullUrl);
+    console.log('Required redirect URI:', `${fullUrl}/api/google-photos/callback`);
+    console.log('==================');
+    
+    res.json({
+      host,
+      protocol,
+      fullUrl,
+      redirectUri: `${fullUrl}/api/google-photos/callback`
+    });
+  });
+
   // Google Photos OAuth authentication URL
   app.get("/api/google-photos/auth-url", async (req, res) => {
     try {
@@ -107,11 +128,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get the domain from the request headers
       const host = req.get('host');
-      const protocol = req.get('x-forwarded-proto') || 'https';
+      const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
       const redirectUri = `${protocol}://${host}/api/google-photos/callback`;
       
+      console.log('=== AUTH URL GENERATION ===');
       console.log('Current host:', host);
+      console.log('Protocol:', protocol);
       console.log('Redirect URI:', redirectUri);
+      console.log('==========================');
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${clientId}&` +
@@ -121,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `access_type=offline&` +
         `prompt=consent`;
 
-      res.json({ authUrl });
+      res.json({ authUrl, redirectUri });
       
     } catch (error) {
       console.error("Error generating auth URL:", error);

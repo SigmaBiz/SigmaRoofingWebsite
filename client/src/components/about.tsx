@@ -115,16 +115,10 @@ export default function About() {
                 <img 
                   src={companyLogo} 
                   alt="Sigma Roofing Company Logo" 
-                  className="mx-auto h-16 w-auto object-contain" 
+                  className="mx-auto h-20 w-auto object-contain" 
                 />
               </div>
             )}
-            
-            <img 
-              src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
-              alt="Beautiful residential home with new roof" 
-              className="rounded-lg shadow-lg w-full h-auto max-h-64 object-cover" 
-            />
           </div>
         </div>
       </div>

@@ -108,6 +108,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000';
       const redirectUri = `${baseUrl}/api/google-photos/callback`;
       
+      console.log('Debug - REPLIT_DEV_DOMAIN:', process.env.REPLIT_DEV_DOMAIN);
+      console.log('Debug - Base URL:', baseUrl);
+      console.log('Debug - Redirect URI:', redirectUri);
+      
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
         `client_id=${clientId}&` +
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +

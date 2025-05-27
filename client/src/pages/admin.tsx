@@ -24,6 +24,7 @@ interface WebsiteImages {
   heroFeatureImage: string;
   
   // Services Section
+  residentialRoofingImage: string;
   roofRepairImage: string;
   roofInspectionImage: string;
   gutterServiceImage: string;
@@ -69,6 +70,7 @@ export default function Admin() {
   const [websiteImages, setWebsiteImages] = useState<WebsiteImages>({
     heroBackground: "",
     heroFeatureImage: "",
+    residentialRoofingImage: "",
     roofRepairImage: "",
     roofInspectionImage: "",
     gutterServiceImage: "",
@@ -317,6 +319,12 @@ export default function Admin() {
                 <CardContent className="p-6 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <ImageUploadField
+                      label="Residential Roofing Image"
+                      field="residentialRoofingImage"
+                      description="Showcase your residential roofing installations"
+                      currentValue={websiteImages.residentialRoofingImage}
+                    />
+                    <ImageUploadField
                       label="Roof Repair Image"
                       field="roofRepairImage"
                       description="Showcase your roof repair work"
@@ -340,13 +348,13 @@ export default function Admin() {
                       description="Storm damage restoration work"
                       currentValue={websiteImages.stormDamageImage}
                     />
+                    <ImageUploadField
+                      label="Painting Service Image"
+                      field="paintingServiceImage"
+                      description="Professional painting services"
+                      currentValue={websiteImages.paintingServiceImage}
+                    />
                   </div>
-                  <ImageUploadField
-                    label="Painting Service Image"
-                    field="paintingServiceImage"
-                    description="Professional painting services"
-                    currentValue={websiteImages.paintingServiceImage}
-                  />
                 </CardContent>
               </Card>
 

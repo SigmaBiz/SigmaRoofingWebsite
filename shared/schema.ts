@@ -68,6 +68,7 @@ export const websiteImages = pgTable("website_images", {
   id: serial("id").primaryKey(),
   heroBackground: text("hero_background"),
   heroFeatureImage: text("hero_feature_image"),
+  residentialRoofingImage: text("residential_roofing_image"),
   roofRepairImage: text("roof_repair_image"),
   roofInspectionImage: text("roof_inspection_image"),
   gutterServiceImage: text("gutter_service_image"),

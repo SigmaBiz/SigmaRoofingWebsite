@@ -1,7 +1,22 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 
 export default function Hero() {
+  const [heroBackground, setHeroBackground] = useState("");
+
+  useEffect(() => {
+    // Fetch the hero background image from admin settings
+    fetch('/api/website-images')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.images.heroBackground) {
+          setHeroBackground(data.images.heroBackground);
+        }
+      })
+      .catch(error => console.log('No custom hero background set'));
+  }, []);
+
   const scrollToContact = () => {
     const element = document.getElementById("contact");
     if (element) {
@@ -10,7 +25,17 @@ export default function Hero() {
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center hero-bg">
+    <section 
+      id="home" 
+      className="relative min-h-screen flex items-center"
+      style={{
+        backgroundImage: heroBackground ? `url(${heroBackground})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {!heroBackground && <div className="hero-bg absolute inset-0" />}
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl text-white text-center lg:text-left">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">

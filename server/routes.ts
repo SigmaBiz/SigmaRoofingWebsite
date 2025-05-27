@@ -550,5 +550,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  // Simple website images storage (for testing hero background)
+  let heroBackgroundUrl = "";
+
+  // Get website images
+  app.get("/api/website-images", (req, res) => {
+    res.json({
+      success: true,
+      images: {
+        heroBackground: heroBackgroundUrl
+      }
+    });
+  });
+
+  // Update website images
+  app.post("/api/website-images", (req, res) => {
+    const { heroBackground } = req.body;
+    if (heroBackground) {
+      heroBackgroundUrl = heroBackground;
+    }
+    res.json({
+      success: true,
+      message: "Hero background updated successfully!"
+    });
+  });
+
   return httpServer;
 }

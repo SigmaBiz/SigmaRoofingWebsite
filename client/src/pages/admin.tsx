@@ -98,11 +98,24 @@ export default function Admin() {
 
   const handleSaveWebsiteImages = async () => {
     try {
-      // Here you would save the website images to your storage system
-      toast({
-        title: "Images Updated Successfully!",
-        description: "Your website images have been updated and will appear on the site immediately.",
+      const response = await fetch('/api/website-images', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          heroBackground: websiteImages.heroBackground
+        }),
       });
+
+      if (response.ok) {
+        toast({
+          title: "Hero Background Updated!",
+          description: "Your homepage hero background has been updated. Refresh your main website to see the changes!",
+        });
+      } else {
+        throw new Error('Failed to update');
+      }
     } catch (error) {
       toast({
         title: "Update Failed",

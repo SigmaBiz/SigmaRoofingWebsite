@@ -1,4 +1,4 @@
-import { users, contactRequests, projects, type User, type InsertUser, type ContactRequest, type InsertContactRequest, type Project, type InsertProject } from "@shared/schema";
+import { users, contactRequests, projects, websiteImages, type User, type InsertUser, type ContactRequest, type InsertContactRequest, type Project, type InsertProject, type WebsiteImages, type InsertWebsiteImages } from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -9,13 +9,18 @@ export interface IStorage {
   createProject(project: InsertProject): Promise<Project>;
   getProjects(): Promise<Project[]>;
   deleteProject(id: number): Promise<boolean>;
+  getWebsiteImages(): Promise<WebsiteImages | undefined>;
+  updateWebsiteImages(images: InsertWebsiteImages): Promise<WebsiteImages>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private contactRequests: Map<number, ContactRequest>;
+  private projects: Map<number, Project>;
+  private websiteImages: WebsiteImages | undefined;
   private currentUserId: number;
   private currentContactId: number;
+  private currentProjectId: number;
 
   constructor() {
     this.users = new Map();

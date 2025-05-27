@@ -130,6 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const detailsData = await detailsResponse.json();
       console.log("Place details response:", detailsData);
+      console.log("Photos available:", detailsData.result?.photos?.length || 0);
       
       if (detailsData.status === "OK" && detailsData.result?.photos) {
         const photos = detailsData.result.photos.slice(0, 6).map((photo: any, index: number) => ({

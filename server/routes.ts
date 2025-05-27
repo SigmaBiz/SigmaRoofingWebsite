@@ -203,6 +203,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all media items from Google Photos (without album filter)
+  app.get("/api/google-photos/all-photos", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ success: false, message: "Access token required" });
+      }
+
+      const accessToken = authHeader.split(' ')[1];
+
+      // Get recent photos from the library (no album filter)
+      const photosResponse = await fetch('https://photoslibrary.googleapis.com/v1/mediaItems', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      const photosData = await photosResponse.json();
+      
+      console.log('All photos API response:', JSON.stringify(photosData, null, 2));
+      
+      if (photosData.mediaItems) {
+        const photos = photosData.mediaItems.slice(0, 10).map((item: any, index: number) => ({
+          id: item.id,
+          title: item.filename || `Photo ${index + 1}`,
+          description: `Photo from your Google Photos library`,
+          imageUrl: `${item.baseUrl}=w800-h600-c`,
+          originalUrl: item.baseUrl
+        }));
+
+        res.json({ success: true, photos, total: photosData.mediaItems.length });
+      } else {
+        res.json({ 
+          success: false, 
+          message: "No photos found in your Google Photos library",
+          debug: photosData 
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error accessing Google Photos:", error);
+      res.status(500).json({ success: false, message: "Failed to access Google Photos" });
+    }
+  });
+
   // Google Photos integration for specific album
   app.get("/api/google-photos/:albumName", async (req, res) => {
     try {

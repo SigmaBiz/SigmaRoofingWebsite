@@ -45,7 +45,9 @@ export default function GooglePhotosTest() {
               description: "Connected to Google Photos successfully.",
             });
             
-            // Automatically load photos from Home Page folder
+            // First try to load any photos from the library
+            loadAllPhotos(event.data.token);
+            // Then try the Home Page folder
             loadHomePagePhotos(event.data.token);
           }
         };
@@ -60,6 +62,38 @@ export default function GooglePhotosTest() {
       });
     }
     setIsLoading(false);
+  };
+
+  const loadAllPhotos = async (token: string) => {
+    try {
+      const response = await fetch('/api/google-photos/all-photos', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.photos) {
+        setPhotos(data.photos);
+        toast({
+          title: "Photos Found!",
+          description: `Found ${data.photos.length} photos in your Google Photos library (showing first 10).`,
+        });
+      } else {
+        toast({
+          title: "No Photos Found",
+          description: data.message || "No photos found in your Google Photos library.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to Load Photos",
+        description: "Unable to access your Google Photos library.",
+        variant: "destructive",
+      });
+    }
   };
 
   const loadHomePagePhotos = async (token: string) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,17 @@ export default function Admin() {
     location: ""
   });
 
+  // Project Gallery Images (6 slots)
+  const [projectImages, setProjectImages] = useState({
+    project1: "",
+    project2: "",
+    project3: "",
+    project4: "",
+    project5: "",
+    project6: ""
+  });
+  const [duplicateWarnings, setDuplicateWarnings] = useState<{[key: string]: boolean}>({});
+
   const [websiteImages, setWebsiteImages] = useState<WebsiteImages>({
     heroBackground: "",
     heroFeatureImage: "",
@@ -72,6 +83,25 @@ export default function Admin() {
   });
 
   const [imagePreview, setImagePreview] = useState<string>("");
+
+  // Load saved images when component mounts
+  useEffect(() => {
+    // Load website images
+    Object.keys(websiteImages).forEach(key => {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        setWebsiteImages(prev => ({ ...prev, [key]: saved }));
+      }
+    });
+
+    // Load project images
+    Object.keys(projectImages).forEach(key => {
+      const saved = localStorage.getItem(`projectGallery_${key}`);
+      if (saved) {
+        setProjectImages(prev => ({ ...prev, [key]: saved }));
+      }
+    });
+  }, []);
 
   const categories = [
     "Residential",
@@ -94,6 +124,56 @@ export default function Admin() {
 
   const handleImageChange = (field: keyof WebsiteImages, value: string) => {
     setWebsiteImages(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Check for duplicate project images
+  const checkForDuplicates = (newUrl: string, currentProject: string) => {
+    const urls = Object.values(projectImages);
+    const isDuplicate = urls.some((url, index) => {
+      const projectKey = Object.keys(projectImages)[index];
+      return url === newUrl && projectKey !== currentProject && url !== "";
+    });
+    return isDuplicate;
+  };
+
+  const handleProjectImageChange = (project: string, value: string) => {
+    const isDuplicate = checkForDuplicates(value, project);
+    
+    setDuplicateWarnings(prev => ({ ...prev, [project]: isDuplicate }));
+    
+    if (!isDuplicate) {
+      setProjectImages(prev => ({ ...prev, [project]: value }));
+    }
+  };
+
+  const saveProjectImages = () => {
+    // Only save if no duplicates exist
+    const hasDuplicates = Object.values(duplicateWarnings).some(warning => warning);
+    if (hasDuplicates) {
+      toast({
+        title: "Cannot Save - Duplicate Images",
+        description: "Please fix duplicate images before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Convert to array format for the Projects component
+    const projectArray = Object.entries(projectImages)
+      .filter(([_, url]) => url !== "")
+      .map(([key, url], index) => ({
+        image: url,
+        title: `Project ${index + 1}`,
+        description: `Custom project managed through admin panel`,
+        category: "Admin Project"
+      }));
+
+    localStorage.setItem('adminProjects', JSON.stringify(projectArray));
+    
+    toast({
+      title: "Project Gallery Updated!",
+      description: "Your project images are now live on the website.",
+    });
   };
 
   const handleSaveWebsiteImages = async () => {

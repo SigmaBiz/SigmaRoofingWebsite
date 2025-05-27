@@ -84,10 +84,11 @@ export default function Hero() {
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
                 alt="Oklahoma Flag" 
-                className="w-20 h-16 mb-2 rounded shadow-lg"
+                className="w-20 h-auto mb-2 rounded shadow-lg object-contain"
                 style={{
                   opacity: 0.7,
-                  filter: 'brightness(1.3) contrast(1.2)'
+                  filter: 'brightness(1.3) contrast(1.2)',
+                  aspectRatio: '3/2'
                 }}
               />
               <div className="text-sm text-gray-300 font-semibold">Operated</div>
@@ -96,10 +97,11 @@ export default function Hero() {
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
                 alt="Oklahoma Flag" 
-                className="w-20 h-16 mb-2 rounded shadow-lg"
+                className="w-20 h-auto mb-2 rounded shadow-lg object-contain"
                 style={{
                   opacity: 0.7,
-                  filter: 'brightness(1.3) contrast(1.2)'
+                  filter: 'brightness(1.3) contrast(1.2)',
+                  aspectRatio: '3/2'
                 }}
               />
               <div className="text-sm text-gray-300 font-semibold">Founded</div>
@@ -108,10 +110,11 @@ export default function Hero() {
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/120px-Flag_of_Oklahoma.svg.png" 
                 alt="Oklahoma Flag" 
-                className="w-20 h-16 mb-2 rounded shadow-lg"
+                className="w-20 h-auto mb-2 rounded shadow-lg object-contain"
                 style={{
                   opacity: 0.7,
-                  filter: 'brightness(1.3) contrast(1.2)'
+                  filter: 'brightness(1.3) contrast(1.2)',
+                  aspectRatio: '3/2'
                 }}
               />
               <div className="text-sm text-gray-300 font-semibold">Licensed & Insured</div>

@@ -4,12 +4,17 @@ import { Phone } from "lucide-react";
 
 export default function Hero() {
   const [heroBackground, setHeroBackground] = useState("");
+  const [heroFeatureImage, setHeroFeatureImage] = useState("");
 
   useEffect(() => {
-    // For now, let's use localStorage to test the hero background functionality
+    // Load both hero images from localStorage
     const savedHeroBackground = localStorage.getItem('heroBackground');
+    const savedHeroFeatureImage = localStorage.getItem('heroFeatureImage');
     if (savedHeroBackground) {
       setHeroBackground(savedHeroBackground);
+    }
+    if (savedHeroFeatureImage) {
+      setHeroFeatureImage(savedHeroFeatureImage);
     }
   }, []);
 
@@ -33,7 +38,8 @@ export default function Hero() {
     >
       {!heroBackground && <div className="hero-bg absolute inset-0" />}
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl text-white text-center lg:text-left">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          <div className="text-white text-center lg:text-left">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">
             <span className="text-white">Stand firm.</span>{" "}
             <span className="text-sigma-emerald">Brave the storm.</span>{" "}
@@ -91,6 +97,19 @@ export default function Hero() {
               <div className="text-sm text-gray-300 font-semibold">Licensed & Insured</div>
             </div>
           </div>
+          </div>
+          
+          {/* Hero Feature Image */}
+          {heroFeatureImage && (
+            <div className="hidden lg:flex justify-center items-center">
+              <img 
+                src={heroFeatureImage} 
+                alt="Sigma Roofing Feature" 
+                className="max-w-full h-auto rounded-lg shadow-2xl"
+                style={{ maxHeight: '600px' }}
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>

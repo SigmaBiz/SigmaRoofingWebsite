@@ -92,24 +92,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Google Photos integration for Home Page folder
-  app.get("/api/google-photos/:albumName", async (req, res) => {
+  // Google Photos OAuth authentication URL
+  app.get("/api/google-photos/auth-url", async (req, res) => {
     try {
-      const { albumName } = req.params;
       const clientId = process.env.OAUTH_2_0_CLIENT_IDS;
       
       if (!clientId) {
         return res.status(500).json({ success: false, message: "OAuth Client ID not configured" });
       }
 
-      // For now, return structure for Google Photos integration
-      // This will need OAuth flow to access user's Google Photos
-      res.json({ 
-        success: false, 
-        message: "Google Photos integration requires OAuth authentication",
-        requiresAuth: true,
-        clientId: clientId
+      const scopes = [
+        'https://www.googleapis.com/auth/photoslibrary.readonly'
+      ].join(' ');
+
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000')}/api/google-photos/callback&` +
+        `response_type=code&` +
+        `scope=${encodeURIComponent(scopes)}&` +
+        `access_type=offline&` +
+        `prompt=consent`;
+
+      res.json({ authUrl });
+      
+    } catch (error) {
+      console.error("Error generating auth URL:", error);
+      res.status(500).json({ success: false, message: "Failed to generate auth URL" });
+    }
+  });
+
+  // Google Photos OAuth callback
+  app.get("/api/google-photos/callback", async (req, res) => {
+    try {
+      const { code } = req.query;
+      
+      if (!code) {
+        return res.status(400).send("Authorization code not provided");
+      }
+
+      // Exchange code for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: process.env.OAUTH_2_0_CLIENT_IDS!,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+          code: code as string,
+          grant_type: 'authorization_code',
+          redirect_uri: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/api/google-photos/callback`
+        })
       });
+
+      const tokenData = await tokenResponse.json();
+      
+      if (tokenData.access_token) {
+        // Store token securely (in a real app, you'd use a database)
+        // For now, we'll pass it to the client
+        res.send(`
+          <script>
+            window.opener.postMessage({
+              type: 'GOOGLE_AUTH_SUCCESS',
+              token: '${tokenData.access_token}'
+            }, '*');
+            window.close();
+          </script>
+        `);
+      } else {
+        res.status(400).send("Failed to obtain access token");
+      }
+      
+    } catch (error) {
+      console.error("OAuth callback error:", error);
+      res.status(500).send("Authentication failed");
+    }
+  });
+
+  // Google Photos integration for specific album
+  app.get("/api/google-photos/:albumName", async (req, res) => {
+    try {
+      const { albumName } = req.params;
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ success: false, message: "Access token required" });
+      }
+
+      const accessToken = authHeader.split(' ')[1];
+
+      // Search for albums with the specified name
+      const albumsResponse = await fetch('https://photoslibrary.googleapis.com/v1/albums', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      const albumsData = await albumsResponse.json();
+      
+      if (!albumsData.albums) {
+        return res.json({ success: false, message: "No albums found" });
+      }
+
+      // Find the specific album
+      const targetAlbum = albumsData.albums.find((album: any) => 
+        album.title.toLowerCase().includes(albumName.toLowerCase())
+      );
+
+      if (!targetAlbum) {
+        return res.json({ success: false, message: `Album "${albumName}" not found` });
+      }
+
+      // Get photos from the album
+      const photosResponse = await fetch('https://photoslibrary.googleapis.com/v1/mediaItems:search', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          albumId: targetAlbum.id,
+          pageSize: 10
+        })
+      });
+
+      const photosData = await photosResponse.json();
+      
+      if (photosData.mediaItems) {
+        const photos = photosData.mediaItems.map((item: any, index: number) => ({
+          id: item.id,
+          title: item.filename || `Photo ${index + 1}`,
+          description: `Photo from ${albumName} folder`,
+          imageUrl: `${item.baseUrl}=w800-h600-c`,
+          originalUrl: item.baseUrl
+        }));
+
+        res.json({ success: true, photos });
+      } else {
+        res.json({ success: false, message: "No photos found in album" });
+      }
       
     } catch (error) {
       console.error("Error accessing Google Photos:", error);

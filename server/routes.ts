@@ -132,18 +132,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Redirect URI:', redirectUri);
       
-      // Use Google's recommended OAuth 2.0 flow
+      // Try a simpler OAuth flow to test basic authentication
       const params = new URLSearchParams({
         client_id: clientId,
         redirect_uri: redirectUri,
         response_type: 'code',
         scope: scopes,
-        access_type: 'offline',
-        prompt: 'consent',
         state: Date.now().toString()
       });
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+      
+      console.log('Generated auth URL:', authUrl);
+      console.log('Client ID being used:', clientId);
+      console.log('Scopes requested:', scopes);
 
       res.setHeader('Cache-Control', 'no-cache');
       res.json({ authUrl, redirectUri, timestamp: Date.now() });

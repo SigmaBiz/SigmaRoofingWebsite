@@ -227,10 +227,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const accessToken = authHeader.split(' ')[1];
 
       // First, let's test if we can access the API at all
-      const testResponse = await fetch(`https://photoslibrary.googleapis.com/v1/mediaItems?pageSize=1&key=${process.env.GOOGLE_PHOTOS_API_KEY}`, {
+      const testResponse = await fetch('https://photoslibrary.googleapis.com/v1/mediaItems?pageSize=1', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${accessToken}`
         }
       });
 
@@ -238,16 +237,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const testData = await testResponse.json();
       console.log('Test API response:', JSON.stringify(testData, null, 2));
 
-      // Get recent photos from the library using POST method with request body
-      const photosResponse = await fetch(`https://photoslibrary.googleapis.com/v1/mediaItems:search?key=${process.env.GOOGLE_PHOTOS_API_KEY}`, {
-        method: 'POST',
+      // Get recent photos from the library (no album filter)
+      const photosResponse = await fetch('https://photoslibrary.googleapis.com/v1/mediaItems?pageSize=50', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          pageSize: 10
-        })
+          'Authorization': `Bearer ${accessToken}`
+        }
       });
 
       const photosData = await photosResponse.json();

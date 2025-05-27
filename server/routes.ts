@@ -170,6 +170,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const protocol = req.get('x-forwarded-proto') || 'https';
 
       // Exchange code for access token
+      console.log('Token exchange - Client ID:', process.env.OAUTH_2_0_CLIENT_IDS);
+      console.log('Token exchange - Has Client Secret:', !!process.env.GOOGLE_CLIENT_SECRET);
+      console.log('Token exchange - Code received:', !!code);
+      
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: {
@@ -185,6 +189,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const tokenData = await tokenResponse.json();
+      console.log('Token response status:', tokenResponse.status);
+      console.log('Token response:', JSON.stringify(tokenData, null, 2));
       
       if (tokenData.access_token) {
         // Store token securely (in a real app, you'd use a database)

@@ -10,12 +10,14 @@ import TermsOfService from "@/pages/terms-of-service";
 import Sitemap from "@/pages/sitemap";
 import Admin from "@/pages/admin";
 import GooglePhotosTest from "@/pages/google-photos-test";
+import DynamicLanding from "@/pages/dynamic-landing";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/landing" component={DynamicLanding} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/sitemap" component={Sitemap} />

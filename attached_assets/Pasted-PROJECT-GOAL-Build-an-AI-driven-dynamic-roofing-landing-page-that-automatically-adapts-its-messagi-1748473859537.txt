@@ -1,0 +1,70 @@
+PROJECT GOAL:
+Build an AI-driven, dynamic roofing landing page that automatically adapts its messaging based on trending roofing-related Google searches in Oklahoma. The system should:
+1. Fetch search phrases from Google Trends using pytrends
+2. Parse phrases into structured variables (like city, storm type, hail size)
+3. Save these entries in a JSON file or simple DB with unique phrase_id keys
+4. Render a landing page dynamically based on ?phrase_id=X
+
+TECH STACK:
+- Python (backend script with pytrends)
+- JSON file or Replit DB (to store phrase metadata)
+- HTML/CSS/JS (frontend for landing page rendering)
+- JavaScript (to extract phrase_id from URL and populate page)
+- Optional: Replit cron job or manual trigger to update phrase data
+
+LANDING PAGE REQUIREMENTS:
+
+✅ Use this dynamic pitch layout, with variables and embedded Q&A links (anchor tags only — Q&A content lives on main site):
+
+<h1>Storm in {{city}} on {{storm_date}}? We’re Here to Help.</h1>
+
+<p>
+Thanks for visiting us today. The {{storm_type}} that hit {{city}} on {{storm_date}} caused widespread damage — weakening roofs even when leaks aren’t immediately visible. Whether you have shingles, metal, or tile, exposure to {{hail_size}} hail or wind can void warranties, trigger insurance issues, or accelerate failure.
+</p>
+
+<p>
+Whether you’re dealing with <a href="#qa-claim-denied">a denied claim</a>, <a href="#qa-should-call">unsure whether to call insurance</a>, or <a href="#qa-signs-of-damage">need to confirm roof damage</a> — you’re in the right place.
+</p>
+
+<p>
+We specialize in local storm restoration, no-pressure roof inspections, and expert help navigating both insurance and retail solutions. 
+</p>
+
+<!-- Single CTA button that links to our existing working lead form -->
+<a href="/request-estimate" class="cta-button">🔍 Schedule Your Free Roof Assessment</a>
+
+VARIABLES TO SUPPORT:
+- {{city}} (e.g., Edmond, Moore, Norman)
+- {{storm_type}} (e.g., hailstorm, windstorm, tornado)
+- {{storm_date}} (e.g., May 20, 2025)
+- {{hail_size}} (e.g., golf-ball, tennis-ball, quarter-sized)
+
+INITIAL JSON EXAMPLE:
+{
+  "001": {
+    "phrase": "roof hail damage inspection",
+    "city": "Moore",
+    "storm_type": "hailstorm",
+    "storm_date": "May 20, 2025",
+    "hail_size": "golf-ball"
+  },
+  "002": {
+    "phrase": "tornado roof damage",
+    "city": "Edmond",
+    "storm_type": "tornado",
+    "storm_date": "May 15, 2025",
+    "hail_size": ""
+  }
+}
+
+ACTION FLOW:
+- Visitor arrives at /landing.html?phrase_id=001
+- Page loads the correct values from the JSON
+- JavaScript replaces placeholders in the HTML with the correct phrase data
+- Button links them to our existing functional lead form (/request-estimate)
+- Q&A anchor links will scroll visitors down if future content is added
+
+START BY:
+1. Installing pytrends and fetching trending roofing terms for “Oklahoma City” or “Oklahoma”
+2. Converting the top 5 phrases into structured JSON entries manually
+3. Building the landing page with the pitch above and injecting data via JavaScript

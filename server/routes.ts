@@ -582,6 +582,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve trending phrases data for dynamic landing pages
+  app.get('/trending_phrases.json', (req, res) => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(process.cwd(), 'trending_phrases.json');
+      
+      if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, 'utf8');
+        res.json(JSON.parse(data));
+      } else {
+        res.status(404).json({ error: 'Trending phrases data not found' });
+      }
+    } catch (error) {
+      console.error('Error serving trending phrases:', error);
+      res.status(500).json({ error: 'Failed to load trending phrases' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

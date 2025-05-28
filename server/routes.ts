@@ -583,7 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Serve trending phrases data for dynamic landing pages
-  app.get('/trending_phrases.json', (req, res) => {
+  app.get('/api/trending_phrases.json', (req, res) => {
     try {
       const fs = require('fs');
       const path = require('path');

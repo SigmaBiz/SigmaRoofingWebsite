@@ -24,24 +24,63 @@ export default function DynamicLanding() {
     const urlParams = new URLSearchParams(window.location.search);
     const phraseId = urlParams.get('phrase_id') || '001';
 
-    // Fetch the phrase data
-    fetch('/trending_phrases.json')
-      .then(response => response.json())
-      .then(data => {
-        const selectedPhrase = data[phraseId];
-        if (selectedPhrase) {
-          setPhraseData(selectedPhrase);
-        } else {
-          // Fallback to first entry if phrase_id not found
-          const firstKey = Object.keys(data)[0];
-          setPhraseData(data[firstKey]);
-        }
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error loading phrase data:', error);
-        setLoading(false);
-      });
+    // Trending phrases data (embedded for testing)
+    const trendingData = {
+      "001": {
+        "phrase_id": "001",
+        "phrase": "hail damage roof inspection oklahoma city",
+        "city": "Oklahoma City",
+        "storm_type": "hailstorm",
+        "storm_date": "January 21, 2025",
+        "hail_size": "golf-ball",
+        "generated_at": "2025-01-28T23:10:00"
+      },
+      "002": {
+        "phrase_id": "002",
+        "phrase": "tornado roof damage edmond oklahoma",
+        "city": "Edmond",
+        "storm_type": "tornado",
+        "storm_date": "January 20, 2025",
+        "hail_size": "",
+        "generated_at": "2025-01-28T23:10:00"
+      },
+      "003": {
+        "phrase_id": "003",
+        "phrase": "storm damage roof repair moore",
+        "city": "Moore",
+        "storm_type": "storm",
+        "storm_date": "January 19, 2025",
+        "hail_size": "quarter-sized",
+        "generated_at": "2025-01-28T23:10:00"
+      },
+      "004": {
+        "phrase_id": "004",
+        "phrase": "roof leak repair norman oklahoma",
+        "city": "Norman",
+        "storm_type": "severe weather",
+        "storm_date": "January 18, 2025",
+        "hail_size": "",
+        "generated_at": "2025-01-28T23:10:00"
+      },
+      "005": {
+        "phrase_id": "005",
+        "phrase": "windstorm roof damage tulsa",
+        "city": "Tulsa",
+        "storm_type": "windstorm",
+        "storm_date": "January 17, 2025",
+        "hail_size": "tennis-ball",
+        "generated_at": "2025-01-28T23:10:00"
+      }
+    };
+
+    const selectedPhrase = trendingData[phraseId];
+    if (selectedPhrase) {
+      setPhraseData(selectedPhrase);
+    } else {
+      // Fallback to first entry if phrase_id not found
+      setPhraseData(trendingData["001"]);
+    }
+    setLoading(false);
   }, [location]);
 
   const scrollToContact = () => {

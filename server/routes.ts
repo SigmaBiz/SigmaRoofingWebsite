@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactRequestSchema } from "@shared/schema";
 import { emailService } from "./email-service";
+import { stormDataService } from "./storm-data-service";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -598,6 +599,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error serving trending phrases:', error);
       res.status(500).json({ error: 'Failed to load trending phrases' });
+    }
+  });
+
+  // NOAA Storm Data API - Get latest relevant storm for Oklahoma
+  app.get('/api/storm-data/latest', async (req, res) => {
+    try {
+      console.log('Fetching latest storm data from NOAA...');
+      const latestStorm = await stormDataService.getLatestRelevantStorm();
+      
+      if (!latestStorm) {
+        return res.json({
+          success: true,
+          hasStorm: false,
+          message: 'No recent significant storms found in Oklahoma',
+          data: null
+        });
+      }
+      
+      res.json({
+        success: true,
+        hasStorm: true,
+        data: latestStorm,
+        message: `Found recent ${latestStorm.storm_type} in ${latestStorm.affected_city}`
+      });
+      
+    } catch (error) {
+      console.error('Error fetching storm data:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch storm data from NOAA',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Test NOAA API connection
+  app.get('/api/storm-data/test', async (req, res) => {
+    try {
+      console.log('Testing NOAA API connection...');
+      const isConnected = await stormDataService.testConnection();
+      
+      res.json({
+        success: isConnected,
+        message: isConnected ? 'NOAA API connection successful' : 'NOAA API connection failed',
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error('Error testing NOAA API:', error);
+      res.status(500).json({
+        success: false,
+        message: 'NOAA API test failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

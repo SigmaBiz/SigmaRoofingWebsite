@@ -1,0 +1,53 @@
+🧠 PROJECT CONTEXT:
+We’re building a dynamic landing page system for a roofing business in Oklahoma that reacts to recent storm events (hail, wind, tornado) using live data. The goal is to automatically show relevant messaging when a storm has impacted a service area — increasing conversions from visitors who may have been affected.
+
+🔧 OBJECTIVE:
+Create a system that pulls real-world storm data (e.g., from NOAA or MRMS) and uses that information to dynamically update landing page content, drawing more traffic and helping homeowners take action at the right time.
+
+🧭 GUIDANCE FOR YOU, REPLIT AI:
+The following is a general suggestion — not a rigid plan. You are encouraged to improve or alter this workflow if you see a more elegant, efficient, or scalable way to accomplish the same goal. Our main focus is:  
+✅ Timely, relevant storm content  
+✅ High-converting lead form  
+✅ Automatic updates without manual content editing
+
+🔄 CORE LOGIC:
+1. Query a storm event API (e.g., NOAA, MRMS, Hail Reports) for Oklahoma metro regions.
+2. Detect most recent impactful event and set these variables:
+   - {{DOL}} → Date of Loss (e.g., May 28, 2025)
+   - {{X}} → Affected City (e.g., Edmond)
+   - {{S}} → Storm type (e.g., “hailstorm” or “tornado”)
+   - {{HS}} → Hail size (if applicable, in inches)
+   - {{HH}} → Boolean if it’s a hail event
+   - {{T}} → Boolean if it’s a wind or tornado event
+   - {{HS_less_than_1_5}} → True if hail size is small
+
+3. Inject these values into the landing page dynamically using a templating system (e.g., Handlebars.js, EJS, or your suggested method).
+
+🧱 SUGGESTED TEMPLATE (HTML + HANDLEBARS):
+
+```html
+<div class="landing-pitch">
+  <h1>Thank You for visiting us today!</h1>
+
+  <p>In light of the recent <strong>{{S}}</strong> on <strong>{{DOL}}</strong> in <strong>{{X}}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
+
+  {{#if HS_less_than_1_5}}
+    <p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof’s lifespan. Even “smaller” hail can leave behind costly, hidden damage.</p>
+  {{else}}
+    <p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem.</p>
+  {{/if}}
+
+  {{#if HH}}
+    <p>Hailstones as large as <strong>{{HS}}\"</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>
+  {{/if}}
+
+  {{#if T}}
+    <p>Winds from this <strong>{{S}}</strong> event damaged homes directly in its path — and even nearby structures saw uplifted shingles, fallen limbs, and structural stress. If you’re within range, your roof may be more vulnerable than it appears.</p>
+  {{/if}}
+
+  <p>Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
+
+  <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
+
+  <a href="/request-estimate" class="cta-button">🔍 Schedule Your Free Roof Assessment</a>
+</div>

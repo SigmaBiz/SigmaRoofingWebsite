@@ -35,6 +35,19 @@ interface ContactForm {
   preferredTime2: string;
 }
 
+interface ValidationErrors {
+  email?: string;
+  phone?: string;
+  address?: string;
+  description?: string;
+  dates?: string;
+}
+
+interface AddressSuggestion {
+  formatted_address: string;
+  place_id: string;
+}
+
 export default function DynamicLanding() {
   const { toast } = useToast();
   const [location] = useLocation();
@@ -55,6 +68,21 @@ export default function DynamicLanding() {
     preferredDate2: "",
     preferredTime2: "",
   });
+
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+  // Get minimum date (today)
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Available time slots for appointments
+  const availableTimeSlots = [
+    "8:00 AM - 12:00 PM",
+    "12:00 PM - 4:00 PM", 
+    "4:00 PM - 7:00 PM"
+  ];
 
   useEffect(() => {
     // Extract phrase_id from URL parameters
@@ -164,22 +192,170 @@ export default function DynamicLanding() {
     },
   });
 
-  // Form validation
+  // Email validation - strict for lead quality
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const commonDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'aol.com', 'icloud.com'];
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
     const domain = email.split('@')[1]?.toLowerCase();
-    return emailRegex.test(email) && (commonDomains.includes(domain) || domain?.includes('.'));
+    return emailRegex.test(email) && 
+           !email.includes('+') && 
+           email.length <= 50 &&
+           (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
   };
 
+  // Phone validation (US format only)
   const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^[\+]?[\s\-\(\)]?[\d\s\-\(\)]{10,}$/;
-    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
-    return phoneRegex.test(phone) && cleanPhone.length >= 10;
+    const phoneDigits = phone.replace(/\D/g, '');
+    return phoneDigits.length === 10 && !['0000000000', '1111111111', '1234567890'].includes(phoneDigits);
+  };
+
+  // Format phone number as user types
+  const formatPhoneNumber = (value: string): string => {
+    const phoneNumber = value.replace(/\D/g, '');
+    if (phoneNumber.length >= 6) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+    } else if (phoneNumber.length >= 3) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    }
+    return phoneNumber;
+  };
+
+  // Content filtering for spam and inappropriate content
+  const filterContent = (text: string): boolean => {
+    const bannedWords = ['spam', 'test123', 'asdf', 'qwerty', 'fake', 'scam', 'viagra', 'casino'];
+    const suspiciousPatterns = [
+      /(.)\1{4,}/g, // Repeated characters like "aaaaaaa"
+      /^[A-Z\s!]{20,}$/g, // All caps long text
+      /\b(click here|free money|act now|limited time|urgent)\b/gi, // Spam phrases
+      /http[s]?:\/\//gi // URLs
+    ];
+    
+    const lowerText = text.toLowerCase();
+    return !bannedWords.some(word => lowerText.includes(word)) && 
+           !suspiciousPatterns.some(pattern => pattern.test(text)) &&
+           text.length >= 10; // Minimum description length
+  };
+
+  // Google Places Autocomplete for Oklahoma addresses
+  const searchOklahomaAddresses = async (query: string) => {
+    if (query.length < 3) {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+      return;
+    }
+
+    try {
+      // Call our backend API to get address suggestions
+      const response = await fetch(`/api/address-suggestions?q=${encodeURIComponent(query)}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.suggestions) {
+          setAddressSuggestions(data.suggestions);
+          setShowAddressSuggestions(data.suggestions.length > 0);
+        }
+      }
+    } catch (error) {
+      console.log('Address validation temporarily unavailable');
+      setShowAddressSuggestions(false);
+    }
+  };
+
+  // Check if time slot is available (simulate booking system)
+  const isSlotAvailable = (date: string, time: string): boolean => {
+    const slotKey = `${date}-${time}`;
+    return !bookedSlots.includes(slotKey);
+  };
+
+  // Validate appointment times don't overlap and are available
+  const validateAppointmentTimes = (): string | null => {
+    if (formData.preferredDate1 === formData.preferredDate2 && 
+        formData.preferredTime1 === formData.preferredTime2 &&
+        formData.preferredDate1 && formData.preferredTime1) {
+      return "Please select different time slots for your preferred appointments";
+    }
+    
+    if (formData.preferredDate1 && formData.preferredTime1) {
+      if (!isSlotAvailable(formData.preferredDate1, formData.preferredTime1)) {
+        return "Your first preferred time slot is already booked. Please select another time.";
+      }
+    }
+    
+    if (formData.preferredDate2 && formData.preferredTime2) {
+      if (!isSlotAvailable(formData.preferredDate2, formData.preferredTime2)) {
+        return "Your second preferred time slot is already booked. Please select another time.";
+      }
+    }
+    
+    return null;
+  };
+
+  // Real-time validation as user types
+  const validateField = (field: keyof ContactForm, value: string) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'email':
+        if (value && !validateEmail(value)) {
+          newErrors.email = "Please enter a valid email address from a recognized provider";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+      case 'phone':
+        if (value && !validatePhone(value)) {
+          newErrors.phone = "Please enter a valid 10-digit US phone number";
+        } else {
+          delete newErrors.phone;
+        }
+        break;
+      case 'address':
+        if (value && !value.toLowerCase().includes('oklahoma') && !value.toLowerCase().includes('ok')) {
+          newErrors.address = "We currently only serve properties in Oklahoma";
+        } else {
+          delete newErrors.address;
+        }
+        break;
+      case 'description':
+        if (value && !filterContent(value)) {
+          newErrors.description = "Please provide a detailed, professional description of your roofing needs";
+        } else {
+          delete newErrors.description;
+        }
+        break;
+    }
+    
+    // Check appointment conflicts
+    const appointmentError = validateAppointmentTimes();
+    if (appointmentError) {
+      newErrors.dates = appointmentError;
+    } else {
+      delete newErrors.dates;
+    }
+    
+    setErrors(newErrors);
   };
 
   const handleInputChange = (field: keyof ContactForm, value: string) => {
+    // Format phone number
+    if (field === 'phone') {
+      value = formatPhoneNumber(value);
+    }
+    
     setFormData(prev => ({ ...prev, [field]: value }));
+    validateField(field, value);
+    
+    // Address autocomplete
+    if (field === 'address') {
+      searchOklahomaAddresses(value);
+    }
+  };
+
+  const handleAddressSelect = (suggestion: AddressSuggestion) => {
+    setFormData(prev => ({ ...prev, address: suggestion.formatted_address }));
+    setShowAddressSuggestions(false);
+    setAddressSuggestions([]);
+    validateField('address', suggestion.formatted_address);
   };
 
   const isFormValid = (): boolean => {
@@ -332,18 +508,44 @@ export default function DynamicLanding() {
                         </div>
                       </div>
 
-                      {/* Address */}
-                      <div>
+                      {/* Address with Autocomplete */}
+                      <div className="relative">
                         <Label htmlFor="address" className="text-gray-700 font-medium">Property Address *</Label>
-                        <Input
-                          id="address"
-                          type="text"
-                          value={formData.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          className="mt-1 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                          placeholder="123 Main Street, Oklahoma City, OK 73102"
-                          required
-                        />
+                        <div className="relative">
+                          <Input
+                            id="address"
+                            type="text"
+                            value={formData.address}
+                            onChange={(e) => handleInputChange('address', e.target.value)}
+                            className={`mt-1 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 ${errors.address ? 'border-red-500' : ''}`}
+                            placeholder="Start typing your Oklahoma address..."
+                            required
+                          />
+                          <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 mt-0.5" />
+                        </div>
+                        
+                        {/* Address Suggestions Dropdown */}
+                        {showAddressSuggestions && addressSuggestions.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {addressSuggestions.map((suggestion, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                className="w-full px-4 py-2 text-left hover:bg-emerald-50 focus:bg-emerald-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                                onClick={() => handleAddressSelect(suggestion)}
+                              >
+                                <div className="flex items-center">
+                                  <MapPin className="h-4 w-4 text-emerald-600 mr-2 flex-shrink-0" />
+                                  <span className="text-gray-800">{suggestion.formatted_address}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {errors.address && (
+                          <p className="text-red-600 text-sm mt-1">{errors.address}</p>
+                        )}
                       </div>
 
                       {/* Service Type */}
@@ -395,27 +597,33 @@ export default function DynamicLanding() {
                               value={formData.preferredDate1}
                               onChange={(e) => handleInputChange('preferredDate1', e.target.value)}
                               className="mt-1 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                              min={new Date().toISOString().split('T')[0]}
+                              min={today}
                               required
                             />
                           </div>
                           <div>
-                            <Label htmlFor="preferredTime1" className="text-gray-700 font-medium">First Choice Time *</Label>
+                            <Label htmlFor="preferredTime1" className="text-gray-700 font-medium">First Choice Time Block *</Label>
                             <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange('preferredTime1', value)}>
                               <SelectTrigger className="mt-1 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500">
-                                <SelectValue placeholder="Select time" />
+                                <SelectValue placeholder="Select time block" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="8:00 AM">8:00 AM</SelectItem>
-                                <SelectItem value="9:00 AM">9:00 AM</SelectItem>
-                                <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                                <SelectItem value="11:00 AM">11:00 AM</SelectItem>
-                                <SelectItem value="12:00 PM">12:00 PM</SelectItem>
-                                <SelectItem value="1:00 PM">1:00 PM</SelectItem>
-                                <SelectItem value="2:00 PM">2:00 PM</SelectItem>
-                                <SelectItem value="3:00 PM">3:00 PM</SelectItem>
-                                <SelectItem value="4:00 PM">4:00 PM</SelectItem>
-                                <SelectItem value="5:00 PM">5:00 PM</SelectItem>
+                                {availableTimeSlots.map((slot) => {
+                                  const isBooked = formData.preferredDate1 && !isSlotAvailable(formData.preferredDate1, slot);
+                                  return (
+                                    <SelectItem 
+                                      key={slot} 
+                                      value={slot}
+                                      disabled={isBooked}
+                                      className={isBooked ? "text-gray-400" : ""}
+                                    >
+                                      <div className="flex items-center justify-between w-full">
+                                        <span>{slot}</span>
+                                        {isBooked && <span className="text-red-500 text-xs ml-2">(Booked)</span>}
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                           </div>
@@ -430,30 +638,50 @@ export default function DynamicLanding() {
                               value={formData.preferredDate2}
                               onChange={(e) => handleInputChange('preferredDate2', e.target.value)}
                               className="mt-1 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                              min={new Date().toISOString().split('T')[0]}
+                              min={today}
                             />
                           </div>
                           <div>
-                            <Label htmlFor="preferredTime2" className="text-gray-700 font-medium">Second Choice Time</Label>
+                            <Label htmlFor="preferredTime2" className="text-gray-700 font-medium">Second Choice Time Block</Label>
                             <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange('preferredTime2', value)}>
                               <SelectTrigger className="mt-1 border-gray-300 focus:border-emerald-500 focus:ring-emerald-500">
-                                <SelectValue placeholder="Select time" />
+                                <SelectValue placeholder="Select time block" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="8:00 AM">8:00 AM</SelectItem>
-                                <SelectItem value="9:00 AM">9:00 AM</SelectItem>
-                                <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                                <SelectItem value="11:00 AM">11:00 AM</SelectItem>
-                                <SelectItem value="12:00 PM">12:00 PM</SelectItem>
-                                <SelectItem value="1:00 PM">1:00 PM</SelectItem>
-                                <SelectItem value="2:00 PM">2:00 PM</SelectItem>
-                                <SelectItem value="3:00 PM">3:00 PM</SelectItem>
-                                <SelectItem value="4:00 PM">4:00 PM</SelectItem>
-                                <SelectItem value="5:00 PM">5:00 PM</SelectItem>
+                                {availableTimeSlots.map((slot) => {
+                                  const isBooked = formData.preferredDate2 && !isSlotAvailable(formData.preferredDate2, slot);
+                                  const isDuplicate = formData.preferredDate1 === formData.preferredDate2 && formData.preferredTime1 === slot;
+                                  const isDisabled = isBooked || isDuplicate;
+                                  
+                                  return (
+                                    <SelectItem 
+                                      key={slot} 
+                                      value={slot}
+                                      disabled={isDisabled}
+                                      className={isDisabled ? "text-gray-400" : ""}
+                                    >
+                                      <div className="flex items-center justify-between w-full">
+                                        <span>{slot}</span>
+                                        {isBooked && <span className="text-red-500 text-xs ml-2">(Booked)</span>}
+                                        {isDuplicate && !isBooked && <span className="text-orange-500 text-xs ml-2">(Already selected)</span>}
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })}
                               </SelectContent>
                             </Select>
                           </div>
                         </div>
+
+                        {/* Show appointment conflict error */}
+                        {errors.dates && (
+                          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                            <p className="text-red-800 text-sm flex items-center">
+                              <AlertTriangle className="h-4 w-4 mr-2" />
+                              {errors.dates}
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       {/* Submit Button */}

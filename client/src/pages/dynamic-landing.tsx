@@ -83,14 +83,9 @@ export default function DynamicLanding() {
     setLoading(false);
   }, [location]);
 
-  const scrollToContact = () => {
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // Navigate to main page contact form if not on same page
-      window.location.href = '/#contact';
-    }
+  const goToContactForm = () => {
+    // Navigate directly to the main website's contact form
+    window.location.href = '/#contact';
   };
 
   if (loading) {
@@ -164,7 +159,7 @@ export default function DynamicLanding() {
                 <Button
                   size="lg"
                   className="bg-sigma-emerald text-white hover:bg-emerald-600 text-xl px-12 py-6 shadow-lg transform hover:scale-105 transition-transform"
-                  onClick={scrollToContact}
+                  onClick={goToContactForm}
                 >
                   🔍 Schedule Your Free Roof Assessment
                   <ArrowRight className="ml-2 h-5 w-5" />

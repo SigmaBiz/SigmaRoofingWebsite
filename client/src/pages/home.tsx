@@ -5,6 +5,7 @@ import Process from "@/components/process";
 import About from "@/components/about";
 import Projects from "@/components/projects";
 import Testimonials from "@/components/testimonials";
+import FAQ from "@/components/faq";
 import Contact from "@/components/contact";
 import Footer from "@/components/footer";
 
@@ -18,6 +19,7 @@ export default function Home() {
       <About />
       <Projects />
       <Testimonials />
+      <FAQ />
       <Contact />
       <Footer />
     </div>

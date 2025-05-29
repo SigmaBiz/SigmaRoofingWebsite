@@ -57,6 +57,12 @@ export default function Header() {
               Projects
             </button>
             <button
+              onClick={() => scrollToSection("faq")}
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
+            >
+              FAQ
+            </button>
+            <button
               onClick={() => scrollToSection("contact")}
               className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
             >
@@ -114,6 +120,12 @@ export default function Header() {
                 className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors text-left"
               >
                 Projects
+              </button>
+              <button
+                onClick={() => scrollToSection("faq")}
+                className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors text-left"
+              >
+                FAQ
               </button>
               <button
                 onClick={() => scrollToSection("contact")}

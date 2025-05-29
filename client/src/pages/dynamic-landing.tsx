@@ -83,8 +83,8 @@ export default function DynamicLanding() {
     setLoading(false);
   }, [location]);
 
-  const goToContactForm = () => {
-    // Navigate directly to the main website's contact form
+  const scrollToContact = () => {
+    // Navigate to main website contact form - same as the Free Estimate button
     window.location.href = '/#contact';
   };
 
@@ -159,7 +159,7 @@ export default function DynamicLanding() {
                 <Button
                   size="lg"
                   className="bg-sigma-emerald text-white hover:bg-emerald-600 text-xl px-12 py-6 shadow-lg transform hover:scale-105 transition-transform"
-                  onClick={goToContactForm}
+                  onClick={scrollToContact}
                 >
                   🔍 Schedule Your Free Roof Assessment
                   <ArrowRight className="ml-2 h-5 w-5" />

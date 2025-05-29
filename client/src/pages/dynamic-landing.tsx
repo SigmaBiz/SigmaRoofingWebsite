@@ -84,7 +84,7 @@ export default function DynamicLanding() {
   }, [location]);
 
   const scrollToContact = () => {
-    // Navigate to main website contact form - same as the Free Estimate button
+    // Navigate directly to the contact section on main page
     window.location.href = '/#contact';
   };
 

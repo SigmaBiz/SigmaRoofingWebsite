@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, CheckCircle, ArrowRight, Mail, MapPin, Send, Calendar, Clock, ShieldCheck } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { Phone, CheckCircle, ArrowRight, Mail, MapPin, Send, Calendar, Clock, ShieldCheck, AlertTriangle, Star } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -46,6 +46,23 @@ interface ValidationErrors {
 interface AddressSuggestion {
   formatted_address: string;
   place_id: string;
+}
+
+interface Review {
+  name: string;
+  role: string;
+  rating: number;
+  review: string;
+  date: string;
+  initials: string;
+}
+
+interface BusinessPhoto {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: string;
 }
 
 export default function DynamicLanding() {

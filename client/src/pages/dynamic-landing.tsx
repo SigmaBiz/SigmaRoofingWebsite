@@ -172,64 +172,69 @@ export default function DynamicLanding() {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  // Use the same project data as your main page
-  const [projectsData, setProjectsData] = useState<Project[]>([]);
+  // Use the exact same project logic as your main page
+  const [projectsData, setProjectsData] = useState<any[]>([]);
+  const [useAdminProjects, setUseAdminProjects] = useState(false);
 
   useEffect(() => {
-    // Load projects from localStorage (same as main page)
     const staticProjects = [
       {
-        id: 1,
-        title: "GAF - Pewter Gray",
-        description: "A beautiful roof with grayish blue hues complimented with black gutters all around and ridge vent to keep the attic properly ventilated. This roof suffered hail damage and was replaced as part of a larger project.",
-        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000001/projects/gaf-pewter-gray.jpg",
-        category: "Storm Damage",
-        location: "Edmond, OK"
+        image: "https://images.unsplash.com/photo-1604709177225-055f99402ea3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+        title: "Asphalt Shingle Replacement",
+        description: "Complete asphalt shingle roof replacement for a 2,200 sq ft home in Edmond. High-quality materials with comprehensive warranty.",
+        category: "Residential Project"
       },
       {
-        id: 2,
-        title: "Project 2",
-        description: "Custom project managed through admin panel",
-        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000002/projects/project-2.jpg",
-        category: "Admin Project",
-        location: "Oklahoma City, OK"
+        image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+        title: "Exterior House Painting",
+        description: "Complete exterior painting for a beautiful Edmond home. Premium paint with weather protection and curb appeal enhancement.",
+        category: "Painting Project"
       },
       {
-        id: 3,
-        title: "Project 3",
-        description: "Professional roofing installation with quality materials and expert craftsmanship.",
-        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000003/projects/project-3.jpg",
-        category: "New Installation",
-        location: "Moore, OK"
+        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+        title: "Storm Damage Repair",
+        description: "Complete asphalt shingle restoration after hail damage. Insurance claim assistance and emergency repairs provided.",
+        category: "Insurance Claim"
       },
       {
-        id: 4,
-        title: "Project 4",
-        description: "Storm damage restoration with insurance claim assistance and emergency repairs.",
-        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000004/projects/project-4.jpg",
-        category: "Insurance Claim",
-        location: "Norman, OK"
+        image: "https://images.unsplash.com/photo-1609220136736-443140cffec6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
+        title: "Asphalt Shingle Installation",
+        description: "New asphalt shingle roof installation for family home. Durable materials with enhanced ventilation system.",
+        category: "New Installation"
       }
     ];
 
-    // Check for admin-managed projects
+    // Check if admin has uploaded custom projects
+    const savedProjects = localStorage.getItem('adminProjects');
+    if (savedProjects) {
+      try {
+        const parsedProjects = JSON.parse(savedProjects);
+        if (parsedProjects.length > 0) {
+          setProjectsData(parsedProjects);
+          setUseAdminProjects(true);
+          return;
+        }
+      } catch (error) {
+        console.log('No admin projects found');
+      }
+    }
+
+    // Also check individual project storage
     let hasAnyProjects = false;
     const projectKeys = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6'];
-    const customProjects: Project[] = [];
+    const customProjects: any[] = [];
 
-    projectKeys.forEach((key, index) => {
+    projectKeys.forEach((key) => {
       const savedProject = localStorage.getItem(`project_${key}`);
       if (savedProject) {
         try {
           const projectData = JSON.parse(savedProject);
           if (projectData.imageUrl) {
             customProjects.push({
-              id: index + 1,
-              title: projectData.title || `Project ${index + 1}`,
+              image: projectData.imageUrl,
+              title: projectData.title || `Project ${customProjects.length + 1}`,
               description: projectData.description || 'Custom project managed through admin panel',
-              imageUrl: projectData.imageUrl,
-              category: projectData.category || 'Admin Project',
-              location: projectData.location || 'Oklahoma'
+              category: projectData.category || 'Admin Project'
             });
             hasAnyProjects = true;
           }
@@ -239,8 +244,15 @@ export default function DynamicLanding() {
       }
     });
 
-    // Use admin projects if available, otherwise use static projects
-    setProjectsData(hasAnyProjects ? customProjects : staticProjects);
+    if (hasAnyProjects) {
+      setProjectsData(customProjects);
+      setUseAdminProjects(true);
+      // Update the adminProjects cache too
+      localStorage.setItem('adminProjects', JSON.stringify(customProjects));
+    } else {
+      setProjectsData(staticProjects);
+      setUseAdminProjects(false);
+    }
   }, []);
 
   // Contact form submission
@@ -896,24 +908,34 @@ export default function DynamicLanding() {
           )}
 
           {/* Recent Projects Section */}
-          {projectsData && (
+          {projectsData && projectsData.length > 0 && (
             <div className="mb-16">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">Recent Storm Restoration Projects</h2>
                 <p className="text-gray-600 max-w-2xl mx-auto">
                   See how we've helped Oklahoma homeowners recover from storm damage with professional roofing solutions.
                 </p>
+                {useAdminProjects && (
+                  <div className="mt-4 inline-flex items-center px-3 py-1 bg-emerald-600 text-white text-sm rounded-full">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse mr-2"></div>
+                    Admin Managed Gallery
+                  </div>
+                )}
               </div>
               
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projectsData.slice(0, 6).map((project: Project) => (
-                  <Card key={project.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow group">
+                {projectsData.slice(0, 6).map((project: any, index: number) => (
+                  <Card key={index} className="bg-white shadow-lg hover:shadow-xl transition-shadow group">
                     <div className="relative overflow-hidden rounded-t-lg">
                       <img 
-                        src={project.imageUrl} 
+                        src={project.image || project.imageUrl} 
                         alt={project.title}
                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => {
+                          // Fallback to placeholder if image fails to load
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1604709177225-055f99402ea3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+                        }}
                       />
                       <div className="absolute top-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                         {project.category}
@@ -921,7 +943,6 @@ export default function DynamicLanding() {
                     </div>
                     <CardContent className="p-6">
                       <h3 className="font-bold text-lg text-gray-900 mb-2">{project.title}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{project.location}</p>
                       <p className="text-gray-600">{project.description}</p>
                     </CardContent>
                   </Card>

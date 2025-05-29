@@ -172,11 +172,76 @@ export default function DynamicLanding() {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  // Fetch curated projects from your admin panel
-  const { data: projectsData } = useQuery({
-    queryKey: ['/api/projects'],
-    staleTime: 1000 * 60 * 30, // 30 minutes
-  });
+  // Use the same project data as your main page
+  const [projectsData, setProjectsData] = useState<Project[]>([]);
+
+  useEffect(() => {
+    // Load projects from localStorage (same as main page)
+    const staticProjects = [
+      {
+        id: 1,
+        title: "GAF - Pewter Gray",
+        description: "A beautiful roof with grayish blue hues complimented with black gutters all around and ridge vent to keep the attic properly ventilated. This roof suffered hail damage and was replaced as part of a larger project.",
+        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000001/projects/gaf-pewter-gray.jpg",
+        category: "Storm Damage",
+        location: "Edmond, OK"
+      },
+      {
+        id: 2,
+        title: "Project 2",
+        description: "Custom project managed through admin panel",
+        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000002/projects/project-2.jpg",
+        category: "Admin Project",
+        location: "Oklahoma City, OK"
+      },
+      {
+        id: 3,
+        title: "Project 3",
+        description: "Professional roofing installation with quality materials and expert craftsmanship.",
+        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000003/projects/project-3.jpg",
+        category: "New Installation",
+        location: "Moore, OK"
+      },
+      {
+        id: 4,
+        title: "Project 4",
+        description: "Storm damage restoration with insurance claim assistance and emergency repairs.",
+        imageUrl: "https://res.cloudinary.com/sigma-roofing/image/upload/v1700000004/projects/project-4.jpg",
+        category: "Insurance Claim",
+        location: "Norman, OK"
+      }
+    ];
+
+    // Check for admin-managed projects
+    let hasAnyProjects = false;
+    const projectKeys = ['project1', 'project2', 'project3', 'project4', 'project5', 'project6'];
+    const customProjects: Project[] = [];
+
+    projectKeys.forEach((key, index) => {
+      const savedProject = localStorage.getItem(`project_${key}`);
+      if (savedProject) {
+        try {
+          const projectData = JSON.parse(savedProject);
+          if (projectData.imageUrl) {
+            customProjects.push({
+              id: index + 1,
+              title: projectData.title || `Project ${index + 1}`,
+              description: projectData.description || 'Custom project managed through admin panel',
+              imageUrl: projectData.imageUrl,
+              category: projectData.category || 'Admin Project',
+              location: projectData.location || 'Oklahoma'
+            });
+            hasAnyProjects = true;
+          }
+        } catch (error) {
+          console.log('Error loading project:', key);
+        }
+      }
+    });
+
+    // Use admin projects if available, otherwise use static projects
+    setProjectsData(hasAnyProjects ? customProjects : staticProjects);
+  }, []);
 
   // Contact form submission
   const contactMutation = useMutation({

@@ -57,12 +57,13 @@ interface Review {
   initials: string;
 }
 
-interface BusinessPhoto {
+interface Project {
   id: number;
   title: string;
   description: string;
   imageUrl: string;
   category: string;
+  location: string;
 }
 
 export default function DynamicLanding() {
@@ -171,9 +172,9 @@ export default function DynamicLanding() {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  // Fetch recent business photos/projects
+  // Fetch curated projects from your admin panel
   const { data: projectsData } = useQuery({
-    queryKey: ['/api/business-photos'],
+    queryKey: ['/api/projects'],
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
@@ -799,7 +800,7 @@ export default function DynamicLanding() {
               </div>
               
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {reviewsData.reviews.slice(0, 3).map((review: Review, index: number) => (
+                {reviewsData.reviews.slice(0, 6).map((review: Review, index: number) => (
                   <Card key={index} className="bg-white shadow-lg hover:shadow-xl transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4">
@@ -830,7 +831,7 @@ export default function DynamicLanding() {
           )}
 
           {/* Recent Projects Section */}
-          {projectsData?.success && projectsData?.photos && (
+          {projectsData && (
             <div className="mb-16">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">Recent Storm Restoration Projects</h2>
@@ -840,7 +841,7 @@ export default function DynamicLanding() {
               </div>
               
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projectsData.photos.slice(0, 6).map((project: BusinessPhoto) => (
+                {projectsData.slice(0, 6).map((project: Project) => (
                   <Card key={project.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow group">
                     <div className="relative overflow-hidden rounded-t-lg">
                       <img 
@@ -855,6 +856,7 @@ export default function DynamicLanding() {
                     </div>
                     <CardContent className="p-6">
                       <h3 className="font-bold text-lg text-gray-900 mb-2">{project.title}</h3>
+                      <p className="text-gray-600 text-sm mb-2">{project.location}</p>
                       <p className="text-gray-600">{project.description}</p>
                     </CardContent>
                   </Card>

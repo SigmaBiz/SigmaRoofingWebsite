@@ -165,6 +165,18 @@ export default function DynamicLanding() {
     setLoading(false);
   }, [location]);
 
+  // Fetch Google Business Profile reviews
+  const { data: reviewsData } = useQuery({
+    queryKey: ['/api/reviews'],
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
+  // Fetch recent business photos/projects
+  const { data: projectsData } = useQuery({
+    queryKey: ['/api/business-photos'],
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
   // Contact form submission
   const contactMutation = useMutation({
     mutationFn: async (data: ContactForm) => {
@@ -768,6 +780,88 @@ export default function DynamicLanding() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Google Reviews Section */}
+          {reviewsData?.success && reviewsData?.reviews && (
+            <div className="mb-16">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
+                <div className="flex items-center justify-center space-x-2 mb-6">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className="h-6 w-6 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <span className="text-lg font-semibold text-gray-700">
+                    {reviewsData.businessRating}/5.0 ({reviewsData.totalReviews} reviews)
+                  </span>
+                </div>
+              </div>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {reviewsData.reviews.slice(0, 3).map((review: Review, index: number) => (
+                  <Card key={index} className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">{review.initials}</span>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <h4 className="font-semibold text-gray-900">{review.name}</h4>
+                            <div className="flex">
+                              {[...Array(review.rating)].map((_, i) => (
+                                <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-gray-600 text-sm mb-2">{review.role}</p>
+                          <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                          <p className="text-gray-500 text-sm mt-2">{review.date}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recent Projects Section */}
+          {projectsData?.success && projectsData?.photos && (
+            <div className="mb-16">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Recent Storm Restoration Projects</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  See how we've helped Oklahoma homeowners recover from storm damage with professional roofing solutions.
+                </p>
+              </div>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projectsData.photos.slice(0, 6).map((project: BusinessPhoto) => (
+                  <Card key={project.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow group">
+                    <div className="relative overflow-hidden rounded-t-lg">
+                      <img 
+                        src={project.imageUrl} 
+                        alt={project.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                      <div className="absolute top-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        {project.category}
+                      </div>
+                    </div>
+                    <CardContent className="p-6">
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">{project.title}</h3>
+                      <p className="text-gray-600">{project.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Emergency Contact */}
           <div className="bg-red-600 text-white rounded-lg p-8 text-center">

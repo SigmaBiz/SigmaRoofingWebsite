@@ -166,16 +166,21 @@ export default function HailDamage() {
       });
   }, []);
 
-  // Email validation - accepts any valid email format
+  // Email validation - strict for lead quality (same as homepage)
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
+    const domain = email.split('@')[1]?.toLowerCase();
+    return emailRegex.test(email) && 
+           !email.includes('+') && 
+           email.length <= 50 &&
+           (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
   };
 
-  // Phone validation - accepts any 10-digit US number
+  // Phone validation (US format only) - same as homepage
   const validatePhone = (phone: string): boolean => {
     const phoneDigits = phone.replace(/\D/g, '');
-    return phoneDigits.length === 10;
+    return phoneDigits.length === 10 && !['0000000000', '1111111111', '1234567890'].includes(phoneDigits);
   };
 
   // Format phone number as user types
@@ -199,33 +204,31 @@ export default function HailDamage() {
     
     setFormData(prev => ({ ...prev, [field]: processedValue }));
     
-    // Immediate validation on every keystroke
+    // Real-time validation using homepage logic
     const newErrors = { ...errors };
     
-    if (field === 'email') {
-      const isValid = validateEmail(processedValue);
-      if (processedValue && !isValid) {
-        newErrors.email = "Please enter a valid email address";
-      } else {
-        delete newErrors.email;
-      }
-    }
-    
-    if (field === 'phone') {
-      const isValid = validatePhone(processedValue);
-      if (processedValue && !isValid) {
-        newErrors.phone = "Please enter a valid 10-digit phone number";
-      } else {
-        delete newErrors.phone;
-      }
-    }
-    
-    if (field === 'address') {
-      if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
-        newErrors.address = "We currently only serve properties in Oklahoma";
-      } else {
-        delete newErrors.address;
-      }
+    switch (field) {
+      case 'email':
+        if (processedValue && !validateEmail(processedValue)) {
+          newErrors.email = "Please enter a valid email address from a recognized provider";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+      case 'phone':
+        if (processedValue && !validatePhone(processedValue)) {
+          newErrors.phone = "Please enter a valid 10-digit US phone number";
+        } else {
+          delete newErrors.phone;
+        }
+        break;
+      case 'address':
+        if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
+          newErrors.address = "We currently only serve properties in Oklahoma";
+        } else {
+          delete newErrors.address;
+        }
+        break;
     }
     
     setErrors(newErrors);

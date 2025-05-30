@@ -1,0 +1,128 @@
+🎯 My goal is to make the email and phone number validation on my **landing page** behave exactly like it does on my **homepage**.
+
+I’ve already confirmed that on the homepage:
+- Email validation checks for recognized domains (e.g., gmail.com, yahoo.com)
+- Phone validation checks for 10 digits and common fake patterns
+- Error messages appear in real time while typing
+- The JSX input blocks show red borders and helpful text during input
+
+📦 I now have the full working code from the homepage, including:
+- `validateEmail()`
+- `validatePhone()`
+- `validateField()` logic
+- `handleInputChange()`
+- The email and phone `<Input>` JSX with labels and error feedback
+
+✅ Please take this full validation setup and **implement it in my landing page**, replacing the less strict or less responsive logic currently there. Keep all API integrations, backend form submission, and layout structure intact — just update the validation logic and input components.
+
+Here’s the working code to insert into the landing page:
+
+```ts
+// 1. Email validation with domain checks
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
+  const domain = email.split('@')[1]?.toLowerCase();
+  return emailRegex.test(email) && 
+         !email.includes('+') && 
+         email.length <= 50 &&
+         (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
+};
+
+// 2. Phone validation with digit rules
+const validatePhone = (phone: string): boolean => {
+  const phoneDigits = phone.replace(/\D/g, '');
+  return phoneDigits.length === 10 && !['0000000000', '1111111111', '1234567890'].includes(phoneDigits);
+};
+
+// 3. Shared field validation
+const validateField = (field: keyof ContactForm, value: string) => {
+  const newErrors = { ...errors };
+
+  switch (field) {
+    case 'email':
+      if (value && !validateEmail(value)) {
+        newErrors.email = "Please enter a valid email address from a recognized provider";
+      } else {
+        delete newErrors.email;
+      }
+      break;
+    case 'phone':
+      if (value && !validatePhone(value)) {
+        newErrors.phone = "Please enter a valid 10-digit US phone number";
+      } else {
+        delete newErrors.phone;
+      }
+      break;
+    case 'address':
+      if (value && !value.toLowerCase().includes('oklahoma') && !value.toLowerCase().includes('ok')) {
+        newErrors.address = "We currently only serve properties in Oklahoma";
+      } else {
+        delete newErrors.address;
+      }
+      break;
+  }
+
+  setErrors(newErrors);
+};
+
+// 4. Unified input change handler
+const handleInputChange = (field: keyof ContactForm, value: string) => {
+  let processedValue = value;
+  if (field === 'phone') {
+    processedValue = formatPhoneNumber(value);
+  }
+  setFormData(prev => ({ ...prev, [field]: processedValue }));
+  validateField(field, processedValue);
+};
+
+// 5. Email Input JSX
+<div className="space-y-2">
+  <Label htmlFor="email" className="text-sm font-medium">
+    <Mail className="w-4 h-4 inline mr-2" />
+    Email Address *
+  </Label>
+  <Input
+    id="email"
+    type="email"
+    value={formData.email}
+    onChange={(e) => handleInputChange('email', e.target.value)}
+    placeholder="your.email@example.com"
+    required
+    className={`h-12 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-green-500' : ''}`}
+  />
+  {errors.email && (
+    <p className="text-red-500 text-sm flex items-center">
+      <AlertTriangle className="w-4 h-4 mr-1" />
+      {errors.email}
+    </p>
+  )}
+  {validateEmail(formData.email) && formData.email && !errors.email && (
+    <p className="text-green-600 text-sm">✓ Email verified</p>
+  )}
+</div>
+
+// 6. Phone Input JSX
+<div className="space-y-2">
+  <Label htmlFor="phone" className="text-sm font-medium">
+    <Phone className="w-4 h-4 inline mr-2" />
+    Phone Number *
+  </Label>
+  <Input
+    id="phone"
+    value={formData.phone}
+    onChange={(e) => handleInputChange('phone', e.target.value)}
+    placeholder="(405) 555-0123"
+    required
+    className={`h-12 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-green-500' : ''}`}
+  />
+  {errors.phone && (
+    <p className="text-red-500 text-sm flex items-center">
+      <AlertTriangle className="w-4 h-4 mr-1" />
+      {errors.phone}
+    </p>
+  )}
+  {validatePhone(formData.phone) && formData.phone && !errors.phone && (
+    <p className="text-green-600 text-sm">✓ Phone verified</p>
+  )}
+</div>

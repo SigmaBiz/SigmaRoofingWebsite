@@ -827,38 +827,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <div class="form-section" style="background: #fff; border: 2px solid #10b981; padding: 30px; border-radius: 8px; margin: 30px 0;">
             <h2 style="text-align: center; margin-bottom: 20px; color: #10b981;">Get Your Free Storm Damage Estimate</h2>
             <p style="text-align: center; margin-bottom: 20px; color: #6b7280;">Professional storm damage assessment in Oklahoma. Fill out our secure form for a detailed estimate within 24 hours.</p>
-            <form id="storm-contact-form" style="max-width: 600px; margin: 0 auto;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <input type="text" name="firstName" placeholder="First Name*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
-                <input type="text" name="lastName" placeholder="Last Name*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+            <form id="storm-contact-form" style="max-width: 700px; margin: 0 auto;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                  <input type="text" name="firstName" placeholder="First Name*" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                </div>
+                <div>
+                  <input type="text" name="lastName" placeholder="Last Name*" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                </div>
               </div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <input type="email" name="email" placeholder="Email Address*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
-                <input type="tel" name="phone" placeholder="Phone Number*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                  <input type="email" name="email" placeholder="Email Address*" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                </div>
+                <div>
+                  <input type="tel" name="phone" placeholder="Phone Number*" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                </div>
               </div>
-              <div class="form-field">
-                <input type="text" name="address" id="address-input" placeholder="Property Address (Oklahoma)*" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 15px;">
+              
+              <div class="form-field" style="margin-bottom: 20px;">
+                <input type="text" name="address" id="address-input" placeholder="Property Address (Oklahoma)*" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
                 <div id="address-suggestions" class="address-suggestions" style="display: none;"></div>
               </div>
               
-              <select name="serviceType" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px;">
-                <option value="">Select Service Type*</option>
-                <option value="Storm Damage Assessment">Storm Damage Assessment</option>
-                <option value="Hail Damage Repair">Hail Damage Repair</option>
-                <option value="Emergency Roof Repair">Emergency Roof Repair</option>
-                <option value="Insurance Claim Assistance">Insurance Claim Assistance</option>
-              </select>
+              <div style="margin-bottom: 20px;">
+                <select name="serviceType" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                  <option value="">Select Service Type*</option>
+                  <option value="Storm Damage Assessment">Storm Damage Assessment</option>
+                  <option value="Hail Damage Repair">Hail Damage Repair</option>
+                  <option value="Emergency Roof Repair">Emergency Roof Repair</option>
+                  <option value="Insurance Claim Assistance">Insurance Claim Assistance</option>
+                </select>
+              </div>
               
-              <textarea name="description" placeholder="Describe the storm damage and your roofing needs..." rows="4" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px; resize: vertical;"></textarea>
+              <div style="margin-bottom: 20px;">
+                <textarea name="description" placeholder="Describe the storm damage and your roofing needs..." rows="4" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; resize: vertical; box-sizing: border-box;"></textarea>
+              </div>
               
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div>
-                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Date 1*</label>
-                  <input type="date" name="preferredDate1" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Preferred Date 1*</label>
+                  <input type="date" name="preferredDate1" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
                 </div>
                 <div>
-                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Time 1*</label>
-                  <select name="preferredTime1" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Preferred Time 1*</label>
+                  <select name="preferredTime1" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
                     <option value="">Select Time</option>
                     <option value="8:00 AM - 12:00 PM">8:00 AM - 12:00 PM</option>
                     <option value="12:00 PM - 4:00 PM">12:00 PM - 4:00 PM</option>
@@ -867,14 +881,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 </div>
               </div>
               
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
                 <div>
-                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Date 2*</label>
-                  <input type="date" name="preferredDate2" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Preferred Date 2*</label>
+                  <input type="date" name="preferredDate2" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
                 </div>
                 <div>
-                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Time 2*</label>
-                  <select name="preferredTime2" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Preferred Time 2*</label>
+                  <select name="preferredTime2" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
                     <option value="">Select Time</option>
                     <option value="8:00 AM - 12:00 PM">8:00 AM - 12:00 PM</option>
                     <option value="12:00 PM - 4:00 PM">12:00 PM - 4:00 PM</option>
@@ -883,7 +897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 </div>
               </div>
               
-              <button type="submit" style="width: 100%; background: #10b981; color: white; padding: 15px; border: none; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer;">Submit Free Estimate Request</button>
+              <button type="submit" style="width: 100%; background: #10b981; color: white; padding: 18px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background 0.2s;">Submit Free Estimate Request</button>
             </form>
           </div>
 
@@ -1005,14 +1019,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             clearTimeout(addressTimeout);
             addressTimeout = setTimeout(async () => {
               try {
-                const response = await fetch(\`/api/address-suggestions?query=\${encodeURIComponent(query)}\`);
+                const response = await fetch(\`/api/address-suggestions?q=\${encodeURIComponent(query)}\`);
                 const data = await response.json();
                 
-                if (data.success && data.suggestions.length > 0) {
+                if (data.success && data.suggestions && data.suggestions.length > 0) {
                   const suggestionsDiv = document.getElementById('address-suggestions');
-                  suggestionsDiv.innerHTML = data.suggestions.map(suggestion => \`
-                    <div class="address-suggestion" onclick="selectAddress('\${suggestion.formatted_address}')">
-                      \${suggestion.formatted_address}
+                  suggestionsDiv.innerHTML = data.suggestions.slice(0, 5).map(suggestion => \`
+                    <div class="address-suggestion" onclick="selectAddress('\${suggestion.formatted_address.replace(/'/g, "\\'")}')">
+                      <div style="font-weight: 500; color: #1f2937;">\${suggestion.formatted_address}</div>
                     </div>
                   \`).join('');
                   suggestionsDiv.style.display = 'block';
@@ -1023,7 +1037,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.error('Error fetching address suggestions:', error);
                 document.getElementById('address-suggestions').style.display = 'none';
               }
-            }, 300);
+            }, 500);
           }
 
           function selectAddress(address) {

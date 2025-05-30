@@ -1,0 +1,95 @@
+🚨 STOP. DO NOT modify, interpret, optimize, refactor, or “improve” anything. You’ve been explicitly instructed to drop all outdated error logic and simply implement this exact solution.
+
+❌ DO NOT use or reference `validateField()`, `setErrors()`, or any `errors` object.
+
+✅ This code uses only live validation via `formData` and `validateEmail`/`validatePhone` for real-time, correct feedback.
+
+👇 Replace your entire email and phone input sections and related logic with this exact code:
+
+------------------------------
+
+// ✅ VALIDATION FUNCTIONS
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
+  const domain = email.split('@')[1]?.toLowerCase();
+  return emailRegex.test(email) &&
+         !email.includes('+') &&
+         email.length <= 50 &&
+         (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
+};
+
+const validatePhone = (phone: string): boolean => {
+  const phoneDigits = phone.replace(/\D/g, '');
+  return phoneDigits.length === 10 && !['0000000000', '1111111111', '1234567890'].includes(phoneDigits);
+};
+
+const formatPhoneNumber = (value: string): string => {
+  const phoneNumber = value.replace(/\D/g, '');
+  if (phoneNumber.length >= 6) {
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  } else if (phoneNumber.length >= 3) {
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+  }
+  return phoneNumber;
+};
+
+// ✅ INPUT HANDLER — CLEAN VERSION WITH NO OLD ERROR LOGIC
+const handleInputChange = (field: keyof ContactForm, value: string) => {
+  let processedValue = value;
+  if (field === 'phone') {
+    processedValue = formatPhoneNumber(value);
+  }
+  setFormData(prev => ({ ...prev, [field]: processedValue }));
+};
+
+------------------------------
+
+// ✅ EMAIL INPUT JSX
+<div className="space-y-2">
+  <Input
+    id="email"
+    type="email"
+    value={formData.email}
+    onChange={(e) => handleInputChange('email', e.target.value)}
+    placeholder="your.email@example.com"
+    className={`h-12 rounded-xl border-gray-200 ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : ''}`}
+    required
+  />
+  {formData.email && !validateEmail(formData.email) && (
+    <p className="text-red-500 text-sm flex items-center">
+      <AlertTriangle className="w-4 h-4 mr-1" />
+      Please enter a valid email address from a recognized provider
+    </p>
+  )}
+  {validateEmail(formData.email) && (
+    <p className="text-emerald-600 text-sm">✓ Email verified</p>
+  )}
+</div>
+
+------------------------------
+
+// ✅ PHONE INPUT JSX
+<div className="space-y-2">
+  <Input
+    id="phone"
+    value={formData.phone}
+    onChange={(e) => handleInputChange('phone', e.target.value)}
+    placeholder="(405) 555-0123"
+    className={`h-12 rounded-xl border-gray-200 ${formData.phone && !validatePhone(formData.phone) ? 'border-red-500' : validatePhone(formData.phone) ? 'border-emerald-500' : ''}`}
+    required
+  />
+  {formData.phone && !validatePhone(formData.phone) && (
+    <p className="text-red-500 text-sm flex items-center">
+      <AlertTriangle className="w-4 h-4 mr-1" />
+      Please enter a valid 10-digit US phone number
+    </p>
+  )}
+  {validatePhone(formData.phone) && (
+    <p className="text-emerald-600 text-sm">✓ Phone verified</p>
+  )}
+</div>
+
+------------------------------
+
+🛑 Do not add any `setErrors`, `validateField`, `touched`, or `onBlur` logic. Just paste this in place and test it. This works in real-time using only `formData` and validator functions — nothing else is needed.

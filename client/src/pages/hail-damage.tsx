@@ -194,47 +194,12 @@ export default function HailDamage() {
     return phoneNumber;
   };
 
-  // Real-time validation as user types
-  const validateField = (field: keyof ContactForm, value: string) => {
-    const newErrors = { ...errors };
-    
-    switch (field) {
-      case 'email':
-        if (value && !validateEmail(value)) {
-          newErrors.email = "Please enter a valid email address from a recognized provider";
-        } else {
-          delete newErrors.email;
-        }
-        break;
-      case 'phone':
-        if (value && !validatePhone(value)) {
-          newErrors.phone = "Please enter a valid 10-digit US phone number";
-        } else {
-          delete newErrors.phone;
-        }
-        break;
-      case 'address':
-        if (value && !value.toLowerCase().includes('oklahoma') && !value.toLowerCase().includes('ok')) {
-          newErrors.address = "We currently only serve properties in Oklahoma";
-        } else {
-          delete newErrors.address;
-        }
-        break;
-    }
-    
-    setErrors(newErrors);
-  };
-
   const handleInputChange = (field: keyof ContactForm, value: string) => {
     let processedValue = value;
-    
-    // Special processing for phone numbers
     if (field === 'phone') {
       processedValue = formatPhoneNumber(value);
     }
-    
     setFormData(prev => ({ ...prev, [field]: processedValue }));
-    validateField(field, processedValue);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

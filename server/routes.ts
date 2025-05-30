@@ -738,16 +738,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>${phrase} - Hail Damage Repair | Sigma Roofing LLC</title>
         <style>
-          body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-          .container { max-width: 800px; margin: auto; padding: 20px; background: white; }
-          .header, .emergency, .footer { padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-          .header { background: linear-gradient(135deg, #10b981, #059669); color: white; text-align: center; }
-          .emergency { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; text-align: center; }
-          .footer { font-size: 12px; color: #6b7280; text-align: center; background: #f9fafb; }
-          button { background: white; color: #b91c1c; font-weight: bold; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; }
-          button:hover { background: #f3f4f6; }
-          .highlight { background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; background: linear-gradient(to-br, #f8fafc, #e2e8f0); margin: 0; padding: 0; line-height: 1.6; }
+          .container { max-width: 1200px; margin: auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #10b981, #059669); color: white; text-align: center; padding: 60px 40px; border-radius: 16px; margin-bottom: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+          .header h1 { font-size: 3rem; margin-bottom: 20px; font-weight: 800; }
+          .header p { font-size: 1.25rem; opacity: 0.9; }
+          .content-section { background: white; padding: 40px; border-radius: 16px; margin-bottom: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+          .emergency { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; text-align: center; padding: 40px; border-radius: 16px; margin: 40px 0; box-shadow: 0 10px 25px rgba(220,38,38,0.15); }
+          .footer { font-size: 14px; color: #6b7280; text-align: center; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+          .emergency button { background: white; color: #dc2626; font-weight: bold; padding: 18px 36px; border: none; border-radius: 12px; cursor: pointer; font-size: 18px; transition: all 0.2s; }
+          .emergency button:hover { background: #f9fafb; transform: translateY(-2px); }
+          .highlight { background: linear-gradient(135deg, #fef3c7, #fde68a); border-left: 6px solid #f59e0b; padding: 30px; margin: 30px 0; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
           strong { color: #10b981; }
+          .reviews-section, .projects-section, .form-section { background: white; padding: 40px; border-radius: 16px; margin: 40px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+          .form-field { position: relative; margin-bottom: 20px; }
+          .address-suggestions { background: white; border: 1px solid #d1d5db; border-radius: 8px; max-height: 200px; overflow-y: auto; position: absolute; z-index: 1000; width: 100%; top: 100%; }
+          .address-suggestion { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background 0.2s; }
+          .address-suggestion:hover { background: #f9fafb; }
+          .address-suggestion:last-child { border-bottom: none; }
+          input, select, textarea { width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; }
+          input:focus, select:focus, textarea:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+          .error { border-color: #ef4444 !important; }
+          .error-message { color: #ef4444; font-size: 14px; margin-top: 5px; }
         </style>
       </head>
       <body>
@@ -757,34 +769,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <p>Hail Damage Restoration Experts - Sigma Roofing LLC</p>
           </div>
 
-          <div>
-            <h2>Recent Storm Report</h2>
-            <p><strong>Storm Type:</strong> ${event.storm_type.toUpperCase()}</p>
-            <p><strong>Date:</strong> ${event.date_of_loss}</p>
-            <p><strong>Location:</strong> ${event.affected_city}</p>
-            <p><strong>Hail Size:</strong> ${event.hail_size}</p>
+          <div class="content-section">
+            <h2 style="color: #1f2937; font-size: 2rem; margin-bottom: 20px;">Recent Storm Report</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+              <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
+                <h4 style="margin: 0 0 5px 0; color: #065f46;">Storm Type</h4>
+                <p style="margin: 0; font-weight: bold; color: #1f2937;">${event.storm_type.toUpperCase()}</p>
+              </div>
+              <div style="background: #eff6ff; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                <h4 style="margin: 0 0 5px 0; color: #1e40af;">Date</h4>
+                <p style="margin: 0; font-weight: bold; color: #1f2937;">${event.date_of_loss}</p>
+              </div>
+              <div style="background: #fef3c7; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                <h4 style="margin: 0 0 5px 0; color: #92400e;">Location</h4>
+                <p style="margin: 0; font-weight: bold; color: #1f2937;">${event.affected_city}</p>
+              </div>
+              <div style="background: #fef2f2; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;">
+                <h4 style="margin: 0 0 5px 0; color: #991b1b;">Hail Size</h4>
+                <p style="margin: 0; font-weight: bold; color: #1f2937;">${event.hail_size}</p>
+              </div>
+            </div>
 
-            <p>In light of the recent <strong>${event.storm_type}</strong> on <strong>${event.date_of_loss}</strong> in <strong>${event.affected_city}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
+            <p style="font-size: 1.125rem; color: #374151; margin-bottom: 25px;">In light of the recent <strong>${event.storm_type}</strong> on <strong>${event.date_of_loss}</strong> in <strong>${event.affected_city}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
 
             ${severityText}
 
             <div class="highlight">
-              <p>Hailstones as large as <strong>${event.hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>
+              <p style="font-size: 1.125rem; margin: 0;">Hailstones as large as <strong>${event.hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>
             </div>
 
-            <p>Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
+            <p style="font-size: 1.125rem; color: #374151; margin-bottom: 20px;">Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
 
-            <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
+            <p style="font-size: 1.125rem; color: #374151;">Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
           </div>
 
           <!-- Google Reviews Section -->
           <div class="reviews-section" style="background: #f9fafb; padding: 30px; border-radius: 8px; margin: 30px 0;">
             <h2 style="text-align: center; margin-bottom: 20px;">What Our Customers Say</h2>
-            <div style="text-align: center; margin-bottom: 20px;">
-              <span style="color: #fbbf24; font-size: 24px;">★★★★★</span>
-              <span style="margin-left: 10px; font-weight: bold;">4.9/5.0 (Real Google Reviews)</span>
+            <div style="text-align: center; margin-bottom: 30px;">
+              <div style="color: #fbbf24; font-size: 32px; margin-bottom: 10px;">★★★★★</div>
+              <div id="rating-display" style="font-size: 18px; font-weight: bold; color: #1f2937;">5.0/5.0 (Real Google Reviews)</div>
             </div>
-            <div id="reviews-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div id="reviews-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
               <!-- Reviews will be loaded here -->
             </div>
           </div>
@@ -810,7 +836,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 <input type="email" name="email" placeholder="Email Address*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
                 <input type="tel" name="phone" placeholder="Phone Number*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
               </div>
-              <input type="text" name="address" placeholder="Property Address (Oklahoma)*" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px;">
+              <div class="form-field">
+                <input type="text" name="address" id="address-input" placeholder="Property Address (Oklahoma)*" required style="width: 100%; padding: 16px; border: 2px solid #e5e7eb; border-radius: 8px; margin-bottom: 15px;">
+                <div id="address-suggestions" class="address-suggestions" style="display: none;"></div>
+              </div>
               
               <select name="serviceType" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px;">
                 <option value="">Select Service Type*</option>
@@ -871,27 +900,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </div>
         
         <script>
-          // Load Google Reviews
+          // Load Google Reviews with correct 5-star rating
           async function loadReviews() {
             try {
               const response = await fetch('/api/reviews');
               const data = await response.json();
               
               if (data.success && data.reviews) {
+                // Update rating display with actual data
+                const ratingDisplay = document.getElementById('rating-display');
+                ratingDisplay.textContent = \`\${data.businessRating}/5.0 (\${data.totalReviews} Google Reviews)\`;
+                
                 const container = document.getElementById('reviews-container');
-                container.innerHTML = data.reviews.slice(0, 3).map(review => \`
-                  <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                      <div style="width: 40px; height: 40px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">
+                container.innerHTML = data.reviews.slice(0, 6).map(review => \`
+                  <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                      <div style="width: 48px; height: 48px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; font-size: 18px;">
                         \${review.initials}
                       </div>
                       <div>
-                        <div style="font-weight: bold;">\${review.name}</div>
-                        <div style="color: #fbbf24;">\${'★'.repeat(review.rating)}</div>
+                        <div style="font-weight: bold; font-size: 16px; color: #1f2937;">\${review.name}</div>
+                        <div style="color: #fbbf24; font-size: 16px; margin-top: 2px;">\${'★'.repeat(review.rating)}</div>
                       </div>
                     </div>
-                    <p style="color: #4b5563; line-height: 1.5;">\${review.review}</p>
-                    <div style="color: #9ca3af; font-size: 12px; margin-top: 10px;">\${review.date}</div>
+                    <p style="color: #374151; line-height: 1.6; font-size: 15px; margin-bottom: 15px;">\${review.review}</p>
+                    <div style="color: #6b7280; font-size: 13px; font-weight: 500;">\${review.date}</div>
                   </div>
                 \`).join('');
               }
@@ -949,15 +982,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           function displayProjects(projects) {
             const container = document.getElementById('projects-container');
             container.innerHTML = projects.map(project => \`
-              <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <img src="\${project.imageUrl}" alt="\${project.title}" style="width: 100%; height: 200px; object-fit: cover;">
-                <div style="padding: 15px;">
-                  <h3 style="margin: 0 0 5px 0; color: #1f2937; font-size: 16px;">\${project.title}</h3>
-                  <p style="margin: 0 0 5px 0; color: #6b7280; font-size: 12px;">\${project.category || 'Roofing'}</p>
-                  <p style="margin: 0; color: #374151; font-size: 14px;">\${project.location}</p>
+              <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; transition: transform 0.2s;">
+                <img src="\${project.imageUrl}" alt="\${project.title}" style="width: 100%; height: 240px; object-fit: cover;" onerror="this.src='/api/placeholder/300/240'">
+                <div style="padding: 20px;">
+                  <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 18px; font-weight: 600;">\${project.title}</h3>
+                  <p style="margin: 0 0 8px 0; color: #10b981; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">\${project.category || 'Roofing Project'}</p>
+                  <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 14px; line-height: 1.4;">\${project.description || project.title}</p>
+                  <p style="margin: 0; color: #374151; font-size: 14px; font-weight: 500;">\${project.location}</p>
                 </div>
               </div>
             \`).join('');
+          }
+
+          // Address suggestions functionality
+          let addressTimeout;
+          async function searchAddresses(query) {
+            if (query.length < 3) {
+              document.getElementById('address-suggestions').style.display = 'none';
+              return;
+            }
+
+            clearTimeout(addressTimeout);
+            addressTimeout = setTimeout(async () => {
+              try {
+                const response = await fetch(\`/api/address-suggestions?query=\${encodeURIComponent(query)}\`);
+                const data = await response.json();
+                
+                if (data.success && data.suggestions.length > 0) {
+                  const suggestionsDiv = document.getElementById('address-suggestions');
+                  suggestionsDiv.innerHTML = data.suggestions.map(suggestion => \`
+                    <div class="address-suggestion" onclick="selectAddress('\${suggestion.formatted_address}')">
+                      \${suggestion.formatted_address}
+                    </div>
+                  \`).join('');
+                  suggestionsDiv.style.display = 'block';
+                } else {
+                  document.getElementById('address-suggestions').style.display = 'none';
+                }
+              } catch (error) {
+                console.error('Error fetching address suggestions:', error);
+                document.getElementById('address-suggestions').style.display = 'none';
+              }
+            }, 300);
+          }
+
+          function selectAddress(address) {
+            document.getElementById('address-input').value = address;
+            document.getElementById('address-suggestions').style.display = 'none';
           }
 
           // Handle form submission with complete validation
@@ -1032,6 +1103,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           document.addEventListener('DOMContentLoaded', function() {
             loadReviews();
             loadProjects();
+            
+            // Add address suggestions listener
+            const addressInput = document.getElementById('address-input');
+            addressInput.addEventListener('input', function(e) {
+              searchAddresses(e.target.value);
+            });
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+              if (!e.target.closest('.form-field')) {
+                document.getElementById('address-suggestions').style.display = 'none';
+              }
+            });
+            
+            // Set minimum dates for date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelector('input[name="preferredDate1"]').min = today;
+            document.querySelector('input[name="preferredDate2"]').min = today;
           });
         </script>
       </body>

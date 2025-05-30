@@ -799,19 +799,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           <!-- Lead Form Section -->
           <div class="form-section" style="background: #fff; border: 2px solid #10b981; padding: 30px; border-radius: 8px; margin: 30px 0;">
-            <h2 style="text-align: center; margin-bottom: 20px; color: #10b981;">Free Storm Damage Inspection</h2>
+            <h2 style="text-align: center; margin-bottom: 20px; color: #10b981;">Get Your Free Storm Damage Estimate</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: #6b7280;">Professional storm damage assessment in Oklahoma. Fill out our secure form for a detailed estimate within 24 hours.</p>
             <form id="storm-contact-form" style="max-width: 600px; margin: 0 auto;">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                 <input type="text" name="firstName" placeholder="First Name*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
                 <input type="text" name="lastName" placeholder="Last Name*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
               </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <input type="email" name="email" placeholder="Email*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
-                <input type="tel" name="phone" placeholder="Phone*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                <input type="email" name="email" placeholder="Email Address*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                <input type="tel" name="phone" placeholder="Phone Number*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
               </div>
-              <input type="text" name="address" placeholder="Property Address*" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px;">
-              <textarea name="description" placeholder="Describe the storm damage you've noticed..." rows="4" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px; resize: vertical;"></textarea>
-              <button type="submit" style="width: 100%; background: #10b981; color: white; padding: 15px; border: none; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer;">Schedule Free Inspection</button>
+              <input type="text" name="address" placeholder="Property Address (Oklahoma)*" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px;">
+              
+              <select name="serviceType" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px;">
+                <option value="">Select Service Type*</option>
+                <option value="Storm Damage Assessment">Storm Damage Assessment</option>
+                <option value="Hail Damage Repair">Hail Damage Repair</option>
+                <option value="Emergency Roof Repair">Emergency Roof Repair</option>
+                <option value="Insurance Claim Assistance">Insurance Claim Assistance</option>
+              </select>
+              
+              <textarea name="description" placeholder="Describe the storm damage and your roofing needs..." rows="4" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px; resize: vertical;"></textarea>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Date 1*</label>
+                  <input type="date" name="preferredDate1" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Time 1*</label>
+                  <select name="preferredTime1" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <option value="">Select Time</option>
+                    <option value="8:00 AM - 12:00 PM">8:00 AM - 12:00 PM</option>
+                    <option value="12:00 PM - 4:00 PM">12:00 PM - 4:00 PM</option>
+                    <option value="4:00 PM - 7:00 PM">4:00 PM - 7:00 PM</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Date 2*</label>
+                  <input type="date" name="preferredDate2" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Preferred Time 2*</label>
+                  <select name="preferredTime2" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <option value="">Select Time</option>
+                    <option value="8:00 AM - 12:00 PM">8:00 AM - 12:00 PM</option>
+                    <option value="12:00 PM - 4:00 PM">12:00 PM - 4:00 PM</option>
+                    <option value="4:00 PM - 7:00 PM">4:00 PM - 7:00 PM</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button type="submit" style="width: 100%; background: #10b981; color: white; padding: 15px; border: none; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer;">Submit Free Estimate Request</button>
             </form>
           </div>
 
@@ -857,52 +900,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // Load Recent Projects
+          // Load Recent Projects from Admin Gallery
           async function loadProjects() {
             try {
-              const response = await fetch('/api/website-images');
-              const data = await response.json();
+              // First try to get admin projects
+              const adminResponse = await fetch('/api/projects');
+              const adminData = await adminResponse.json();
               
-              if (data.success && data.images) {
-                const container = document.getElementById('projects-container');
-                const projects = [
-                  { key: 'project1', title: 'Storm Damage Repair', location: 'Edmond, OK' },
-                  { key: 'project2', title: 'Hail Damage Restoration', location: 'Oklahoma City, OK' },
-                  { key: 'project3', title: 'Emergency Roof Repair', location: 'Norman, OK' }
-                ];
+              if (adminData.success && adminData.projects && adminData.projects.length > 0) {
+                displayProjects(adminData.projects.slice(0, 3));
+              } else {
+                // Fallback to website images with project data
+                const imageResponse = await fetch('/api/website-images');
+                const imageData = await imageResponse.json();
                 
-                container.innerHTML = projects.map(project => {
-                  const imageUrl = data.images[project.key] || '/api/placeholder/250/200';
-                  return \`
-                    <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                      <img src="\${imageUrl}" alt="\${project.title}" style="width: 100%; height: 200px; object-fit: cover;">
-                      <div style="padding: 15px;">
-                        <h3 style="margin: 0 0 5px 0; color: #1f2937;">\${project.title}</h3>
-                        <p style="margin: 0; color: #6b7280; font-size: 14px;">\${project.location}</p>
-                      </div>
-                    </div>
-                  \`;
-                }).join('');
+                if (imageData.success && imageData.images) {
+                  const fallbackProjects = [
+                    {
+                      title: 'Residential Roof Replacement',
+                      description: 'Complete roof replacement with architectural shingles',
+                      imageUrl: imageData.images.project1 || '/api/placeholder/250/200',
+                      category: 'Roof Replacement',
+                      location: 'Edmond, OK'
+                    },
+                    {
+                      title: 'Storm Damage Restoration',
+                      description: 'Hail damage repair and insurance claim assistance',
+                      imageUrl: imageData.images.project2 || '/api/placeholder/250/200',
+                      category: 'Storm Damage',
+                      location: 'Oklahoma City, OK'
+                    },
+                    {
+                      title: 'Emergency Roof Repair',
+                      description: 'Emergency leak repair and temporary protection',
+                      imageUrl: imageData.images.project3 || '/api/placeholder/250/200',
+                      category: 'Emergency Repair',
+                      location: 'Norman, OK'
+                    }
+                  ];
+                  displayProjects(fallbackProjects);
+                }
               }
             } catch (error) {
               console.error('Error loading projects:', error);
             }
           }
 
-          // Handle form submission
+          function displayProjects(projects) {
+            const container = document.getElementById('projects-container');
+            container.innerHTML = projects.map(project => \`
+              <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <img src="\${project.imageUrl}" alt="\${project.title}" style="width: 100%; height: 200px; object-fit: cover;">
+                <div style="padding: 15px;">
+                  <h3 style="margin: 0 0 5px 0; color: #1f2937; font-size: 16px;">\${project.title}</h3>
+                  <p style="margin: 0 0 5px 0; color: #6b7280; font-size: 12px;">\${project.category || 'Roofing'}</p>
+                  <p style="margin: 0; color: #374151; font-size: 14px;">\${project.location}</p>
+                </div>
+              </div>
+            \`).join('');
+          }
+
+          // Handle form submission with complete validation
           document.getElementById('storm-contact-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(e.target);
+            
+            // Set minimum dates for date inputs
+            const today = new Date().toISOString().split('T')[0];
+            const date1Input = document.querySelector('input[name="preferredDate1"]');
+            const date2Input = document.querySelector('input[name="preferredDate2"]');
+            date1Input.min = today;
+            date2Input.min = today;
+            
             const data = {
               firstName: formData.get('firstName'),
               lastName: formData.get('lastName'),
               email: formData.get('email'),
               phone: formData.get('phone'),
               address: formData.get('address'),
-              serviceType: 'Storm Damage Assessment',
-              description: formData.get('description') || 'Storm damage inspection requested from hail landing page'
+              serviceType: formData.get('serviceType'),
+              description: formData.get('description'),
+              preferredDate1: formData.get('preferredDate1'),
+              preferredTime1: formData.get('preferredTime1'),
+              preferredDate2: formData.get('preferredDate2'),
+              preferredTime2: formData.get('preferredTime2')
             };
+
+            // Basic validation
+            if (!data.firstName || !data.lastName || !data.email || !data.phone || 
+                !data.address || !data.serviceType || !data.description ||
+                !data.preferredDate1 || !data.preferredTime1 || 
+                !data.preferredDate2 || !data.preferredTime2) {
+              alert('Please fill in all required fields.');
+              return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            if (!emailRegex.test(data.email)) {
+              alert('Please enter a valid email address.');
+              return;
+            }
+
+            // Oklahoma address validation
+            if (!data.address.toLowerCase().includes('oklahoma') && 
+                !data.address.toLowerCase().includes(' ok')) {
+              alert('Please enter an Oklahoma address.');
+              return;
+            }
 
             try {
               const response = await fetch('/api/contact', {
@@ -912,13 +1018,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
 
               if (response.ok) {
-                alert('Request submitted successfully! We\\'ll contact you within 24 hours.');
+                alert('Request submitted successfully! We\\'ll contact you within 24 hours to schedule your estimate.');
                 e.target.reset();
               } else {
                 throw new Error('Submission failed');
               }
             } catch (error) {
-              alert('Please try again or call us directly at (405) 902-1826');
+              alert('Please check your information and try again, or call us directly at (405) 902-1826');
             }
           });
 

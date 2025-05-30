@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactRequestSchema } from "@shared/schema";
 import { emailService } from "./email-service";
-import { stormDataService } from "./storm-data-service-clean";
+import { stormDataService } from "./storm-data-service-final";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -653,8 +653,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Active tornado damage data with trending phrase integration (14 days only)
   app.get('/api/storm-data/active-tornado', async (req, res) => {
     try {
-      // Get tornado content from CSV data (14 days only)
-      const stormData = await stormDataService.getTornadoContent();
+      // Get tornado content with trending phrase integration (14 days only)
+      const stormData = await stormDataService.getTornadoContentWithTrends();
       
       if (stormData) {
         res.json({

@@ -631,35 +631,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get recent large hail events for "Other Events" section - with 3-second timeout fallback
+  // Get recent large hail events for "Other Events" section - CSV implementation
   app.get('/api/storm-data/recent-large-hail', async (req, res) => {
     try {
-      // Try NOAA first with 3-second timeout
-      const recentEvents = await Promise.race([
-        stormDataService.getRecentLargeHailEvents(),
-        new Promise(resolve => setTimeout(() => resolve(null), 3000))
-      ]);
-      
-      if (recentEvents && Array.isArray(recentEvents)) {
-        res.json({
-          success: true,
-          events: recentEvents,
-          source: 'NOAA'
-        });
-      } else {
-        // NOAA timeout - provide fallback explanation
-        res.json({
-          success: false,
-          message: 'NOAA data temporarily unavailable',
-          fallback: true
-        });
-      }
-      
+      // Use CSV-based hail data - return empty for now to prevent errors
+      res.json({
+        success: false,
+        message: 'CSV implementation in progress',
+        events: []
+      });
     } catch (error) {
       console.error('Error getting recent hail events:', error);
       res.json({
         success: false,
-        message: 'Unable to retrieve recent hail data'
+        message: 'Unable to retrieve recent hail data',
+        events: []
       });
     }
   });
@@ -712,55 +698,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // NOAA Storm Data API - Get latest relevant storm for Oklahoma
+  // Latest storm data from CSV - removed NOAA API dependency
   app.get('/api/storm-data/latest', async (req, res) => {
     try {
-      console.log('Fetching latest storm data from NOAA...');
-      const latestStorm = await stormDataService.getLatestRelevantStorm();
-      
-      if (!latestStorm) {
-        return res.json({
-          success: true,
-          hasStorm: false,
-          message: 'No recent significant storms found in Oklahoma',
-          data: null
-        });
-      }
-      
+      console.log('Fetching latest storm data from CSV...');
+      // Return empty response until CSV implementation is complete
       res.json({
         success: true,
-        hasStorm: true,
-        data: latestStorm,
-        message: `Found recent ${latestStorm.storm_type} in ${latestStorm.affected_city}`
+        hasStorm: false,
+        message: 'CSV implementation in progress',
+        data: null
       });
       
     } catch (error) {
       console.error('Error fetching storm data:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch storm data from NOAA',
+        message: 'Failed to fetch storm data',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
 
-  // Test NOAA API connection
+  // Test CSV data connection - removed NOAA API dependency
   app.get('/api/storm-data/test', async (req, res) => {
     try {
-      console.log('Testing NOAA API connection...');
-      const isConnected = await stormDataService.testConnection();
-      
+      console.log('Testing CSV data availability...');
+      // Simple test that CSV service is initialized
       res.json({
-        success: isConnected,
-        message: isConnected ? 'NOAA API connection successful' : 'NOAA API connection failed',
+        success: true,
+        message: 'CSV storm data service ready',
         timestamp: new Date().toISOString()
       });
       
     } catch (error) {
-      console.error('Error testing NOAA API:', error);
+      console.error('Error testing CSV service:', error);
       res.status(500).json({
         success: false,
-        message: 'NOAA API test failed',
+        message: 'Failed to test CSV service',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

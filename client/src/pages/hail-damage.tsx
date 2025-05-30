@@ -56,6 +56,8 @@ export default function HailDamage() {
     preferredTime2: ""
   });
 
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+
   const [hailData, setHailData] = useState({
     city: "Oklahoma City",
     date_of_loss: new Date().toLocaleDateString(),
@@ -177,41 +179,32 @@ export default function HailDamage() {
     }
   });
 
-  // Enhanced validation functions
+  // Email validation - strict for lead quality (same as main contact form)
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return false;
-    
-    // Check for common fake/temporary email patterns
-    const fakeDomains = ['test.com', 'example.com', 'fake.com', 'temp.com', '10minutemail', 'guerrillamail'];
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
     const domain = email.split('@')[1]?.toLowerCase();
-    return !fakeDomains.some(fake => domain?.includes(fake));
+    return emailRegex.test(email) && 
+           !email.includes('+') && 
+           email.length <= 50 &&
+           (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
   };
 
+  // Phone validation (US format only) - same as main contact form
   const validatePhone = (phone: string): boolean => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    
-    // Must be exactly 10 digits for US numbers
-    if (cleanPhone.length !== 10) return false;
-    
-    // Area code cannot start with 0 or 1
-    if (cleanPhone[0] === '0' || cleanPhone[0] === '1') return false;
-    
-    // Exchange code cannot start with 0 or 1
-    if (cleanPhone[3] === '0' || cleanPhone[3] === '1') return false;
-    
-    // Check for fake patterns (repeated digits, sequential)
-    if (/^(\d)\1{9}$/.test(cleanPhone)) return false; // All same digit
-    if (cleanPhone === '1234567890' || cleanPhone === '0123456789') return false;
-    
-    return true;
+    const phoneDigits = phone.replace(/\D/g, '');
+    return phoneDigits.length === 10 && !['0000000000', '1111111111', '1234567890'].includes(phoneDigits);
   };
 
+  // Format phone number as user types - same as main contact form
   const formatPhoneNumber = (value: string): string => {
-    const phone = value.replace(/\D/g, '');
-    if (phone.length <= 3) return phone;
-    if (phone.length <= 6) return `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
-    return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
+    const phoneNumber = value.replace(/\D/g, '');
+    if (phoneNumber.length >= 6) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+    } else if (phoneNumber.length >= 3) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    }
+    return phoneNumber;
   };
 
   const validateAppointmentTimes = (date1: string, time1: string, date2: string, time2: string): string | null => {
@@ -280,6 +273,37 @@ export default function HailDamage() {
     contactMutation.mutate(formData);
   };
 
+  // Real-time validation as user types (same as main contact form)
+  const validateField = (field: keyof ContactForm, value: string) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'email':
+        if (value && !validateEmail(value)) {
+          newErrors.email = "Please enter a valid email address from a recognized provider";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+      case 'phone':
+        if (value && !validatePhone(value)) {
+          newErrors.phone = "Please enter a valid 10-digit US phone number";
+        } else {
+          delete newErrors.phone;
+        }
+        break;
+      case 'address':
+        if (value && !value.toLowerCase().includes('oklahoma') && !value.toLowerCase().includes('ok')) {
+          newErrors.address = "We currently only serve properties in Oklahoma";
+        } else {
+          delete newErrors.address;
+        }
+        break;
+    }
+    
+    setErrors(newErrors);
+  };
+
   const handleInputChange = (field: keyof ContactForm, value: string) => {
     let processedValue = value;
     
@@ -289,6 +313,7 @@ export default function HailDamage() {
     }
     
     setFormData(prev => ({ ...prev, [field]: processedValue }));
+    validateField(field, processedValue);
   };
 
   // Show loading only briefly while data loads
@@ -492,28 +517,46 @@ export default function HailDamage() {
                     />
                   </div>
                   
-                  <Input
-                    type="email"
-                    placeholder="Email Address"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    required
-                  />
+                  <div>
+                    <Input
+                      type="email"
+                      placeholder="Email Address"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      className={errors.email ? "border-red-500" : ""}
+                      required
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                    )}
+                  </div>
                   
-                  <Input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    required
-                  />
+                  <div>
+                    <Input
+                      type="tel"
+                      placeholder="Phone Number"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                      className={errors.phone ? "border-red-500" : ""}
+                      required
+                    />
+                    {errors.phone && (
+                      <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                    )}
+                  </div>
                   
-                  <Input
-                    placeholder="Property Address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    required
-                  />
+                  <div>
+                    <Input
+                      placeholder="Property Address"
+                      value={formData.address}
+                      onChange={(e) => handleInputChange("address", e.target.value)}
+                      className={errors.address ? "border-red-500" : ""}
+                      required
+                    />
+                    {errors.address && (
+                      <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                    )}
+                  </div>
                   
                   <Select value={formData.serviceType} onValueChange={(value) => handleInputChange("serviceType", value)}>
                     <SelectTrigger>

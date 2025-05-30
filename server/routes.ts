@@ -777,6 +777,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
           </div>
 
+          <!-- Google Reviews Section -->
+          <div class="reviews-section" style="background: #f9fafb; padding: 30px; border-radius: 8px; margin: 30px 0;">
+            <h2 style="text-align: center; margin-bottom: 20px;">What Our Customers Say</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+              <span style="color: #fbbf24; font-size: 24px;">★★★★★</span>
+              <span style="margin-left: 10px; font-weight: bold;">4.9/5.0 (Real Google Reviews)</span>
+            </div>
+            <div id="reviews-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+              <!-- Reviews will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Recent Projects Section -->
+          <div class="projects-section" style="background: #f0fdf4; padding: 30px; border-radius: 8px; margin: 30px 0;">
+            <h2 style="text-align: center; margin-bottom: 20px;">Recent Storm Damage Projects</h2>
+            <div id="projects-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+              <!-- Projects will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Lead Form Section -->
+          <div class="form-section" style="background: #fff; border: 2px solid #10b981; padding: 30px; border-radius: 8px; margin: 30px 0;">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #10b981;">Free Storm Damage Inspection</h2>
+            <form id="storm-contact-form" style="max-width: 600px; margin: 0 auto;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <input type="text" name="firstName" placeholder="First Name*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                <input type="text" name="lastName" placeholder="Last Name*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <input type="email" name="email" placeholder="Email*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+                <input type="tel" name="phone" placeholder="Phone*" required style="padding: 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+              </div>
+              <input type="text" name="address" placeholder="Property Address*" required style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px;">
+              <textarea name="description" placeholder="Describe the storm damage you've noticed..." rows="4" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 4px; margin-bottom: 15px; resize: vertical;"></textarea>
+              <button type="submit" style="width: 100%; background: #10b981; color: white; padding: 15px; border: none; border-radius: 4px; font-size: 18px; font-weight: bold; cursor: pointer;">Schedule Free Inspection</button>
+            </form>
+          </div>
+
           <div class="emergency">
             <h2>Emergency Storm Damage?</h2>
             <p>Call us now for immediate help:</p>
@@ -788,6 +826,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
             Page generated on: ${new Date(event.generated_at).toLocaleString()}
           </div>
         </div>
+        
+        <script>
+          // Load Google Reviews
+          async function loadReviews() {
+            try {
+              const response = await fetch('/api/reviews');
+              const data = await response.json();
+              
+              if (data.success && data.reviews) {
+                const container = document.getElementById('reviews-container');
+                container.innerHTML = data.reviews.slice(0, 3).map(review => \`
+                  <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                      <div style="width: 40px; height: 40px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">
+                        \${review.initials}
+                      </div>
+                      <div>
+                        <div style="font-weight: bold;">\${review.name}</div>
+                        <div style="color: #fbbf24;">\${'★'.repeat(review.rating)}</div>
+                      </div>
+                    </div>
+                    <p style="color: #4b5563; line-height: 1.5;">\${review.review}</p>
+                    <div style="color: #9ca3af; font-size: 12px; margin-top: 10px;">\${review.date}</div>
+                  </div>
+                \`).join('');
+              }
+            } catch (error) {
+              console.error('Error loading reviews:', error);
+            }
+          }
+
+          // Load Recent Projects
+          async function loadProjects() {
+            try {
+              const response = await fetch('/api/website-images');
+              const data = await response.json();
+              
+              if (data.success && data.images) {
+                const container = document.getElementById('projects-container');
+                const projects = [
+                  { key: 'project1', title: 'Storm Damage Repair', location: 'Edmond, OK' },
+                  { key: 'project2', title: 'Hail Damage Restoration', location: 'Oklahoma City, OK' },
+                  { key: 'project3', title: 'Emergency Roof Repair', location: 'Norman, OK' }
+                ];
+                
+                container.innerHTML = projects.map(project => {
+                  const imageUrl = data.images[project.key] || '/api/placeholder/250/200';
+                  return \`
+                    <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                      <img src="\${imageUrl}" alt="\${project.title}" style="width: 100%; height: 200px; object-fit: cover;">
+                      <div style="padding: 15px;">
+                        <h3 style="margin: 0 0 5px 0; color: #1f2937;">\${project.title}</h3>
+                        <p style="margin: 0; color: #6b7280; font-size: 14px;">\${project.location}</p>
+                      </div>
+                    </div>
+                  \`;
+                }).join('');
+              }
+            } catch (error) {
+              console.error('Error loading projects:', error);
+            }
+          }
+
+          // Handle form submission
+          document.getElementById('storm-contact-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+              firstName: formData.get('firstName'),
+              lastName: formData.get('lastName'),
+              email: formData.get('email'),
+              phone: formData.get('phone'),
+              address: formData.get('address'),
+              serviceType: 'Storm Damage Assessment',
+              description: formData.get('description') || 'Storm damage inspection requested from hail landing page'
+            };
+
+            try {
+              const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              });
+
+              if (response.ok) {
+                alert('Request submitted successfully! We\\'ll contact you within 24 hours.');
+                e.target.reset();
+              } else {
+                throw new Error('Submission failed');
+              }
+            } catch (error) {
+              alert('Please try again or call us directly at (405) 902-1826');
+            }
+          });
+
+          // Load content when page loads
+          document.addEventListener('DOMContentLoaded', function() {
+            loadReviews();
+            loadProjects();
+          });
+        </script>
       </body>
       </html>
     `;

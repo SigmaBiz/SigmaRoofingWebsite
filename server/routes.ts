@@ -727,8 +727,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   function generateHailLandingPage(event: any, phrase: string): string {
     const hailSize = parseFloat(event.hail_size);
     const severityText = hailSize >= 2.5
-      ? `<p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem. That's why searches like <strong>"${phrase}"</strong> are trending — homeowners are looking for answers and real help, fast.</p>`
-      : `<p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage. The recent spike in searches like <strong>"${phrase}"</strong> shows that others in your area are asking the same questions.</p>`;
+      ? `<p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem. That's why searches like <strong>"${phrase}"</strong> have spiked — homeowners are looking for real answers and real help.</p>`
+      : `<p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage. That's why you'll see more searches lately for <strong>"${phrase}"</strong>.</p>`;
 
     return `
       <!DOCTYPE html>
@@ -856,8 +856,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.send(`<h1>No qualifying hail events found</h1><p>Call us directly: (405) 902-1826</p>`);
       }
 
-      const phrase = phrases.find(p => stormDataService.matchesPhrase(event, p)) || 'Oklahoma Hail Storm Damage';
-      const html = generateHailLandingPage(event, phrase);
+      // Enhanced trending phrase matching logic
+      const recentPhrases = phrases.filter(p => (p as any).recent);
+      const fallbackPhrase = 'Oklahoma Hail Storm Damage';
+
+      // Create a temporary event object for matching that includes the original CSV structure
+      const eventForMatching = {
+        EVENT_TYPE: event.storm_type,
+        EVENT_NARRATIVE: event.event_details,
+        CZ_NAME: event.affected_city,
+        BEGIN_LOCATION: event.affected_city,
+        BEGIN_DATE_TIME: '',
+        MAGNITUDE: event.hail_size,
+        EVENT_ID: '',
+        STATE: 'OKLAHOMA'
+      };
+
+      const matchingPhrase = 
+        recentPhrases.find(p => stormDataService.matchesPhrase(eventForMatching, (p as any).text || p))?.text ||
+        phrases.find(p => stormDataService.matchesPhrase(eventForMatching, p)) ||
+        fallbackPhrase;
+
+      const html = generateHailLandingPage(event, matchingPhrase);
       res.send(html);
       
     } catch (err) {

@@ -1,0 +1,48 @@
+// ✅ FINAL INTEGRATION PROMPT FOR REPLIT – /hail-damage PAGE
+
+// GOAL: Finalize the dynamic hail damage landing page using NOAA CSV, recent search trends, and our brand's original pitch language. Use trending phrases from the last week (if any), or fallback to the best from the last 12 months.
+
+////////////////////////////////////////////////////////////////////////////////////
+// 🛠️ SECTION 1: Update Trending Phrase Matching Logic (in /hail-damage route)
+////////////////////////////////////////////////////////////////////////////////////
+
+// 🔄 REPLACE your phrase selection logic with the following:
+const recentPhrases = phrases.filter(p => p.recent);
+const fallbackPhrase = 'Oklahoma Hail Storm Damage';
+
+const matchingPhrase =
+  recentPhrases.find(p => stormDataService.matchesPhrase(event, p.text))?.text ||
+  phrases.find(p => stormDataService.matchesPhrase(event, p.text))?.text ||
+  fallbackPhrase;
+
+////////////////////////////////////////////////////////////////////////////////////
+// 🛠️ SECTION 2: Use Original Pitch Language – ONLY Inject the Phrase Slightly
+////////////////////////////////////////////////////////////////////////////////////
+
+// 🔄 REPLACE the existing `severityText` definition in generateHailLandingPage():
+const severityText = hailSize >= 2.5
+  ? `<p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem. That’s why searches like <strong>"${phrase}"</strong> have spiked — homeowners are looking for real answers and real help.</p>`
+  : `<p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof’s lifespan. Even “smaller” hail can leave behind costly, hidden damage. That’s why you’ll see more searches lately for <strong>"${phrase}"</strong>.</p>`;
+
+////////////////////////////////////////////////////////////////////////////////////
+// 🛠️ SECTION 3: Confirm `phrase` appears in key HTML spots
+////////////////////////////////////////////////////////////////////////////////////
+
+// ✅ Make sure these are present in the returned HTML:
+<title>${phrase} - Hail Damage Repair | Sigma Roofing LLC</title>
+<h1>${phrase}</h1>
+
+// Also embed ${phrase} once or twice in the body copy using strong tags as shown above.
+
+////////////////////////////////////////////////////////////////////////////////////
+// ✅ DONE! These steps ensure the system:
+////////////////////////////////////////////////////////////////////////////////////
+// - Pulls real NOAA hail data from CSV, not API
+// - Injects trending search phrases naturally
+// - Uses our authentic pitch (not rewritten copy)
+// - Prioritizes recent phrases (last 7 days), else uses year-long ones
+// - Avoids “default” fallback unless truly needed
+// - Rotates hail events daily and respects magnitude filtering
+// - Improves relevance and conversion potential for local storm traffic
+
+// 👍 After you’ve confirmed it works, we’ll replicate the logic for /tornado-damage.

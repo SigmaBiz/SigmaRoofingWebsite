@@ -137,8 +137,8 @@ export default function HailSimpleForm() {
           fontWeight: 'bold',
           cursor: 'pointer'
         }}
-        onMouseOver={(e) => e.target.style.backgroundColor = '#059669'}
-        onMouseOut={(e) => e.target.style.backgroundColor = '#10b981'}
+        onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#059669'}
+        onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#10b981'}
       >
         Submit Free Estimate Request
       </button>

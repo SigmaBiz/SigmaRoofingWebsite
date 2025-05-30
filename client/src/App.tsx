@@ -12,14 +12,16 @@ import Admin from "@/pages/admin";
 import GooglePhotosTest from "@/pages/google-photos-test";
 import DynamicLanding from "@/pages/dynamic-landing";
 import StormLanding from "@/pages/storm-landing";
+import HailDamage from "@/pages/hail-damage";
+import TornadoDamage from "@/pages/tornado-damage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/landing" component={DynamicLanding} />
-      <Route path="/storm" component={StormLanding} />
+      <Route path="/hail-damage" component={HailDamage} />
+      <Route path="/tornado-damage" component={TornadoDamage} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/sitemap" component={Sitemap} />

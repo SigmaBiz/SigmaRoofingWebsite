@@ -1,0 +1,42 @@
+🧠 Prompt: Replace the existing “Storm” landing page with two event-specific dynamic landing pages:
+
+1. `/hail-damage`
+2. `/tornado-damage`
+
+🎯 Purpose:
+Allow separate targeting of high-intent users affected by different storm types using Google Trends + NOAA data. Each page will dynamically adapt content based on the trending search phrase and local storm data.
+
+📌 Triggers:
+- Google Trends API (or equivalent) provides trending search phrases.
+- AI extracts storm type, date, location, and other context (e.g., city `X`, storm type `S`, date `DOL`).
+- NOAA hail and tornado databases provide verified historical storm data.
+
+🔹 `/hail-damage` Page Specifics:
+- Triggered when trending phrase involves **hail**.
+- Show dynamic content based on:
+   - City: `X`
+   - Date of loss: `DOL`
+   - Hail size: `HS` (must be **2 inches or larger** to qualify)
+- Include a **dynamic report section** listing other **hail events of 2”+** within the **last 12 months** in the Oklahoma City metro area.
+   - This NOAA-based section builds authority and adds weight to their concern by showing it's part of a wider hail trend.
+- Retain conditional pitch logic (e.g., if `HS < 1.5`, show softer warning text).
+
+🔹 `/tornado-damage` Page Specifics:
+- Triggered when trending phrase involves **tornado**.
+- Display content for:
+   - City: `X`
+   - Storm type: `S = tornado`
+   - Date of loss: `DOL`
+- Describe risks from debris, uplift, wind pressure, and building envelope failure.
+- Emphasize inspection urgency even if structural damage is not immediately obvious.
+
+📄 Shared Features:
+- Each landing page ends in a clear CTA:
+   - “🔍 Schedule Your Free Roof Assessment”
+- All CTA buttons route to the already-built functional lead form at `/request-estimate`.
+- Pages must be SEO-friendly and lightweight for fast indexing and ranking.
+- Optional: include tracking hooks (Google Analytics or similar) for measuring page-specific conversions.
+
+💡 Implementation Notes:
+- Use your best judgment to optimize the system. The logic above is the owner's vision, but you may enhance structure, performance, or integrations as long as functionality aligns.
+- Focus is on relevance, clarity, trust-building, and SEO authority — especially using recent real-world weather data to strengthen calls to action.

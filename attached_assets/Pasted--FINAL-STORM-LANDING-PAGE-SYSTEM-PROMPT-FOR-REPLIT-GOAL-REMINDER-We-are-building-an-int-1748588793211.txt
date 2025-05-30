@@ -1,0 +1,92 @@
+// 🧠 FINAL STORM LANDING PAGE SYSTEM PROMPT FOR REPLIT
+
+/*
+🧭 GOAL REMINDER:
+We are building an intelligent hail and tornado landing page system that:
+- Uses verified NOAA CSV data (not API) for events
+- Pulls Google Trends phrases (without API) from a static list or web scrape to find "bait"
+- Displays relevant pitch content using dynamic placeholders like {storm_type}, {hail_size}, etc.
+- Only shows tornado pages if an actual tornado in OKC metro was reported in the last 14 days
+- Always shows a hail page, defaulting to the best matched hail event in the last 12 months with hail ≥2"
+- Matches events to trending phrases, and displays ONE matched event per day using a deterministic selector (hash)
+*/
+
+import express from 'express';
+import { stormDataService } from './storm-data-service-clean'; // Already implemented
+import fs from 'fs';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Load mock trending phrases (ideally refreshed periodically from scraped source or CSV)
+function getTrendingPhrases(): string[] {
+  try {
+    const raw = fs.readFileSync('./mock_trending_phrases.json', 'utf8');
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+// Simple keyword matcher to link phrases to hail or tornado events
+function matchesPhrase(event: any, phrase: string): boolean {
+  const haystack = `${event.EVENT_TYPE} ${event.EVENT_NARRATIVE} ${event.CZ_NAME} ${event.BEGIN_LOCATION}`.toLowerCase();
+  return phrase.toLowerCase().split(/\s+/).some(word => haystack.includes(word));
+}
+
+app.get('/hail-damage', async (req, res) => {
+  const phrases = getTrendingPhrases();
+  const event = await stormDataService.getDailyHailContent();
+  if (!event) return res.send('No qualifying hail event found.');
+
+  const matchingPhrase = phrases.find(phrase => matchesPhrase(event, phrase)) || 'Recent hail storm';
+  const html = generateLandingPage(event, matchingPhrase);
+  res.send(html);
+});
+
+app.get('/tornado-damage', async (req, res) => {
+  const phrases = getTrendingPhrases();
+  const event = await stormDataService.getTornadoContent();
+  if (!event) return res.send('No tornado found in last 14 days for OKC metro.');
+
+  const matchingPhrase = phrases.find(phrase => matchesPhrase(event, phrase)) || 'Tornado damage Oklahoma';
+  const html = generateLandingPage(event, matchingPhrase);
+  res.send(html);
+});
+
+function generateLandingPage(event: any, keyword: string): string {
+  const isHail = event.is_hail_event;
+  const severityText = isHail
+    ? parseFloat(event.hail_size) >= 2.5
+      ? `<p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem.</p>`
+      : `<p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage.</p>`
+    : `<p>Winds from this ${event.storm_type} event damaged homes directly in its path — and even nearby structures saw uplifted shingles, fallen limbs, and structural stress. If you're within range, your roof may be more vulnerable than it appears.</p>`;
+
+  return `
+    <html>
+    <head><title>${keyword}</title></head>
+    <body>
+      <h1>Thank You for visiting us today!</h1>
+      <div class="main-pitch">
+        <p>In light of the recent <strong>${event.storm_type}</strong> on <strong>${event.date_of_loss}</strong> in <strong>${event.affected_city}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
+        ${severityText}
+        ${isHail ? `<p>Hailstones as large as <strong>${event.hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>` : ''}
+        <p>Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
+        <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
+      </div>
+      <div class="emergency-section">
+        <h2>Emergency Storm Damage?</h2>
+        <p>If you have immediate safety concerns or active leaks, call us now for emergency services.</p>
+        <button>Emergency: (405) 902-1826</button>
+      </div>
+      <div class="data-source">
+        <strong>Storm Data Source:</strong> NOAA Storm Events CSV | Generated: ${event.generated_at}
+      </div>
+    </body>
+    </html>`;
+}
+
+app.listen(PORT, () => {
+  console.log(`Storm Landing Page server running on port ${PORT}`);
+});

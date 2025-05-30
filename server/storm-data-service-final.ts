@@ -186,26 +186,34 @@ export class StormDataService {
 
   private loadTrendingPhrases(): string[] {
     try {
+      // Try to load from trending_phrases.json first
       if (fs.existsSync(this.trendsFile)) {
         const trendsData = JSON.parse(fs.readFileSync(this.trendsFile, 'utf8'));
         console.log(`Loaded ${trendsData.phrases?.length || 0} trending phrases for storm matching`);
         return trendsData.phrases || [];
       }
+      
+      // Fall back to mock_trending_phrases.json
+      const mockTrendsFile = path.join(process.cwd(), 'mock_trending_phrases.json');
+      if (fs.existsSync(mockTrendsFile)) {
+        const mockData = JSON.parse(fs.readFileSync(mockTrendsFile, 'utf8'));
+        console.log(`Loaded ${mockData.length} mock trending phrases for storm matching`);
+        return mockData;
+      }
     } catch (error) {
       console.error('Error loading trending phrases:', error);
     }
     
-    // Fallback phrases if file doesn't exist
-    return [
-      'hail damage roof oklahoma',
-      'tornado damage repair oklahoma', 
-      'storm damage roofing oklahoma city',
-      'roof repair after hail',
-      'emergency roof repair oklahoma',
-      'insurance claim roof damage',
-      'hail storm oklahoma city',
-      'tornado damage assessment'
-    ];
+    return [];
+  }
+
+  getTrendingPhrases(): string[] {
+    return this.loadTrendingPhrases();
+  }
+
+  matchesPhrase(event: CSVStormEvent, phrase: string): boolean {
+    const haystack = `${event.EVENT_TYPE} ${event.EVENT_NARRATIVE} ${event.CZ_NAME} ${event.BEGIN_LOCATION}`.toLowerCase();
+    return phrase.toLowerCase().split(/\s+/).some(word => haystack.includes(word));
   }
 
   private matchPhrasesToEvents(phrases: string[], events: CSVStormEvent[]): CSVStormEvent[] {

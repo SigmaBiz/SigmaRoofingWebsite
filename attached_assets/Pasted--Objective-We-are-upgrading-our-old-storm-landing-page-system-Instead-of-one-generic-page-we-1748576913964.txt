@@ -1,0 +1,46 @@
+🧭 Objective:
+We are upgrading our old “/storm” landing page system. Instead of one generic page, we are now **splitting it into two targeted dynamic pages**:
+
+1. `/hail-damage`
+2. `/tornado-damage`
+
+These pages will be dynamically generated **only** when they meet both of the following strict criteria:
+1. The **Google Trends phrase** matches a recent, **confirmed NOAA storm event**.
+2. The matched event must meet the **minimum severity threshold**:
+   - For hail: **≥ 2 inches**
+   - For tornado: Valid tornado report, not just strong winds
+
+📂 Existing Code Base:
+- Preserve and reuse the original "Storm" pitch logic already built.
+   - If the phrase type is **hail**, use the existing hail logic (e.g., HS, HH conditionals).
+   - If it’s **tornado**, use the tornado logic (T).
+
+🌀 `/hail-damage` Page:
+- Triggered when the search phrase P:
+   - Is hail-related
+   - AND corresponds to a NOAA-confirmed hail event ≥ 2” in the OKC metro or nearby
+- Dynamically fill:
+   - Storm type (`S`)
+   - Hail size (`HS`)
+   - Date (`DOL`)
+   - City (`X`)
+- Include a dynamic section:
+   - “Other recent hailstorms in the area”
+   - Show **3–5 additional NOAA-confirmed hail events** (≥2") within the **last 12 months** to support concern and improve SEO depth
+
+🌪️ `/tornado-damage` Page:
+- Triggered only if:
+   - P is clearly tornado-related
+   - AND a matching tornado report exists in NOAA data (near OKC, verifiable within phrase timeframe)
+- Use original tornado pitch (`T`)
+- Include relevant storm type, city, date
+
+✅ Shared Functionality:
+- Each page ends with a strong CTA:  
+  **🔍 Schedule Your Free Roof Assessment** → `/request-estimate`
+- Pages must be mobile-friendly, fast-loading, SEO-optimized
+- Keep structure human-friendly and conversion-focused
+- Auto-remove or suppress any phrase/page generation that cannot be verified against NOAA data (false positives = no-go)
+
+🤖 Developer’s Note:
+This prompt is a structured guide for the implementation — you may optimize logic or structure as needed. Prioritize clarity, factual accuracy, and SEO integrity. Do not launch pages unless both conditions (search phrase relevance + NOAA confirmation) are satisfied.

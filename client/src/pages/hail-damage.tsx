@@ -60,8 +60,42 @@ export default function HailDamage() {
     city: "Oklahoma City",
     date_of_loss: new Date().toLocaleDateString(),
     hail_size: "2.5 inches",
-    damage_likely: true
+    damage_likely: true,
+    verified: false
   });
+
+  const [pageError, setPageError] = useState<string | null>(null);
+
+  // Check URL parameters for trending phrase verification
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const phrase = urlParams.get('phrase');
+    
+    if (phrase) {
+      // Verify this phrase matches a real NOAA hail event ≥2"
+      fetch(`/api/verify-phrase/hail/${encodeURIComponent(phrase)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.verified && data.storm) {
+            setHailData({
+              city: data.storm.affected_city,
+              date_of_loss: data.storm.date_of_loss,
+              hail_size: data.storm.hail_size,
+              damage_likely: data.storm.hail_size >= "2",
+              verified: true
+            });
+          } else {
+            setPageError("This page is only available for verified storm events with hail 2 inches or larger.");
+          }
+        })
+        .catch(err => {
+          console.error('Verification failed:', err);
+          setPageError("Unable to verify storm data. This page requires confirmed NOAA storm events.");
+        });
+    } else {
+      setPageError("This page requires a verified trending phrase parameter.");
+    }
+  }, []);
 
   // Fetch Google reviews
   const { data: reviewsData } = useQuery({
@@ -120,6 +154,39 @@ export default function HailDamage() {
   const handleInputChange = (field: keyof ContactForm, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  // Show error page if verification fails
+  if (pageError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Available</h2>
+            <p className="text-gray-600 mb-6">{pageError}</p>
+            <Button
+              onClick={() => window.location.href = '/'}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              Return to Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Only show page content if storm data is verified
+  if (!hailData.verified) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying storm data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

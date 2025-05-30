@@ -285,18 +285,18 @@ export class StormDataService {
     }
   }
 
-  async getDailyHailContentWithTrends(phrase?: string): Promise<StormData | null> {
+  async getDailyHailContentWithTrends(): Promise<StormData | null> {
     try {
       const events = await this.downloadAndParseCSV();
-      
-      // Filter for hail events in the last 12 months
+      const trends = this.getTrendingPhrases();
+
       const twelveMonthsAgo = new Date();
       twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-      
-      const hailEvents = events.filter(event => {
+
+      const filteredEvents = events.filter(event => {
         if (!event.EVENT_TYPE.toLowerCase().includes('hail')) return false;
         if (parseFloat(event.MAGNITUDE) < 2.0) return false;
-        
+
         try {
           const eventDate = new Date(event.BEGIN_DATE_TIME);
           return eventDate >= twelveMonthsAgo;
@@ -304,24 +304,30 @@ export class StormDataService {
           return false;
         }
       });
-      
-      if (hailEvents.length === 0) {
+
+      if (filteredEvents.length === 0) {
         console.log('No hail events >= 2.0" found in OKC metro from past 12 months');
         return null;
       }
-      
-      // Get trending phrases and match them to events
-      const trendingPhrases = this.loadTrendingPhrases();
-      const matchedEvents = this.matchPhrasesToEvents(trendingPhrases, hailEvents);
-      
-      // Use best matched event or daily rotation fallback
-      const selectedEvent = matchedEvents.length > 0 ? matchedEvents[0] : hailEvents[0];
-      
-      console.log(`Selected hail event from ${selectedEvent.BEGIN_DATE_TIME} with magnitude ${selectedEvent.MAGNITUDE}"`);
-      return this.convertCSVEventToStormData(selectedEvent);
-      
-    } catch (error) {
-      console.error('Error getting trending hail content:', error);
+
+      // Step 1: Try to match events to trending phrases
+      for (const phrase of trends) {
+        const matchedEvent = filteredEvents.find(event => this.matchesPhrase(event, phrase));
+        if (matchedEvent) {
+          console.log(`Matched hail event to trend phrase "${phrase}"`);
+          return this.convertCSVEventToStormData(matchedEvent);
+        }
+      }
+
+      // Step 2: Fallback to daily deterministic rotation
+      const today = new Date().toDateString();
+      const hash = today.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      const fallbackEvent = filteredEvents[hash % filteredEvents.length];
+      console.log(`Using fallback hail event from ${fallbackEvent.BEGIN_DATE_TIME}`);
+      return this.convertCSVEventToStormData(fallbackEvent);
+
+    } catch (err) {
+      console.error('Error getting hail content with trends:', err);
       return null;
     }
   }

@@ -602,13 +602,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get daily hail content with rotation - phrase + verified NOAA storm
+  // Get daily hail content with trending phrase integration
   app.get('/api/storm-data/daily-hail-content', async (req, res) => {
     try {
       const phrase = req.query.phrase as string;
       
-      // Get today's active hail content (rotates once per day)
-      const activeContent = await stormDataService.getDailyHailContent(phrase);
+      // Get trending-enhanced hail content (12 months lookback)
+      const activeContent = await stormDataService.getDailyHailContentWithTrends(phrase);
       
       if (activeContent) {
         res.json({
@@ -618,12 +618,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.json({
           success: false,
-          message: 'No verified NOAA hail content available for today'
+          message: 'No verified NOAA hail content available from past 12 months'
         });
       }
       
     } catch (error) {
-      console.error('Error getting daily hail content:', error);
+      console.error('Error getting trending hail content:', error);
       res.json({
         success: false,
         message: 'Unable to retrieve storm content'
@@ -650,11 +650,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Active tornado damage data - CSV implementation
+  // Active tornado damage data with trending phrase integration (14 days only)
   app.get('/api/storm-data/active-tornado', async (req, res) => {
     try {
-      // Get tornado content from CSV data service
-      const stormData = await stormDataService.getTornadoContent();
+      // Get trending-enhanced tornado content (14 days only)
+      const stormData = await stormDataService.getTornadoContentWithTrends();
       
       if (stormData) {
         res.json({
@@ -662,38 +662,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           storm: stormData
         });
       } else {
-        // Provide default response if no data available
+        // No recent tornado events - return null to hide page
         res.json({
-          success: true,
-          storm: {
-            date_of_loss: "Recent Storm Event",
-            affected_city: "Oklahoma City",
-            storm_type: "tornado",
-            hail_size: "0\"",
-            is_hail_event: false,
-            is_tornado_event: true,
-            hail_less_than_1_5: true,
-            event_details: "Recent tornado activity in the Oklahoma City metro area",
-            generated_at: new Date().toISOString()
-          }
+          success: false,
+          message: 'No recent tornado events found in past 14 days',
+          storm: null
         });
       }
       
     } catch (error) {
       console.error('Error getting tornado data:', error);
       res.json({
-        success: true,
-        storm: {
-          date_of_loss: "Recent Storm Event",
-          affected_city: "Oklahoma City", 
-          storm_type: "tornado",
-          hail_size: "0\"",
-          is_hail_event: false,
-          is_tornado_event: true,
-          hail_less_than_1_5: true,
-          event_details: "Recent tornado activity in the Oklahoma City metro area",
-          generated_at: new Date().toISOString()
-        }
+        success: false,
+        message: 'Unable to retrieve tornado data',
+        storm: null
       });
     }
   });

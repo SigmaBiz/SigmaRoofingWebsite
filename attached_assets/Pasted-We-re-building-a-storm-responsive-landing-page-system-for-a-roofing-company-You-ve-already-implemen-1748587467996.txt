@@ -1,0 +1,69 @@
+We’re building a storm-responsive landing page system for a roofing company. You’ve already implemented CSV-based parsing of NOAA data — keep using that approach and **do not revert to the NOAA API**, which was triggering 500 errors. Use only the downloaded .CSV files from the official NOAA SWDI archive.
+
+⚠️ YOU MUST NOT fallback to any API call or try to use stale auth methods.
+Instead, use only `.csv.gz` NOAA storm files like:
+https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/StormEvents_details-ftp_v1.0_d2024_c20250520.csv.gz
+
+---
+
+### 🔁 NEW REQUIREMENTS TO IMPLEMENT:
+
+1. **TRENDING PHRASE INTEGRATION (Google Trends)**  
+   Pull trending search phrases using `google-trends-api` (or other method) and filter them based on:
+   - ✅ Relevance to **hail** or **tornado**
+   - ✅ Match to a verified NOAA event in the OKC metro area
+   - ✅ Meets the storm criteria:
+     - For **hail**: 2.0" or larger, anytime in the last **12 months**
+     - For **tornado**: Actual tornado event in the last **14 days**
+   - ✅ Priority logic:
+     - Prefer events that match high-volume trend phrases
+     - Prefer newer events over old ones
+     - Hail: Always show something (fallback to top phrase/event match in 12 months)
+     - Tornado: Only show if recent verified event exists. Otherwise hide the page.
+
+2. **DATA FLOW EXPECTATION**
+   - Use the `google-trends-api` or similar to get top U.S. trending phrases
+   - Match trending phrase keywords to filtered NOAA events from your CSV pipeline
+   - Select 1 event per day based on phrase match, size/date recency, and location relevance
+   - Show phrase-driven hail/tornado event on landing page
+   - Rotate daily using phrase-hash or storm-hash
+
+---
+
+### 🌩️ CUSTOM LANDING PAGE CONTENT  
+Use this updated HTML to display the landing message:
+
+```html
+<!-- STORM LANDING PAGE PITCH -->
+<h1>Thank You for visiting us today!</h1>
+
+<div class="main-pitch">
+  <p>In light of the recent <strong>{storm_type}</strong> on <strong>{date_of_loss}</strong> in <strong>{affected_city}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
+
+  <!-- For smaller hail events -->
+  <p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage.</p>
+
+  <!-- For larger storm events -->
+  <p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem.</p>
+
+  <!-- For specific hail size -->
+  <p>Hailstones as large as <strong>{hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>
+
+  <!-- For tornado events -->
+  <p>Winds from this <strong>{storm_type}</strong> event damaged homes directly in its path — and even nearby structures saw uplifted shingles, fallen limbs, and structural stress. If you're within range, your roof may be more vulnerable than it appears.</p>
+
+  <p>Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
+  <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
+</div>
+
+<!-- Emergency Contact Section -->
+<div class="emergency-section">
+  <h2>Emergency Storm Damage?</h2>
+  <p>If you have immediate safety concerns or active leaks, call us now for emergency services.</p>
+  <button>Emergency: (405) 902-1826</button>
+</div>
+
+<!-- Data Source Indicator -->
+<div class="data-source">
+  <strong>Storm Data Source:</strong> Verified NOAA Storm Events CSV | Generated: {timestamp}
+</div>

@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as zlib from 'zlib';
 import * as https from 'https';
+const googleTrends = require('google-trends-api');
 
 interface StormData {
   date_of_loss: string;
@@ -33,7 +34,9 @@ export class StormDataService {
   ];
 
   private csvCacheFile = path.join(process.cwd(), 'noaa_storm_events_cache.json');
+  private trendsCache = path.join(process.cwd(), 'trends_cache.json');
   private lastDownload = 0;
+  private lastTrendsUpdate = 0;
   private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
 
   constructor() {
@@ -337,6 +340,195 @@ export class StormDataService {
     return str.replace(/\w\S*/g, (txt) => 
       txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
     );
+  }
+
+  /**
+   * Get trending phrases related to storms
+   */
+  async getTrendingStormPhrases(): Promise<string[]> {
+    try {
+      const now = Date.now();
+      
+      // Check if we have cached trends data
+      if (fs.existsSync(this.trendsCache) && (now - this.lastTrendsUpdate) < this.cacheExpiry) {
+        console.log('Using cached trends data');
+        const cached = JSON.parse(fs.readFileSync(this.trendsCache, 'utf8'));
+        return cached.phrases || [];
+      }
+
+      console.log('Fetching trending storm-related phrases...');
+      
+      // Get trending searches for storm-related terms
+      const stormKeywords = ['hail damage', 'tornado damage', 'roof damage', 'storm damage', 'hail roof', 'tornado roof'];
+      const trendingPhrases: string[] = [];
+      
+      for (const keyword of stormKeywords) {
+        try {
+          const result = await googleTrends.relatedQueries({
+            keyword: keyword,
+            startTime: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days
+            geo: 'US-OK' // Oklahoma
+          });
+          
+          const data = JSON.parse(result);
+          if (data.default?.rankedList?.[0]?.rankedKeyword) {
+            const phrases = data.default.rankedList[0].rankedKeyword
+              .slice(0, 5)
+              .map((item: any) => item.query);
+            trendingPhrases.push(...phrases);
+          }
+        } catch (error: any) {
+          console.log(`Trends lookup failed for ${keyword}:`, error?.message || 'Unknown error');
+        }
+      }
+
+      // Cache the results
+      fs.writeFileSync(this.trendsCache, JSON.stringify({
+        phrases: trendingPhrases,
+        updateTime: now
+      }));
+      
+      this.lastTrendsUpdate = now;
+      console.log(`Found ${trendingPhrases.length} trending storm phrases`);
+      
+      return trendingPhrases;
+      
+    } catch (error) {
+      console.error('Error getting trending phrases:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Match trending phrases with verified storm events
+   */
+  private matchPhrasesToEvents(phrases: string[], events: CSVStormEvent[]): CSVStormEvent[] {
+    const matchedEvents: Array<{event: CSVStormEvent, score: number}> = [];
+    
+    for (const event of events) {
+      let score = 0;
+      const eventText = `${event.EVENT_TYPE} ${event.CZ_NAME} ${event.BEGIN_LOCATION} ${event.EVENT_NARRATIVE}`.toLowerCase();
+      
+      // Score based on phrase matches
+      for (const phrase of phrases) {
+        const phraseWords = phrase.toLowerCase().split(' ');
+        for (const word of phraseWords) {
+          if (word.length > 3 && eventText.includes(word)) {
+            score += 1;
+          }
+        }
+      }
+      
+      // Boost score for larger hail
+      if (event.EVENT_TYPE.toLowerCase().includes('hail')) {
+        const magnitude = parseFloat(event.MAGNITUDE || '0');
+        if (magnitude >= 2.5) score += 3;
+        if (magnitude >= 3.0) score += 5;
+      }
+      
+      // Boost score for recent events
+      try {
+        const eventDate = new Date(event.BEGIN_DATE_TIME);
+        const daysAgo = (Date.now() - eventDate.getTime()) / (24 * 60 * 60 * 1000);
+        if (daysAgo < 30) score += 2;
+        if (daysAgo < 7) score += 5;
+      } catch {}
+      
+      if (score > 0) {
+        matchedEvents.push({event, score});
+      }
+    }
+    
+    // Sort by score and return events
+    return matchedEvents
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.event);
+  }
+
+  /**
+   * Enhanced daily hail content with trending phrase integration
+   */
+  async getDailyHailContentWithTrends(phrase?: string): Promise<StormData | null> {
+    try {
+      const events = await this.downloadAndParseCSV();
+      
+      // Filter for hail events in the last 12 months
+      const twelveMonthsAgo = new Date();
+      twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+      
+      const hailEvents = events.filter(event => {
+        if (!event.EVENT_TYPE.toLowerCase().includes('hail')) return false;
+        if (parseFloat(event.MAGNITUDE) < 2.0) return false;
+        
+        try {
+          const eventDate = new Date(event.BEGIN_DATE_TIME);
+          return eventDate >= twelveMonthsAgo;
+        } catch {
+          return false;
+        }
+      });
+      
+      if (hailEvents.length === 0) {
+        console.log('No hail events >= 2.0" found in OKC metro from past 12 months');
+        return null;
+      }
+      
+      // Get trending phrases and match them
+      const trendingPhrases = await this.getTrendingStormPhrases();
+      const matchedEvents = this.matchPhrasesToEvents(trendingPhrases, hailEvents);
+      
+      // Use best matched event or daily rotation fallback
+      const selectedEvent = matchedEvents.length > 0 ? matchedEvents[0] : hailEvents[0];
+      
+      return this.convertCSVEventToStormData(selectedEvent);
+      
+    } catch (error) {
+      console.error('Error getting trending hail content:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Enhanced tornado content with trending phrase integration (14 days only)
+   */
+  async getTornadoContentWithTrends(): Promise<StormData | null> {
+    try {
+      const events = await this.downloadAndParseCSV();
+      
+      // Filter for tornado events from the past 14 days only
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      
+      const tornadoEvents = events.filter(event => {
+        if (!event.EVENT_TYPE.toLowerCase().includes('tornado')) return false;
+        
+        try {
+          const eventDate = new Date(event.BEGIN_DATE_TIME);
+          return eventDate >= twoWeeksAgo;
+        } catch {
+          return false;
+        }
+      });
+      
+      if (tornadoEvents.length === 0) {
+        console.log('No recent tornado events found in OKC metro from past 14 days');
+        return null; // Don't show tornado page if no recent events
+      }
+      
+      // Get trending phrases and match them
+      const trendingPhrases = await this.getTrendingStormPhrases();
+      const matchedEvents = this.matchPhrasesToEvents(trendingPhrases, tornadoEvents);
+      
+      // Use best matched event or most recent
+      const selectedEvent = matchedEvents.length > 0 ? matchedEvents[0] : 
+        tornadoEvents.sort((a, b) => new Date(b.BEGIN_DATE_TIME).getTime() - new Date(a.BEGIN_DATE_TIME).getTime())[0];
+      
+      return this.convertCSVEventToStormData(selectedEvent);
+      
+    } catch (error) {
+      console.error('Error getting trending tornado content:', error);
+      return null;
+    }
   }
 }
 

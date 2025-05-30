@@ -1,3 +1,8 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import * as zlib from 'zlib';
+import * as https from 'https';
+
 interface StormData {
   date_of_loss: string;
   affected_city: string;
@@ -10,49 +15,328 @@ interface StormData {
   generated_at: string;
 }
 
+interface CSVStormEvent {
+  EVENT_TYPE: string;
+  STATE: string;
+  CZ_NAME: string;
+  BEGIN_LOCATION: string;
+  BEGIN_DATE_TIME: string;
+  MAGNITUDE: string;
+  EVENT_ID: string;
+  EVENT_NARRATIVE: string;
+}
+
 export class StormDataService {
+  private readonly OKC_METRO_CITIES = [
+    'oklahoma city', 'edmond', 'norman', 'moore', 'midwest city',
+    'yukon', 'bethany', 'del city', 'mustang', 'nichols hills'
+  ];
+
+  private csvCacheFile = path.join(process.cwd(), 'noaa_storm_events_cache.json');
+  private lastDownload = 0;
+  private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
+
   constructor() {
-    console.log('Storm Data Service initialized with CSV data source');
+    console.log('Storm Data Service initialized with NOAA CSV data source');
   }
 
   /**
-   * Get daily hail content - CSV implementation placeholder
+   * Download and parse the latest NOAA storm events CSV
+   */
+  async downloadAndParseCSV(): Promise<CSVStormEvent[]> {
+    const now = Date.now();
+    
+    // Check if we have cached data that's still fresh
+    if (fs.existsSync(this.csvCacheFile) && (now - this.lastDownload) < this.cacheExpiry) {
+      console.log('Using cached NOAA storm events data');
+      const cached = JSON.parse(fs.readFileSync(this.csvCacheFile, 'utf8'));
+      return cached.events || [];
+    }
+
+    console.log('Downloading latest NOAA storm events CSV...');
+    
+    try {
+      // Download the 2024 storm events CSV file
+      const csvUrl = 'https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/StormEvents_details-ftp_v1.0_d2024_c20241130.csv.gz';
+      
+      const csvData = await this.downloadFile(csvUrl);
+      const decompressed = zlib.gunzipSync(csvData);
+      const csvText = decompressed.toString('utf8');
+      
+      const events = this.parseCSV(csvText);
+      
+      // Cache the results
+      fs.writeFileSync(this.csvCacheFile, JSON.stringify({
+        events,
+        downloadTime: now,
+        url: csvUrl
+      }));
+      
+      this.lastDownload = now;
+      console.log(`Successfully parsed ${events.length} relevant storm events from CSV`);
+      
+      return events;
+      
+    } catch (error) {
+      console.error('Error downloading/parsing CSV:', error);
+      
+      // Try to use stale cached data if available
+      if (fs.existsSync(this.csvCacheFile)) {
+        console.log('Using stale cached data due to download error');
+        const cached = JSON.parse(fs.readFileSync(this.csvCacheFile, 'utf8'));
+        return cached.events || [];
+      }
+      
+      return [];
+    }
+  }
+
+  /**
+   * Download file from URL
+   */
+  private downloadFile(url: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      https.get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
+          return;
+        }
+        
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk) => chunks.push(chunk));
+        response.on('end', () => resolve(Buffer.concat(chunks)));
+        response.on('error', reject);
+      }).on('error', reject);
+    });
+  }
+
+  /**
+   * Parse CSV and filter for Oklahoma storm events
+   */
+  private parseCSV(csvText: string): CSVStormEvent[] {
+    const lines = csvText.split('\n');
+    if (lines.length < 2) return [];
+    
+    const headers = this.parseCSVLine(lines[0]).map(h => h.trim());
+    const events: CSVStormEvent[] = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      const values = this.parseCSVLine(line);
+      if (values.length < headers.length) continue;
+      
+      const event: any = {};
+      headers.forEach((header, index) => {
+        event[header] = values[index] ? values[index].trim() : '';
+      });
+      
+      // Filter: Must be Oklahoma
+      if (event.STATE !== 'OKLAHOMA') continue;
+      
+      // Filter: Must be Hail or Tornado
+      const eventType = event.EVENT_TYPE?.toLowerCase() || '';
+      if (!eventType.includes('hail') && !eventType.includes('tornado')) continue;
+      
+      // Filter: Must be in OKC metro area
+      const location = ((event.CZ_NAME || '') + ' ' + (event.BEGIN_LOCATION || '')).toLowerCase();
+      const isInMetro = this.OKC_METRO_CITIES.some(city => 
+        location.includes(city.toLowerCase())
+      );
+      
+      if (!isInMetro) continue;
+      
+      // For hail events, filter by magnitude >= 2.0
+      if (eventType.includes('hail')) {
+        const magnitude = parseFloat(event.MAGNITUDE || '0');
+        if (magnitude < 2.0) continue;
+      }
+      
+      events.push({
+        EVENT_TYPE: event.EVENT_TYPE || '',
+        STATE: event.STATE || '',
+        CZ_NAME: event.CZ_NAME || '',
+        BEGIN_LOCATION: event.BEGIN_LOCATION || '',
+        BEGIN_DATE_TIME: event.BEGIN_DATE_TIME || '',
+        MAGNITUDE: event.MAGNITUDE || '0',
+        EVENT_ID: event.EVENT_ID || '',
+        EVENT_NARRATIVE: event.EVENT_NARRATIVE || ''
+      });
+    }
+    
+    return events;
+  }
+
+  /**
+   * Parse CSV line handling quoted values properly
+   */
+  private parseCSVLine(line: string): string[] {
+    const values: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        values.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    values.push(current);
+    return values;
+  }
+
+  /**
+   * Get daily hail content from CSV data
    */
   async getDailyHailContent(phrase?: string): Promise<StormData | null> {
-    console.log('CSV-based hail data retrieval - implementation in progress');
+    try {
+      const events = await this.downloadAndParseCSV();
+      
+      // Filter for hail events only
+      const hailEvents = events.filter(event => 
+        event.EVENT_TYPE.toLowerCase().includes('hail') &&
+        parseFloat(event.MAGNITUDE) >= 2.0
+      );
+      
+      if (hailEvents.length === 0) {
+        console.log('No hail events >= 2.0" found in OKC metro from CSV');
+        return null;
+      }
+      
+      // Daily rotation based on current date
+      const today = new Date().toDateString();
+      const dayHash = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const eventIndex = dayHash % hailEvents.length;
+      
+      return this.convertCSVEventToStormData(hailEvents[eventIndex]);
+      
+    } catch (error) {
+      console.error('Error getting daily hail content:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get tornado content from CSV data
+   */
+  async getTornadoContent(): Promise<StormData | null> {
+    try {
+      const events = await this.downloadAndParseCSV();
+      
+      // Filter for tornado events from the past 14 days
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      
+      const tornadoEvents = events.filter(event => {
+        if (!event.EVENT_TYPE.toLowerCase().includes('tornado')) return false;
+        
+        try {
+          const eventDate = new Date(event.BEGIN_DATE_TIME);
+          return eventDate >= twoWeeksAgo;
+        } catch {
+          return false;
+        }
+      });
+      
+      if (tornadoEvents.length === 0) {
+        console.log('No recent tornado events found in OKC metro from CSV');
+        return null;
+      }
+      
+      // Return most recent tornado event
+      tornadoEvents.sort((a, b) => {
+        const dateA = new Date(a.BEGIN_DATE_TIME).getTime();
+        const dateB = new Date(b.BEGIN_DATE_TIME).getTime();
+        return dateB - dateA;
+      });
+      
+      return this.convertCSVEventToStormData(tornadoEvents[0]);
+      
+    } catch (error) {
+      console.error('Error getting tornado content:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Convert CSV event to StormData format
+   */
+  private convertCSVEventToStormData(event: CSVStormEvent): StormData {
+    const cityName = this.extractCityName(event.CZ_NAME || event.BEGIN_LOCATION);
+    const isHail = event.EVENT_TYPE.toLowerCase().includes('hail');
+    const magnitude = parseFloat(event.MAGNITUDE || '0');
     
-    // Return sample data based on verified storm patterns
     return {
-      date_of_loss: 'April 27, 2024',
-      affected_city: 'Moore',
-      storm_type: 'hail',
-      hail_size: '2.75"',
-      is_hail_event: true,
-      is_tornado_event: false,
-      hail_less_than_1_5: false,
-      event_details: 'Severe hailstorm reported with quarter-size to golf ball-size hail in Moore area',
+      date_of_loss: this.formatDate(event.BEGIN_DATE_TIME),
+      affected_city: cityName,
+      storm_type: isHail ? 'hail' : 'tornado',
+      hail_size: isHail ? `${magnitude}"` : '0"',
+      is_hail_event: isHail,
+      is_tornado_event: !isHail,
+      hail_less_than_1_5: magnitude < 1.5,
+      event_details: event.EVENT_NARRATIVE || `${event.EVENT_TYPE} event in ${cityName}`,
       generated_at: new Date().toISOString()
     };
   }
 
   /**
-   * Get tornado content - CSV implementation placeholder
+   * Extract city name from location string
    */
-  async getTornadoContent(): Promise<StormData | null> {
-    console.log('CSV-based tornado data retrieval - implementation in progress');
+  private extractCityName(location: string): string {
+    if (!location) return 'Oklahoma City';
     
-    // Return sample data based on verified storm patterns
-    return {
-      date_of_loss: 'May 20, 2024',
-      affected_city: 'Norman',
-      storm_type: 'tornado',
-      hail_size: '0"',
-      is_hail_event: false,
-      is_tornado_event: true,
-      hail_less_than_1_5: true,
-      event_details: 'EF2 tornado touched down causing significant structural damage in Norman area',
-      generated_at: new Date().toISOString()
-    };
+    const cleanLocation = location.toLowerCase();
+    
+    for (const city of this.OKC_METRO_CITIES) {
+      if (cleanLocation.includes(city)) {
+        return this.toTitleCase(city);
+      }
+    }
+    
+    return 'Oklahoma City';
+  }
+
+  /**
+   * Format date string to "Month Day, Year" format
+   */
+  private formatDate(dateStr: string): string {
+    if (!dateStr) return 'Recent Storm Event';
+    
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch {
+      return 'Recent Storm Event';
+    }
+  }
+
+  /**
+   * Convert string to title case
+   */
+  private toTitleCase(str: string): string {
+    return str.replace(/\w\S*/g, (txt) => 
+      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
   }
 }
 

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from 'react';
 
 export default function HailSimple() {
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,49 +23,76 @@ export default function HailSimple() {
     return cleanPhone.length === 10;
   };
 
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    console.log('Email changed:', e.target.value); // Debug log
+  };
+
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPhone(e.target.value);
+    console.log('Phone changed:', e.target.value); // Debug log
+  };
+
   return (
-    <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto" }}>
-      <h1>Hail Damage Form - Simple Test</h1>
+    <div style={{ 
+      padding: "20px", 
+      maxWidth: "500px", 
+      margin: "0 auto",
+      fontFamily: "system-ui, -apple-system, sans-serif"
+    }}>
+      <h1 style={{ marginBottom: "20px" }}>Hail Damage Form - Simple Test</h1>
       
       <div style={{ marginBottom: "20px" }}>
-        <label>Email:</label>
+        <label style={{ display: "block", marginBottom: "5px" }}>Email:</label>
         <input
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleEmailChange}
           placeholder="test@gmail.com"
           style={{
             width: "100%",
             padding: "10px",
             border: `2px solid ${!email ? '#ccc' : validateEmail(email) ? 'green' : 'red'}`,
-            borderRadius: "4px"
+            borderRadius: "4px",
+            boxSizing: "border-box",
+            marginBottom: "5px"
           }}
         />
-        <div>Value: "{email}"</div>
+        <div style={{ fontSize: "14px", color: "#666" }}>Value: "{email}"</div>
         {email && (
-          <div style={{ color: validateEmail(email) ? 'green' : 'red' }}>
+          <div style={{ 
+            color: validateEmail(email) ? 'green' : 'red',
+            marginTop: "5px",
+            fontSize: "14px"
+          }}>
             {validateEmail(email) ? '✓ Valid email' : '✗ Invalid email'}
           </div>
         )}
       </div>
 
       <div style={{ marginBottom: "20px" }}>
-        <label>Phone:</label>
+        <label style={{ display: "block", marginBottom: "5px" }}>Phone:</label>
         <input
           type="tel"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={handlePhoneChange}
           placeholder="1234567890"
           style={{
             width: "100%",
             padding: "10px",
             border: `2px solid ${!phone ? '#ccc' : validatePhone(phone) ? 'green' : 'red'}`,
-            borderRadius: "4px"
+            borderRadius: "4px",
+            boxSizing: "border-box",
+            marginBottom: "5px"
           }}
         />
-        <div>Value: "{phone}"</div>
+        <div style={{ fontSize: "14px", color: "#666" }}>Value: "{phone}"</div>
         {phone && (
-          <div style={{ color: validatePhone(phone) ? 'green' : 'red' }}>
+          <div style={{ 
+            color: validatePhone(phone) ? 'green' : 'red',
+            marginTop: "5px",
+            fontSize: "14px"
+          }}>
             {validatePhone(phone) ? '✓ Valid phone' : '✗ Phone must be 10 digits'}
           </div>
         )}

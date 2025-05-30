@@ -517,31 +517,44 @@ export default function HailDamage() {
                     />
                   </div>
                   
-                  <div>
+                  <div className="space-y-2">
                     <Input
+                      id="email"
                       type="email"
-                      placeholder="Email Address"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      className={errors.email ? "border-red-500" : ""}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="your.email@example.com"
                       required
+                      className={`h-12 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-green-500' : ''}`}
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                      <p className="text-red-500 text-sm flex items-center">
+                        <AlertTriangle className="w-4 h-4 mr-1" />
+                        {errors.email}
+                      </p>
+                    )}
+                    {validateEmail(formData.email) && formData.email && !errors.email && (
+                      <p className="text-green-600 text-sm">✓ Email verified</p>
                     )}
                   </div>
                   
-                  <div>
+                  <div className="space-y-2">
                     <Input
-                      type="tel"
-                      placeholder="Phone Number"
+                      id="phone"
                       value={formData.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
-                      className={errors.phone ? "border-red-500" : ""}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="(405) 555-0123"
                       required
+                      className={`h-12 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-green-500' : ''}`}
                     />
                     {errors.phone && (
-                      <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                      <p className="text-red-500 text-sm flex items-center">
+                        <AlertTriangle className="w-4 h-4 mr-1" />
+                        {errors.phone}
+                      </p>
+                    )}
+                    {validatePhone(formData.phone) && formData.phone && !errors.phone && (
+                      <p className="text-green-600 text-sm">✓ Phone verified</p>
                     )}
                   </div>
                   

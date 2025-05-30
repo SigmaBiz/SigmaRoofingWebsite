@@ -101,12 +101,11 @@ export class StormDataService {
       const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD format
       const endDateStr = endDate.toISOString().split('T')[0];
       
-      // Loop through each OKC metro county FIPS code
+      // Loop through each OKC metro county FIPS code with rate limiting
       for (const fips of this.OKC_METRO_FIPS) {
         try {
           const params = new URLSearchParams({
             datasetid: 'STORMEVENTS',
-            datatypeid: 'HAIL',
             locationid: `FIPS:${fips}`,
             startdate: startDateStr,
             enddate: endDateStr,
@@ -124,18 +123,30 @@ export class StormDataService {
           
           if (!response.ok) {
             console.log(`NOAA API request failed for FIPS ${fips}: ${response.status}`);
-            continue; // Try next county
+            // Add delay before trying next county to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            continue;
           }
           
           const data = await response.json() as any;
           
           if (data.results && Array.isArray(data.results)) {
-            allEvents.push(...data.results);
+            // Filter for hail events in the results
+            const hailEvents = data.results.filter((event: any) => 
+              event.eventtype?.toLowerCase().includes('hail') ||
+              event.event_type?.toLowerCase().includes('hail')
+            );
+            allEvents.push(...hailEvents);
           }
+          
+          // Add delay between requests to prevent rate limiting
+          await new Promise(resolve => setTimeout(resolve, 800));
           
         } catch (error) {
           console.log(`Error fetching data for FIPS ${fips}:`, error);
-          continue; // Try next county
+          // Add delay before continuing
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
         }
       }
       

@@ -202,38 +202,39 @@ export default function HailDamage() {
       processedValue = formatPhoneNumber(value);
     }
     
+    // Update form data
     setFormData(prev => ({ ...prev, [field]: processedValue }));
     
-    // Real-time validation - force re-render by creating new object
-    setErrors(prevErrors => {
-      const newErrors = { ...prevErrors };
+    // Immediate validation with forced state update
+    setTimeout(() => {
+      const newErrors = { ...errors };
       
-      switch (field) {
-        case 'email':
-          if (processedValue && !validateEmail(processedValue)) {
-            newErrors.email = "Please enter a valid email address from a recognized provider";
-          } else {
-            delete newErrors.email;
-          }
-          break;
-        case 'phone':
-          if (processedValue && !validatePhone(processedValue)) {
-            newErrors.phone = "Please enter a valid 10-digit US phone number";
-          } else {
-            delete newErrors.phone;
-          }
-          break;
-        case 'address':
-          if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
-            newErrors.address = "We currently only serve properties in Oklahoma";
-          } else {
-            delete newErrors.address;
-          }
-          break;
+      if (field === 'email') {
+        if (processedValue && !validateEmail(processedValue)) {
+          newErrors.email = "Please enter a valid email address from a recognized provider";
+        } else {
+          delete newErrors.email;
+        }
       }
       
-      return newErrors;
-    });
+      if (field === 'phone') {
+        if (processedValue && !validatePhone(processedValue)) {
+          newErrors.phone = "Please enter a valid 10-digit US phone number";
+        } else {
+          delete newErrors.phone;
+        }
+      }
+      
+      if (field === 'address') {
+        if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
+          newErrors.address = "We currently only serve properties in Oklahoma";
+        } else {
+          delete newErrors.address;
+        }
+      }
+      
+      setErrors(newErrors);
+    }, 0);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

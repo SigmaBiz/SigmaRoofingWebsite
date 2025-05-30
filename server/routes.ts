@@ -607,8 +607,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const phrase = req.query.phrase as string;
       
-      // Get trending-enhanced hail content (12 months lookback)
-      const activeContent = await stormDataService.getDailyHailContentWithTrends(phrase);
+      // Get hail content from CSV data (12 months lookback)
+      const activeContent = await stormDataService.getDailyHailContent(phrase);
       
       if (activeContent) {
         res.json({
@@ -653,8 +653,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Active tornado damage data with trending phrase integration (14 days only)
   app.get('/api/storm-data/active-tornado', async (req, res) => {
     try {
-      // Get trending-enhanced tornado content (14 days only)
-      const stormData = await stormDataService.getTornadoContentWithTrends();
+      // Get tornado content from CSV data (14 days only)
+      const stormData = await stormDataService.getTornadoContent();
       
       if (stormData) {
         res.json({

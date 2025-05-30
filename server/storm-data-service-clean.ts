@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as zlib from 'zlib';
 import * as https from 'https';
-const googleTrends = require('google-trends-api');
 
 interface StormData {
   date_of_loss: string;
@@ -343,60 +342,18 @@ export class StormDataService {
   }
 
   /**
-   * Get trending phrases related to storms
+   * Get storm-related search patterns for matching
    */
-  async getTrendingStormPhrases(): Promise<string[]> {
-    try {
-      const now = Date.now();
-      
-      // Check if we have cached trends data
-      if (fs.existsSync(this.trendsCache) && (now - this.lastTrendsUpdate) < this.cacheExpiry) {
-        console.log('Using cached trends data');
-        const cached = JSON.parse(fs.readFileSync(this.trendsCache, 'utf8'));
-        return cached.phrases || [];
-      }
-
-      console.log('Fetching trending storm-related phrases...');
-      
-      // Get trending searches for storm-related terms
-      const stormKeywords = ['hail damage', 'tornado damage', 'roof damage', 'storm damage', 'hail roof', 'tornado roof'];
-      const trendingPhrases: string[] = [];
-      
-      for (const keyword of stormKeywords) {
-        try {
-          const result = await googleTrends.relatedQueries({
-            keyword: keyword,
-            startTime: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days
-            geo: 'US-OK' // Oklahoma
-          });
-          
-          const data = JSON.parse(result);
-          if (data.default?.rankedList?.[0]?.rankedKeyword) {
-            const phrases = data.default.rankedList[0].rankedKeyword
-              .slice(0, 5)
-              .map((item: any) => item.query);
-            trendingPhrases.push(...phrases);
-          }
-        } catch (error: any) {
-          console.log(`Trends lookup failed for ${keyword}:`, error?.message || 'Unknown error');
-        }
-      }
-
-      // Cache the results
-      fs.writeFileSync(this.trendsCache, JSON.stringify({
-        phrases: trendingPhrases,
-        updateTime: now
-      }));
-      
-      this.lastTrendsUpdate = now;
-      console.log(`Found ${trendingPhrases.length} trending storm phrases`);
-      
-      return trendingPhrases;
-      
-    } catch (error) {
-      console.error('Error getting trending phrases:', error);
-      return [];
-    }
+  getStormSearchPatterns(): string[] {
+    // Common storm-related search patterns that people use
+    return [
+      'hail damage roof', 'tornado damage roof', 'storm damage roof',
+      'hail roof repair', 'tornado roof repair', 'storm roof repair',
+      'roof hail damage', 'roof tornado damage', 'roof storm damage',
+      'hail insurance claim', 'tornado insurance claim', 'storm insurance claim',
+      'roof inspection hail', 'roof inspection tornado', 'roof inspection storm',
+      'emergency roof repair', 'emergency roof service', 'roof tarping service'
+    ];
   }
 
   /**
@@ -445,91 +402,7 @@ export class StormDataService {
       .map(item => item.event);
   }
 
-  /**
-   * Enhanced daily hail content with trending phrase integration
-   */
-  async getDailyHailContentWithTrends(phrase?: string): Promise<StormData | null> {
-    try {
-      const events = await this.downloadAndParseCSV();
-      
-      // Filter for hail events in the last 12 months
-      const twelveMonthsAgo = new Date();
-      twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
-      
-      const hailEvents = events.filter(event => {
-        if (!event.EVENT_TYPE.toLowerCase().includes('hail')) return false;
-        if (parseFloat(event.MAGNITUDE) < 2.0) return false;
-        
-        try {
-          const eventDate = new Date(event.BEGIN_DATE_TIME);
-          return eventDate >= twelveMonthsAgo;
-        } catch {
-          return false;
-        }
-      });
-      
-      if (hailEvents.length === 0) {
-        console.log('No hail events >= 2.0" found in OKC metro from past 12 months');
-        return null;
-      }
-      
-      // Get trending phrases and match them
-      const trendingPhrases = await this.getTrendingStormPhrases();
-      const matchedEvents = this.matchPhrasesToEvents(trendingPhrases, hailEvents);
-      
-      // Use best matched event or daily rotation fallback
-      const selectedEvent = matchedEvents.length > 0 ? matchedEvents[0] : hailEvents[0];
-      
-      return this.convertCSVEventToStormData(selectedEvent);
-      
-    } catch (error) {
-      console.error('Error getting trending hail content:', error);
-      return null;
-    }
-  }
 
-  /**
-   * Enhanced tornado content with trending phrase integration (14 days only)
-   */
-  async getTornadoContentWithTrends(): Promise<StormData | null> {
-    try {
-      const events = await this.downloadAndParseCSV();
-      
-      // Filter for tornado events from the past 14 days only
-      const twoWeeksAgo = new Date();
-      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-      
-      const tornadoEvents = events.filter(event => {
-        if (!event.EVENT_TYPE.toLowerCase().includes('tornado')) return false;
-        
-        try {
-          const eventDate = new Date(event.BEGIN_DATE_TIME);
-          return eventDate >= twoWeeksAgo;
-        } catch {
-          return false;
-        }
-      });
-      
-      if (tornadoEvents.length === 0) {
-        console.log('No recent tornado events found in OKC metro from past 14 days');
-        return null; // Don't show tornado page if no recent events
-      }
-      
-      // Get trending phrases and match them
-      const trendingPhrases = await this.getTrendingStormPhrases();
-      const matchedEvents = this.matchPhrasesToEvents(trendingPhrases, tornadoEvents);
-      
-      // Use best matched event or most recent
-      const selectedEvent = matchedEvents.length > 0 ? matchedEvents[0] : 
-        tornadoEvents.sort((a, b) => new Date(b.BEGIN_DATE_TIME).getTime() - new Date(a.BEGIN_DATE_TIME).getTime())[0];
-      
-      return this.convertCSVEventToStormData(selectedEvent);
-      
-    } catch (error) {
-      console.error('Error getting trending tornado content:', error);
-      return null;
-    }
-  }
 }
 
 export const stormDataService = new StormDataService();

@@ -179,21 +179,16 @@ export default function HailDamage() {
     }
   });
 
-  // Email validation - strict for lead quality (same as main contact form)
+  // Email validation - accepts any valid email format
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
-    const domain = email.split('@')[1]?.toLowerCase();
-    return emailRegex.test(email) && 
-           !email.includes('+') && 
-           email.length <= 50 &&
-           (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
+    return emailRegex.test(email);
   };
 
-  // Phone validation (US format only) - same as main contact form
+  // Phone validation - accepts any 10-digit US number
   const validatePhone = (phone: string): boolean => {
     const phoneDigits = phone.replace(/\D/g, '');
-    return phoneDigits.length === 10 && !['0000000000', '1111111111', '1234567890'].includes(phoneDigits);
+    return phoneDigits.length === 10;
   };
 
   // Format phone number as user types - same as main contact form
@@ -322,9 +317,8 @@ export default function HailDamage() {
     
     if (field === 'email') {
       const isValid = validateEmail(processedValue);
-      console.log(`Email validation result: ${isValid}`); // Debug log
       if (processedValue && !isValid) {
-        newErrors.email = "Please enter a valid email address from a recognized provider";
+        newErrors.email = "Please enter a valid email address";
       } else {
         delete newErrors.email;
       }
@@ -332,9 +326,8 @@ export default function HailDamage() {
     
     if (field === 'phone') {
       const isValid = validatePhone(processedValue);
-      console.log(`Phone validation result: ${isValid}`); // Debug log
       if (processedValue && !isValid) {
-        newErrors.phone = "Please enter a valid 10-digit US phone number";
+        newErrors.phone = "Please enter a valid 10-digit phone number";
       } else {
         delete newErrors.phone;
       }

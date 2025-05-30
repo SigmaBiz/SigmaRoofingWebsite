@@ -452,6 +452,9 @@ export default function HailDamage() {
                           {errors.email}
                         </p>
                       )}
+                      {formData.email && !validateEmail(formData.email) && (
+                        <p className="text-red-500 text-sm">DEBUG: Invalid email detected</p>
+                      )}
                       {validateEmail(formData.email) && formData.email && !errors.email && (
                         <p className="text-emerald-600 text-sm">✓ Email verified</p>
                       )}

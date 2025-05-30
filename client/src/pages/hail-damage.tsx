@@ -447,10 +447,10 @@ export default function HailDamage() {
                         className={`h-12 rounded-xl border-gray-200 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-emerald-500' : ''}`}
                         required
                       />
-                      {errors.email && (
+                      {(errors.email || (formData.email && !validateEmail(formData.email))) && (
                         <p className="text-red-500 text-sm flex items-center">
                           <AlertTriangle className="w-4 h-4 mr-1" />
-                          {errors.email}
+                          {errors.email || "Please enter a valid email address from a recognized provider"}
                         </p>
                       )}
 
@@ -468,10 +468,10 @@ export default function HailDamage() {
                         className={`h-12 rounded-xl border-gray-200 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-emerald-500' : ''}`}
                         required
                       />
-                      {errors.phone && (
+                      {(errors.phone || (formData.phone && !validatePhone(formData.phone))) && (
                         <p className="text-red-500 text-sm flex items-center">
                           <AlertTriangle className="w-4 h-4 mr-1" />
-                          {errors.phone}
+                          {errors.phone || "Please enter a valid 10-digit US phone number"}
                         </p>
                       )}
                       {validatePhone(formData.phone) && formData.phone && !errors.phone && (

@@ -195,7 +195,6 @@ export default function HailDamage() {
   };
 
   const handleInputChange = (field: keyof ContactForm, value: string) => {
-    console.log('handleInputChange called:', field, value);
     let processedValue = value;
     if (field === 'phone') {
       processedValue = formatPhoneNumber(value);

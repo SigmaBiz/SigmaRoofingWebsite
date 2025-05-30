@@ -607,8 +607,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const phrase = req.query.phrase as string;
       
-      // Get hail content from CSV data (12 months lookback)
-      const activeContent = await stormDataService.getDailyHailContent(phrase);
+      // Get hail content with trending phrase integration (12 months lookback)
+      const activeContent = await stormDataService.getDailyHailContentWithTrends(phrase);
       
       if (activeContent) {
         res.json({

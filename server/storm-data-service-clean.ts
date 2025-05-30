@@ -33,9 +33,8 @@ export class StormDataService {
   ];
 
   private csvCacheFile = path.join(process.cwd(), 'noaa_storm_events_cache.json');
-  private trendsCache = path.join(process.cwd(), 'trends_cache.json');
+  private trendsFile = path.join(process.cwd(), 'trending_phrases.json');
   private lastDownload = 0;
-  private lastTrendsUpdate = 0;
   private cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
 
   constructor() {
@@ -339,6 +338,39 @@ export class StormDataService {
     return str.replace(/\w\S*/g, (txt) => 
       txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
     );
+  }
+
+  /**
+   * Load trending phrases from generated file
+   */
+  private loadTrendingPhrases(): string[] {
+    try {
+      if (fs.existsSync(this.trendsFile)) {
+        const trendsData = JSON.parse(fs.readFileSync(this.trendsFile, 'utf8'));
+        return trendsData.phrases || [];
+      }
+    } catch (error) {
+      console.error('Error loading trending phrases:', error);
+    }
+    
+    // Fallback phrases if file doesn't exist
+    return [
+      'hail damage roof oklahoma',
+      'tornado damage repair oklahoma', 
+      'storm damage roofing oklahoma city',
+      'roof repair after hail',
+      'emergency roof repair oklahoma',
+      'insurance claim roof damage',
+      'hail storm oklahoma city',
+      'tornado damage assessment'
+    ];
+  }
+
+  /**
+   * Get storm-related search patterns for matching
+   */
+  getStormSearchPatterns(): string[] {
+    return this.loadTrendingPhrases();
   }
 
   /**

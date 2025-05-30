@@ -305,11 +305,14 @@ export default function HailDamage() {
   };
 
   const handleInputChange = (field: keyof ContactForm, value: string) => {
+    console.log(`Validating ${field}: ${value}`); // Debug log
+    
     let processedValue = value;
     
     // Format phone number on input
     if (field === 'phone') {
       processedValue = formatPhoneNumber(value);
+      console.log(`Formatted phone: ${processedValue}`); // Debug log
     }
     
     setFormData(prev => ({ ...prev, [field]: processedValue }));
@@ -318,7 +321,9 @@ export default function HailDamage() {
     const newErrors = { ...errors };
     
     if (field === 'email') {
-      if (processedValue && !validateEmail(processedValue)) {
+      const isValid = validateEmail(processedValue);
+      console.log(`Email validation result: ${isValid}`); // Debug log
+      if (processedValue && !isValid) {
         newErrors.email = "Please enter a valid email address from a recognized provider";
       } else {
         delete newErrors.email;
@@ -326,7 +331,9 @@ export default function HailDamage() {
     }
     
     if (field === 'phone') {
-      if (processedValue && !validatePhone(processedValue)) {
+      const isValid = validatePhone(processedValue);
+      console.log(`Phone validation result: ${isValid}`); // Debug log
+      if (processedValue && !isValid) {
         newErrors.phone = "Please enter a valid 10-digit US phone number";
       } else {
         delete newErrors.phone;
@@ -341,6 +348,7 @@ export default function HailDamage() {
       }
     }
     
+    console.log(`Setting errors:`, newErrors); // Debug log
     setErrors(newErrors);
   };
 

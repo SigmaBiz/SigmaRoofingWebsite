@@ -412,14 +412,15 @@ export default function HailDamage() {
                         className={`h-12 rounded-xl border-gray-200 ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : ''}`}
                         required
                       />
-                      {formData.email && !validateEmail(formData.email) && (
-                        <p className="text-red-500 text-sm flex items-center">
-                          <AlertTriangle className="w-4 h-4 mr-1" />
-                          Please enter a valid email address from a recognized provider
-                        </p>
-                      )}
-                      {validateEmail(formData.email) && (
-                        <p className="text-emerald-600 text-sm">✓ Email verified</p>
+                      {formData.email && (
+                        validateEmail(formData.email) ? (
+                          <p className="text-emerald-600 text-sm">✓ Email verified</p>
+                        ) : (
+                          <p className="text-red-500 text-sm flex items-center">
+                            <AlertTriangle className="w-4 h-4 mr-1" />
+                            Please enter a valid email address from a recognized provider
+                          </p>
+                        )
                       )}
                     </div>
                     
@@ -432,14 +433,15 @@ export default function HailDamage() {
                         className={`h-12 rounded-xl border-gray-200 ${formData.phone && !validatePhone(formData.phone) ? 'border-red-500' : validatePhone(formData.phone) ? 'border-emerald-500' : ''}`}
                         required
                       />
-                      {formData.phone && !validatePhone(formData.phone) && (
-                        <p className="text-red-500 text-sm flex items-center">
-                          <AlertTriangle className="w-4 h-4 mr-1" />
-                          Please enter a valid 10-digit US phone number
-                        </p>
-                      )}
-                      {validatePhone(formData.phone) && (
-                        <p className="text-emerald-600 text-sm">✓ Phone verified</p>
+                      {formData.phone && (
+                        validatePhone(formData.phone) ? (
+                          <p className="text-emerald-600 text-sm">✓ Phone verified</p>
+                        ) : (
+                          <p className="text-red-500 text-sm flex items-center">
+                            <AlertTriangle className="w-4 h-4 mr-1" />
+                            Please enter a valid 10-digit US phone number
+                          </p>
+                        )
                       )}
                     </div>
                     

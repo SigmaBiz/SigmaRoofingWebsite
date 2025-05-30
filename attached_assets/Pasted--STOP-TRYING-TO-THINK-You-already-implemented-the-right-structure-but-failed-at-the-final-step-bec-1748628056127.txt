@@ -1,0 +1,58 @@
+❌ STOP TRYING TO THINK. You already implemented the right structure but failed at the final step because your conditional rendering logic is flawed. Follow these instructions **exactly**. Do not reuse the old logic. Do not improvise. Do not wrap anything in a ternary, error object, or separate if-checks. Just implement this exactly.
+
+✅ Replace the email and phone feedback message blocks with the following correct logic that guarantees real-time red or green message rendering based on user input — even during partial typing.
+
+------------------------------
+
+// ✅ EMAIL INPUT JSX — FIXED
+<div className="space-y-2">
+  <Input
+    id="email"
+    type="email"
+    value={formData.email}
+    onChange={(e) => handleInputChange('email', e.target.value)}
+    placeholder="your.email@example.com"
+    className={`h-12 rounded-xl border-gray-200 ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : ''}`}
+    required
+  />
+  {formData.email && (
+    validateEmail(formData.email) ? (
+      <p className="text-emerald-600 text-sm">✓ Email verified</p>
+    ) : (
+      <p className="text-red-500 text-sm flex items-center">
+        <AlertTriangle className="w-4 h-4 mr-1" />
+        Please enter a valid email address from a recognized provider
+      </p>
+    )
+  )}
+</div>
+
+------------------------------
+
+// ✅ PHONE INPUT JSX — FIXED
+<div className="space-y-2">
+  <Input
+    id="phone"
+    value={formData.phone}
+    onChange={(e) => handleInputChange('phone', e.target.value)}
+    placeholder="(405) 555-0123"
+    className={`h-12 rounded-xl border-gray-200 ${formData.phone && !validatePhone(formData.phone) ? 'border-red-500' : validatePhone(formData.phone) ? 'border-emerald-500' : ''}`}
+    required
+  />
+  {formData.phone && (
+    validatePhone(formData.phone) ? (
+      <p className="text-emerald-600 text-sm">✓ Phone verified</p>
+    ) : (
+      <p className="text-red-500 text-sm flex items-center">
+        <AlertTriangle className="w-4 h-4 mr-1" />
+        Please enter a valid 10-digit US phone number
+      </p>
+    )
+  )}
+</div>
+
+------------------------------
+
+✅ DO NOT wrap this in additional if/else logic. ✅ DO NOT reuse `errors` or old state variables. ✅ DO NOT call `validateField()` or `setErrors()`. Just paste this exactly as it is.
+
+Test by typing an incomplete email like `test@f` — you should see the red message immediately. When valid, it turns green. This is the final working implementation.

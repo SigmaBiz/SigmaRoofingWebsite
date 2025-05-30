@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle } from "lucide-react";
+import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle, Mail } from "lucide-react";
 
 interface HailEvent {
   date: string;
@@ -313,7 +313,35 @@ export default function HailDamage() {
     }
     
     setFormData(prev => ({ ...prev, [field]: processedValue }));
-    validateField(field, processedValue);
+    
+    // Immediate validation on every keystroke
+    const newErrors = { ...errors };
+    
+    if (field === 'email') {
+      if (processedValue && !validateEmail(processedValue)) {
+        newErrors.email = "Please enter a valid email address from a recognized provider";
+      } else {
+        delete newErrors.email;
+      }
+    }
+    
+    if (field === 'phone') {
+      if (processedValue && !validatePhone(processedValue)) {
+        newErrors.phone = "Please enter a valid 10-digit US phone number";
+      } else {
+        delete newErrors.phone;
+      }
+    }
+    
+    if (field === 'address') {
+      if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
+        newErrors.address = "We currently only serve properties in Oklahoma";
+      } else {
+        delete newErrors.address;
+      }
+    }
+    
+    setErrors(newErrors);
   };
 
   // Show loading only briefly while data loads

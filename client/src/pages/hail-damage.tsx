@@ -4,11 +4,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface HailEvent {
   date: string;
@@ -169,13 +169,118 @@ export default function HailDamage() {
     }
   });
 
+  // Enhanced validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return false;
+    
+    // Check for common fake/temporary email patterns
+    const fakeDomains = ['test.com', 'example.com', 'fake.com', 'temp.com', '10minutemail', 'guerrillamail'];
+    const domain = email.split('@')[1]?.toLowerCase();
+    return !fakeDomains.some(fake => domain?.includes(fake));
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    // Must be exactly 10 digits for US numbers
+    if (cleanPhone.length !== 10) return false;
+    
+    // Area code cannot start with 0 or 1
+    if (cleanPhone[0] === '0' || cleanPhone[0] === '1') return false;
+    
+    // Exchange code cannot start with 0 or 1
+    if (cleanPhone[3] === '0' || cleanPhone[3] === '1') return false;
+    
+    // Check for fake patterns (repeated digits, sequential)
+    if (/^(\d)\1{9}$/.test(cleanPhone)) return false; // All same digit
+    if (cleanPhone === '1234567890' || cleanPhone === '0123456789') return false;
+    
+    return true;
+  };
+
+  const formatPhoneNumber = (value: string): string => {
+    const phone = value.replace(/\D/g, '');
+    if (phone.length <= 3) return phone;
+    if (phone.length <= 6) return `(${phone.slice(0, 3)}) ${phone.slice(3)}`;
+    return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`;
+  };
+
+  const validateAppointmentTimes = (date1: string, time1: string, date2: string, time2: string): string | null => {
+    if (date1 === date2 && time1 === time2) {
+      return 'Please select different time slots for your two preferred appointments.';
+    }
+    return null;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Comprehensive validation before submission
+    if (!formData.firstName?.trim()) {
+      toast({ title: "First name is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.lastName?.trim()) {
+      toast({ title: "Last name is required", variant: "destructive" });
+      return;
+    }
+    if (!validateEmail(formData.email)) {
+      toast({ title: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
+    if (!validatePhone(formData.phone)) {
+      toast({ title: "Please enter a valid phone number", variant: "destructive" });
+      return;
+    }
+    if (!formData.address?.trim()) {
+      toast({ title: "Address is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.address.toLowerCase().includes('oklahoma') && !formData.address.toLowerCase().includes(' ok')) {
+      toast({ title: "Please enter an Oklahoma address", variant: "destructive" });
+      return;
+    }
+    if (!formData.serviceType) {
+      toast({ title: "Please select a service type", variant: "destructive" });
+      return;
+    }
+    if (!formData.description?.trim()) {
+      toast({ title: "Please describe your roofing needs", variant: "destructive" });
+      return;
+    }
+    if (!formData.preferredDate1 || !formData.preferredTime1) {
+      toast({ title: "Please select your first preferred appointment", variant: "destructive" });
+      return;
+    }
+    if (!formData.preferredDate2 || !formData.preferredTime2) {
+      toast({ title: "Please select your second preferred appointment", variant: "destructive" });
+      return;
+    }
+    
+    const appointmentError = validateAppointmentTimes(
+      formData.preferredDate1, 
+      formData.preferredTime1, 
+      formData.preferredDate2, 
+      formData.preferredTime2
+    );
+    if (appointmentError) {
+      toast({ title: appointmentError, variant: "destructive" });
+      return;
+    }
+
     contactMutation.mutate(formData);
   };
 
   const handleInputChange = (field: keyof ContactForm, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    let processedValue = value;
+    
+    // Format phone number on input
+    if (field === 'phone') {
+      processedValue = formatPhoneNumber(value);
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: processedValue }));
   };
 
   // Show loading only briefly while data loads
@@ -421,48 +526,77 @@ export default function HailDamage() {
                     rows={3}
                   />
 
-                  <div className="space-y-3">
-                    <p className="text-sm font-semibold text-gray-700">Preferred Inspection Times:</p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        type="date"
-                        value={formData.preferredDate1}
-                        onChange={(e) => handleInputChange("preferredDate1", e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                      <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange("preferredTime1", value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</SelectItem>
-                          <SelectItem value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</SelectItem>
-                          <SelectItem value="12:00 PM - 2:00 PM">12:00 PM - 2:00 PM</SelectItem>
-                          <SelectItem value="2:00 PM - 4:00 PM">2:00 PM - 4:00 PM</SelectItem>
-                          <SelectItem value="4:00 PM - 6:00 PM">4:00 PM - 6:00 PM</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  {/* Appointment Scheduling */}
+                  <div className="space-y-6">
+                    <div className="flex items-center">
+                      <Calendar className="w-5 h-5 text-emerald-600 mr-2" />
+                      <h3 className="text-lg font-semibold text-gray-700">Preferred Appointment Times</h3>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        type="date"
-                        value={formData.preferredDate2}
-                        onChange={(e) => handleInputChange("preferredDate2", e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                      <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange("preferredTime2", value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Alt. Time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</SelectItem>
-                          <SelectItem value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</SelectItem>
-                          <SelectItem value="12:00 PM - 2:00 PM">12:00 PM - 2:00 PM</SelectItem>
-                          <SelectItem value="2:00 PM - 4:00 PM">2:00 PM - 4:00 PM</SelectItem>
-                          <SelectItem value="4:00 PM - 6:00 PM">4:00 PM - 6:00 PM</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    {/* First Appointment */}
+                    <div className="p-4 bg-emerald-50 rounded-lg">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">First Choice Appointment *</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">Date</Label>
+                          <Input
+                            type="date"
+                            value={formData.preferredDate1}
+                            onChange={(e) => handleInputChange("preferredDate1", e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                            required
+                            className="h-12"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">Time Window</Label>
+                          <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange("preferredTime1", value)}>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select time window" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</SelectItem>
+                              <SelectItem value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</SelectItem>
+                              <SelectItem value="12:00 PM - 2:00 PM">12:00 PM - 2:00 PM</SelectItem>
+                              <SelectItem value="2:00 PM - 4:00 PM">2:00 PM - 4:00 PM</SelectItem>
+                              <SelectItem value="4:00 PM - 6:00 PM">4:00 PM - 6:00 PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Second Appointment */}
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Second Choice Appointment *</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">Date</Label>
+                          <Input
+                            type="date"
+                            value={formData.preferredDate2}
+                            onChange={(e) => handleInputChange("preferredDate2", e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                            required
+                            className="h-12"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">Time Window</Label>
+                          <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange("preferredTime2", value)}>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select different time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</SelectItem>
+                              <SelectItem value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</SelectItem>
+                              <SelectItem value="12:00 PM - 2:00 PM">12:00 PM - 2:00 PM</SelectItem>
+                              <SelectItem value="2:00 PM - 4:00 PM">2:00 PM - 4:00 PM</SelectItem>
+                              <SelectItem value="4:00 PM - 6:00 PM">4:00 PM - 6:00 PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
                   </div>
 

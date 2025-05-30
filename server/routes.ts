@@ -1076,13 +1076,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Validation functions
           function validateEmail(email) {
+            // Enhanced email validation with real domain checking
             const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-            return emailRegex.test(email);
+            if (!emailRegex.test(email)) return false;
+            
+            // Check for common fake/temporary email patterns
+            const fakeDomains = ['test.com', 'example.com', 'fake.com', 'temp.com', '10minutemail', 'guerrillamail'];
+            const domain = email.split('@')[1]?.toLowerCase();
+            return !fakeDomains.some(fake => domain?.includes(fake));
           }
 
           function validatePhone(phone) {
-            const phoneRegex = /^[\\(]?[0-9]{3}[\\)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4}$/;
-            return phoneRegex.test(phone.replace(/\\D/g, ''));
+            const cleanPhone = phone.replace(/\\D/g, '');
+            
+            // Must be exactly 10 digits for US numbers
+            if (cleanPhone.length !== 10) return false;
+            
+            // Area code cannot start with 0 or 1
+            if (cleanPhone[0] === '0' || cleanPhone[0] === '1') return false;
+            
+            // Exchange code cannot start with 0 or 1
+            if (cleanPhone[3] === '0' || cleanPhone[3] === '1') return false;
+            
+            // Check for fake patterns (repeated digits, sequential)
+            if (/^(\\d)\\1{9}$/.test(cleanPhone)) return false; // All same digit
+            if (cleanPhone === '1234567890' || cleanPhone === '0123456789') return false;
+            
+            return true;
           }
 
           function formatPhoneNumber(value) {

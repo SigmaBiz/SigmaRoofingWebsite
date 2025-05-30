@@ -194,47 +194,47 @@ export default function HailDamage() {
     return phoneNumber;
   };
 
-  const handleInputChange = (field: keyof ContactForm, value: string) => {
-    let processedValue = value;
+  // Real-time validation as user types
+  const validateField = (field: keyof ContactForm, value: string) => {
+    const newErrors = { ...errors };
     
-    // Format phone number on input
-    if (field === 'phone') {
-      processedValue = formatPhoneNumber(value);
-    }
-    
-    // Update form data
-    setFormData(prev => ({ ...prev, [field]: processedValue }));
-    
-    // Immediate validation with forced state update
-    setTimeout(() => {
-      const newErrors = { ...errors };
-      
-      if (field === 'email') {
-        if (processedValue && !validateEmail(processedValue)) {
+    switch (field) {
+      case 'email':
+        if (value && !validateEmail(value)) {
           newErrors.email = "Please enter a valid email address from a recognized provider";
         } else {
           delete newErrors.email;
         }
-      }
-      
-      if (field === 'phone') {
-        if (processedValue && !validatePhone(processedValue)) {
+        break;
+      case 'phone':
+        if (value && !validatePhone(value)) {
           newErrors.phone = "Please enter a valid 10-digit US phone number";
         } else {
           delete newErrors.phone;
         }
-      }
-      
-      if (field === 'address') {
-        if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
+        break;
+      case 'address':
+        if (value && !value.toLowerCase().includes('oklahoma') && !value.toLowerCase().includes('ok')) {
           newErrors.address = "We currently only serve properties in Oklahoma";
         } else {
           delete newErrors.address;
         }
-      }
-      
-      setErrors(newErrors);
-    }, 0);
+        break;
+    }
+    
+    setErrors(newErrors);
+  };
+
+  const handleInputChange = (field: keyof ContactForm, value: string) => {
+    let processedValue = value;
+    
+    // Special processing for phone numbers
+    if (field === 'phone') {
+      processedValue = formatPhoneNumber(value);
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: processedValue }));
+    validateField(field, processedValue);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -453,9 +453,7 @@ export default function HailDamage() {
                           {errors.email}
                         </p>
                       )}
-                      {formData.email && !validateEmail(formData.email) && (
-                        <p className="text-red-500 text-sm">DEBUG: Invalid email detected</p>
-                      )}
+
                       {validateEmail(formData.email) && formData.email && !errors.email && (
                         <p className="text-emerald-600 text-sm">✓ Email verified</p>
                       )}

@@ -950,46 +950,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Load Recent Projects from Admin Gallery
           async function loadProjects() {
             try {
-              // First try to get admin projects
-              const adminResponse = await fetch('/api/projects');
-              const adminData = await adminResponse.json();
+              // Get website images for project gallery
+              const imageResponse = await fetch('/api/website-images');
+              const imageData = await imageResponse.json();
               
-              if (adminData.success && adminData.projects && adminData.projects.length > 0) {
-                displayProjects(adminData.projects.slice(0, 3));
+              if (imageData.success && imageData.images) {
+                const projects = [
+                  {
+                    title: 'Residential Roof Replacement',
+                    description: 'Complete roof replacement with architectural shingles in Edmond area',
+                    imageUrl: imageData.images.project1 || '/api/placeholder/300/240',
+                    category: 'Roof Replacement',
+                    location: 'Edmond, OK'
+                  },
+                  {
+                    title: 'Storm Damage Restoration',
+                    description: 'Professional hail damage repair with insurance assistance',
+                    imageUrl: imageData.images.project2 || '/api/placeholder/300/240',
+                    category: 'Storm Damage',
+                    location: 'Oklahoma City, OK'
+                  },
+                  {
+                    title: 'Emergency Roof Repair',
+                    description: 'Fast emergency leak repair and storm protection',
+                    imageUrl: imageData.images.project3 || '/api/placeholder/300/240',
+                    category: 'Emergency Repair',
+                    location: 'Norman, OK'
+                  }
+                ];
+                displayProjects(projects);
               } else {
-                // Fallback to website images with project data
-                const imageResponse = await fetch('/api/website-images');
-                const imageData = await imageResponse.json();
-                
-                if (imageData.success && imageData.images) {
-                  const fallbackProjects = [
-                    {
-                      title: 'Residential Roof Replacement',
-                      description: 'Complete roof replacement with architectural shingles',
-                      imageUrl: imageData.images.project1 || '/api/placeholder/250/200',
-                      category: 'Roof Replacement',
-                      location: 'Edmond, OK'
-                    },
-                    {
-                      title: 'Storm Damage Restoration',
-                      description: 'Hail damage repair and insurance claim assistance',
-                      imageUrl: imageData.images.project2 || '/api/placeholder/250/200',
-                      category: 'Storm Damage',
-                      location: 'Oklahoma City, OK'
-                    },
-                    {
-                      title: 'Emergency Roof Repair',
-                      description: 'Emergency leak repair and temporary protection',
-                      imageUrl: imageData.images.project3 || '/api/placeholder/250/200',
-                      category: 'Emergency Repair',
-                      location: 'Norman, OK'
-                    }
-                  ];
-                  displayProjects(fallbackProjects);
-                }
+                console.log('No website images found, using placeholders');
+                const placeholderProjects = [
+                  {
+                    title: 'Recent Roofing Project',
+                    description: 'Professional roofing work in the Oklahoma City area',
+                    imageUrl: '/api/placeholder/300/240',
+                    category: 'Roofing Project',
+                    location: 'Oklahoma City, OK'
+                  },
+                  {
+                    title: 'Storm Damage Repair',
+                    description: 'Expert storm damage restoration services',
+                    imageUrl: '/api/placeholder/300/240',
+                    category: 'Storm Repair',
+                    location: 'Edmond, OK'
+                  },
+                  {
+                    title: 'Roof Replacement',
+                    description: 'Complete residential roof replacement',
+                    imageUrl: '/api/placeholder/300/240',
+                    category: 'Replacement',
+                    location: 'Norman, OK'
+                  }
+                ];
+                displayProjects(placeholderProjects);
               }
             } catch (error) {
               console.error('Error loading projects:', error);
+              // Show placeholder projects if API fails
+              const errorProjects = [
+                {
+                  title: 'Professional Roofing Services',
+                  description: 'Quality roofing work throughout Oklahoma',
+                  imageUrl: '/api/placeholder/300/240',
+                  category: 'Roofing',
+                  location: 'Oklahoma'
+                }
+              ];
+              displayProjects(errorProjects);
             }
           }
 
@@ -1045,19 +1074,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
             document.getElementById('address-suggestions').style.display = 'none';
           }
 
+          // Validation functions
+          function validateEmail(email) {
+            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            return emailRegex.test(email);
+          }
+
+          function validatePhone(phone) {
+            const phoneRegex = /^[\\(]?[0-9]{3}[\\)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4}$/;
+            return phoneRegex.test(phone.replace(/\\D/g, ''));
+          }
+
+          function formatPhoneNumber(value) {
+            const phone = value.replace(/\\D/g, '');
+            if (phone.length <= 3) return phone;
+            if (phone.length <= 6) return \`(\${phone.slice(0, 3)}) \${phone.slice(3)}\`;
+            return \`(\${phone.slice(0, 3)}) \${phone.slice(3, 6)}-\${phone.slice(6, 10)}\`;
+          }
+
+          function validateAppointmentTimes(date1, time1, date2, time2) {
+            if (date1 === date2 && time1 === time2) {
+              return 'Please select different time slots for your two preferred appointments.';
+            }
+            return null;
+          }
+
           // Handle form submission with complete validation
           document.getElementById('storm-contact-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(e.target);
-            
-            // Set minimum dates for date inputs
-            const today = new Date().toISOString().split('T')[0];
-            const date1Input = document.querySelector('input[name="preferredDate1"]');
-            const date2Input = document.querySelector('input[name="preferredDate2"]');
-            date1Input.min = today;
-            date2Input.min = today;
-            
             const data = {
               firstName: formData.get('firstName'),
               lastName: formData.get('lastName'),
@@ -1072,28 +1118,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
               preferredTime2: formData.get('preferredTime2')
             };
 
-            // Basic validation
-            if (!data.firstName || !data.lastName || !data.email || !data.phone || 
-                !data.address || !data.serviceType || !data.description ||
-                !data.preferredDate1 || !data.preferredTime1 || 
-                !data.preferredDate2 || !data.preferredTime2) {
-              alert('Please fill in all required fields.');
-              return;
+            // Comprehensive validation
+            if (!data.firstName?.trim()) return alert('First name is required.');
+            if (!data.lastName?.trim()) return alert('Last name is required.');
+            if (!validateEmail(data.email)) return alert('Please enter a valid email address.');
+            if (!validatePhone(data.phone)) return alert('Please enter a valid phone number.');
+            if (!data.address?.trim()) return alert('Address is required.');
+            if (!data.address.toLowerCase().includes('oklahoma') && !data.address.toLowerCase().includes(' ok')) {
+              return alert('Please enter an Oklahoma address.');
             }
-
-            // Email validation
-            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-            if (!emailRegex.test(data.email)) {
-              alert('Please enter a valid email address.');
-              return;
-            }
-
-            // Oklahoma address validation
-            if (!data.address.toLowerCase().includes('oklahoma') && 
-                !data.address.toLowerCase().includes(' ok')) {
-              alert('Please enter an Oklahoma address.');
-              return;
-            }
+            if (!data.serviceType) return alert('Please select a service type.');
+            if (!data.description?.trim()) return alert('Please describe your roofing needs.');
+            if (!data.preferredDate1 || !data.preferredTime1) return alert('Please select your first preferred appointment.');
+            if (!data.preferredDate2 || !data.preferredTime2) return alert('Please select your second preferred appointment.');
+            
+            const appointmentError = validateAppointmentTimes(data.preferredDate1, data.preferredTime1, data.preferredDate2, data.preferredTime2);
+            if (appointmentError) return alert(appointmentError);
 
             try {
               const response = await fetch('/api/contact', {
@@ -1122,6 +1162,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const addressInput = document.getElementById('address-input');
             addressInput.addEventListener('input', function(e) {
               searchAddresses(e.target.value);
+            });
+            
+            // Add phone number formatting
+            const phoneInput = document.querySelector('input[name="phone"]');
+            phoneInput.addEventListener('input', function(e) {
+              e.target.value = formatPhoneNumber(e.target.value);
             });
             
             // Hide suggestions when clicking outside

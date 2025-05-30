@@ -724,55 +724,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Storm landing page generation functions
-  function generateHailLandingPage(event: any, keyword: string): string {
+  function generateHailLandingPage(event: any, phrase: string): string {
     const hailSize = parseFloat(event.hail_size);
     const severityText = hailSize >= 2.5
-      ? `<p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem.</p>`
-      : `<p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage.</p>`;
+      ? `<p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem. That's why searches like <strong>"${phrase}"</strong> are trending — homeowners are looking for answers and real help, fast.</p>`
+      : `<p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage. The recent spike in searches like <strong>"${phrase}"</strong> shows that others in your area are asking the same questions.</p>`;
 
     return `
       <!DOCTYPE html>
       <html lang="en">
       <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${keyword} - Sigma Roofing LLC</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${phrase} - Hail Damage Repair | Sigma Roofing LLC</title>
         <style>
-          body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
-          .header { background: #10b981; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-          .main-pitch { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-          .emergency-section { background: #dc2626; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-          .emergency-section button { background: white; color: #dc2626; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 5px; cursor: pointer; }
-          .data-source { font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 10px; }
+          body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+          .container { max-width: 800px; margin: auto; padding: 20px; background: white; }
+          .header, .emergency, .footer { padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+          .header { background: linear-gradient(135deg, #10b981, #059669); color: white; text-align: center; }
+          .emergency { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; text-align: center; }
+          .footer { font-size: 12px; color: #6b7280; text-align: center; background: #f9fafb; }
+          button { background: white; color: #b91c1c; font-weight: bold; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; }
+          button:hover { background: #f3f4f6; }
+          .highlight { background: #fef3c7; border-left: 5px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 5px; }
           strong { color: #10b981; }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1>Sigma Roofing LLC - Storm Damage Assessment</h1>
-          <p>Stand firm. Brave the storm. Serve with heart.</p>
-        </div>
-        
-        <div class="main-pitch">
-          <h2>Thank You for visiting us today!</h2>
-          <p>In light of the recent <strong>${event.storm_type}</strong> on <strong>${event.date_of_loss}</strong> in <strong>${event.affected_city}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
-          ${severityText}
-          <p>Hailstones as large as <strong>${event.hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>
-          <p>Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
-          <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
-        </div>
-        
-        <div class="emergency-section">
-          <h2>Emergency Storm Damage?</h2>
-          <p>If you have immediate safety concerns or active leaks, call us now for emergency services.</p>
-          <button onclick="window.location.href='tel:+14059021826'">Emergency: (405) 902-1826</button>
-        </div>
-        
-        <div class="data-source">
-          <strong>Storm Data Source:</strong> NOAA Storm Events CSV | Generated: ${event.generated_at}
+        <div class="container">
+          <div class="header">
+            <h1>${phrase}</h1>
+            <p>Hail Damage Restoration Experts - Sigma Roofing LLC</p>
+          </div>
+
+          <div>
+            <h2>Recent Storm Report</h2>
+            <p><strong>Storm Type:</strong> ${event.storm_type.toUpperCase()}</p>
+            <p><strong>Date:</strong> ${event.date_of_loss}</p>
+            <p><strong>Location:</strong> ${event.affected_city}</p>
+            <p><strong>Hail Size:</strong> ${event.hail_size}</p>
+
+            <p>In response to the trending topic <strong>"${phrase}"</strong>, we're providing localized, verified updates for residents affected by recent hail storms. This is not just a headline — it's a real event confirmed by NOAA affecting your neighborhood.</p>
+
+            ${severityText}
+
+            <div class="highlight">
+              <p>Hailstones as large as <strong>${event.hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later. Don't wait — <strong>schedule an inspection today</strong>.</p>
+            </div>
+
+            <p>We specialize in helping homeowners just like you. Our full-service storm damage process includes:</p>
+            <ul>
+              <li>✅ Free roof inspection within 24 hours</li>
+              <li>✅ Emergency tarping and water mitigation</li>
+              <li>✅ Full insurance claim documentation</li>
+              <li>✅ Local, licensed, and fully insured team</li>
+            </ul>
+
+            <p>Don't wait until small issues become costly repairs. If you've searched <strong>"${phrase}"</strong> recently — you're not alone. We're here to answer that call.</p>
+          </div>
+
+          <div class="emergency">
+            <h2>Emergency Storm Damage?</h2>
+            <p>Call us now for immediate help:</p>
+            <button onclick="window.location.href='tel:+14059021826'">📞 (405) 902-1826</button>
+          </div>
+
+          <div class="footer">
+            Storm data source: NOAA Storm Events Database<br />
+            Page generated on: ${new Date(event.generated_at).toLocaleString()}
+          </div>
         </div>
       </body>
-      </html>`;
+      </html>
+    `;
   }
 
   function generateTornadoLandingPage(event: any, keyword: string): string {
@@ -829,18 +853,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const event = await stormDataService.getDailyHailContentWithTrends();
       
       if (!event) {
-        return res.send('<h1>No qualifying hail event found in NOAA data.</h1>');
+        return res.send(`<h1>No qualifying hail events found</h1><p>Call us directly: (405) 902-1826</p>`);
       }
 
-      const matchingPhrase = phrases.find(phrase => 
-        stormDataService.matchesPhrase(event as any, phrase)
-      ) || 'Recent hail storm damage';
-      
-      const html = generateHailLandingPage(event, matchingPhrase);
+      const phrase = phrases.find(p => stormDataService.matchesPhrase(event, p)) || 'Oklahoma Hail Storm Damage';
+      const html = generateHailLandingPage(event, phrase);
       res.send(html);
-    } catch (error) {
-      console.error('Error generating hail landing page:', error);
-      res.status(500).send('<h1>Error loading storm data</h1>');
+      
+    } catch (err) {
+      console.error(err);
+      res.status(500).send(`<h1>Service Unavailable</h1><p>Please call us: (405) 902-1826</p>`);
     }
   });
 

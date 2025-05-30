@@ -1,0 +1,44 @@
+I need you to immediately fix the real-time validation behavior for the email and phone number inputs on my form. The current implementation using `errors.email` and `errors.phone` is broken — it fails to show red error messages reliably during typing due to React's state update timing. Do not preserve or try to patch that outdated logic. Replace it entirely with the following approach which works 100% reliably and mimics the homepage behavior:
+
+Replace the JSX for the email input with this:
+
+<Input
+  id="email"
+  type="email"
+  value={formData.email}
+  onChange={(e) => handleInputChange('email', e.target.value)}
+  placeholder="your.email@example.com"
+  className={`h-12 rounded-xl border-gray-200 ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : ''}`}
+  required
+/>
+{formData.email && !validateEmail(formData.email) && (
+  <p className="text-red-500 text-sm flex items-center">
+    <AlertTriangle className="w-4 h-4 mr-1" />
+    Please enter a valid email address from a recognized provider
+  </p>
+)}
+{validateEmail(formData.email) && (
+  <p className="text-emerald-600 text-sm">✓ Email verified</p>
+)}
+
+Then replace the JSX for the phone input with this:
+
+<Input
+  id="phone"
+  value={formData.phone}
+  onChange={(e) => handleInputChange('phone', e.target.value)}
+  placeholder="(405) 555-0123"
+  className={`h-12 rounded-xl border-gray-200 ${formData.phone && !validatePhone(formData.phone) ? 'border-red-500' : validatePhone(formData.phone) ? 'border-emerald-500' : ''}`}
+  required
+/>
+{formData.phone && !validatePhone(formData.phone) && (
+  <p className="text-red-500 text-sm flex items-center">
+    <AlertTriangle className="w-4 h-4 mr-1" />
+    Please enter a valid 10-digit US phone number
+  </p>
+)}
+{validatePhone(formData.phone) && (
+  <p className="text-emerald-600 text-sm">✓ Phone verified</p>
+)}
+
+Do not try to use the old pattern where errors are set in state and conditionally rendered based on `errors.email` or `errors.phone`. That approach introduces lag and unpredictability. This implementation uses only the current form state and direct validation, ensuring instant feedback with no need for a touched state or blur tracking. Implement this immediately and confirm that validation feedback now appears in real time as the user types.

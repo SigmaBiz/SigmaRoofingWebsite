@@ -444,17 +444,16 @@ export default function HailDamage() {
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         placeholder="your.email@example.com"
-                        className={`h-12 rounded-xl border-gray-200 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-emerald-500' : ''}`}
+                        className={`h-12 rounded-xl border-gray-200 ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : ''}`}
                         required
                       />
-                      {(errors.email || (formData.email && !validateEmail(formData.email))) && (
+                      {formData.email && !validateEmail(formData.email) && (
                         <p className="text-red-500 text-sm flex items-center">
                           <AlertTriangle className="w-4 h-4 mr-1" />
-                          {errors.email || "Please enter a valid email address from a recognized provider"}
+                          Please enter a valid email address from a recognized provider
                         </p>
                       )}
-
-                      {validateEmail(formData.email) && formData.email && !errors.email && (
+                      {validateEmail(formData.email) && (
                         <p className="text-emerald-600 text-sm">✓ Email verified</p>
                       )}
                     </div>
@@ -465,16 +464,16 @@ export default function HailDamage() {
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
                         placeholder="(405) 555-0123"
-                        className={`h-12 rounded-xl border-gray-200 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-emerald-500' : ''}`}
+                        className={`h-12 rounded-xl border-gray-200 ${formData.phone && !validatePhone(formData.phone) ? 'border-red-500' : validatePhone(formData.phone) ? 'border-emerald-500' : ''}`}
                         required
                       />
-                      {(errors.phone || (formData.phone && !validatePhone(formData.phone))) && (
+                      {formData.phone && !validatePhone(formData.phone) && (
                         <p className="text-red-500 text-sm flex items-center">
                           <AlertTriangle className="w-4 h-4 mr-1" />
-                          {errors.phone || "Please enter a valid 10-digit US phone number"}
+                          Please enter a valid 10-digit US phone number
                         </p>
                       )}
-                      {validatePhone(formData.phone) && formData.phone && !errors.phone && (
+                      {validatePhone(formData.phone) && (
                         <p className="text-emerald-600 text-sm">✓ Phone verified</p>
                       )}
                     </div>

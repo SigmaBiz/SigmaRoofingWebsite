@@ -43,7 +43,6 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <LogoBackground />
         <Toaster />
         <Router />
       </TooltipProvider>

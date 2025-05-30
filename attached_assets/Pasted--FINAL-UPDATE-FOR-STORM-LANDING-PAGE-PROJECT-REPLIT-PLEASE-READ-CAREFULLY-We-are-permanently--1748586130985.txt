@@ -1,0 +1,45 @@
+🚨 FINAL UPDATE FOR STORM LANDING PAGE PROJECT (REPLIT, PLEASE READ CAREFULLY):
+
+We are permanently discontinuing all use of the NOAA CDO API.
+
+❌ DO NOT attempt to connect to:
+- https://www.ncei.noaa.gov/cdo-web/api/v2/
+- Any storm-related endpoint using `token`, `fetch`, or `headers` to this domain
+
+❌ DO NOT use fallback functions, cached states, or hidden recovery logic tied to API failure.
+CLEAR all references, imports, default JSONs, try/catch fallbacks, or cached tokens that refer to the NOAA API approach.
+
+✅ ✅ ✅ You are now required to rebuild the hail/tornado storm data pipeline using the **CSV files available via NOAA’s public FTP archive**.
+
+🎯 NEW OFFICIAL DATA SOURCE:
+- https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/
+
+Use the latest available CSV file:
+- `StormEvents_details-ftp_v1.0_d2024_c*.csv.gz` or similar
+
+🧠 IMPLEMENTATION:
+1. Download and decompress the latest `.csv.gz` file (gzip-compressed).
+2. Parse and filter records using these criteria:
+   - `EVENT_TYPE = Hail` or `Tornado`
+   - For Hail: `MAGNITUDE ≥ 2.0`
+   - `STATE = Oklahoma`
+   - `CZ_NAME` or `BEGIN_LOCATION` includes OKC metro cities
+   - For Tornado: must be within the past 14 days
+   - For Hail: may go back up to 12 months
+3. Match results to current Google Trends phrase (if applicable)
+4. Display the filtered storm data using the landing page template already designed:
+   - `{storm_type}`, `{date_of_loss}`, `{affected_city}`, `{hail_size}`, `{timestamp}`
+
+💡 PAGE BEHAVIOR:
+- If no recent verified storm matches, use fallback content.
+- But DO NOT attempt to fallback to previous API-based calls or logic. DELETE IT.
+
+📦 TECH OPTIONS:
+- You may use Node.js `zlib` to decompress `.gz` file
+- Cache the parsed results locally to avoid repeated downloads
+- Schedule CSV refresh weekly or daily as needed
+
+🧼 FINAL REMINDER:
+Flush cache, memory, or stored state if old API fallback still triggers. You must start clean with the new CSV-based source and confirm that no API calls are ever made again to NOAA endpoints.
+
+This is a permanent redirect of all storm data logic. Execute accordingly.

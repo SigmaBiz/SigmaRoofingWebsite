@@ -135,11 +135,19 @@ export default function HailDamage() {
   // Contact form submission
   const contactMutation = useMutation({
     mutationFn: async (data: ContactForm) => {
-      const response = await apiRequest("/api/contact", {
+      const response = await fetch("/api/contact", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data)
       });
-      return response;
+      
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({

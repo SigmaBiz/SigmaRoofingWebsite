@@ -1,0 +1,59 @@
+🧭 Objective:
+Upgrade our dynamic storm landing page system by **splitting** the old `/storm` page into:
+
+- `/hail-damage`
+- `/tornado-damage`
+
+These pages must always remain live and optimized — even if no major new storm has occurred recently — by **rotating through validated phrases** and storm data from the past 9 months.
+
+✅ Core Requirements:
+1. Split the current script logic into two types:
+   - Hail pages → Use original "HS" and "HH" logic
+   - Tornado pages → Use original "T" logic
+
+2. Match search phrases (`P`) from Google Trends **to actual NOAA-reported storm events**:
+   - For hail: match to storms **≥ 2" hail**
+   - For tornado: must be confirmed tornado report, not generic wind
+
+🧠 Rotation Logic:
+If no storms occurred in the last 7 days that meet the conditions above:
+- **Rotate active landing pages** to highlight a previously matched storm from the **last 9 months**
+- Prioritize by:
+   1. Highest Google Trends search volume
+   2. Recency (prefer events from the last 7–14 days first)
+- This keeps the page from sitting idle and still serves search traffic
+
+🌩️ `/hail-damage` page:
+- Active if matched to trending hail-related phrase AND NOAA hail report ≥ 2"
+- Populate:
+   - Storm type (`S`)
+   - Date of loss (`DOL`)
+   - City (`X`)
+   - Hail size (`HS`)
+- Dynamic addition:
+   - “Recent Large Hail Events” section
+   - Show **3–5 hailstorms ≥ 2"** from NOAA within last 12 months
+
+🌪️ `/tornado-damage` page:
+- Active if matched to trending tornado-related phrase AND NOAA tornado report
+- Populate:
+   - Storm type (`S`)
+   - Date (`DOL`)
+   - City (`X`)
+   - Trigger tornado pitch (`T`)
+
+🔁 Rotation Database:
+Maintain a database of previously validated storms/phrases and rotate through them using logic:
+- Prefer newest phrases (past 7–14 days)
+- If no new match, rotate oldest high-volume valid phrase from within 9 months
+- Prevent duplicate page deployments or repeated matches
+
+📨 CTA:
+All pages must end with a clear CTA:
+→ `/request-estimate` (already implemented)
+
+🧠 Developer’s Note:
+This is a **framework and strategy**, not hard constraints. If a more efficient structure or logic exists, you are encouraged to optimize. Just ensure:
+- Pages only show verified NOAA storms
+- Logic filters for storm severity
+- SEO and user value are prioritized

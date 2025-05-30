@@ -109,7 +109,8 @@ export class StormDataService {
             locationid: `FIPS:${fips}`,
             startdate: startDateStr,
             enddate: endDateStr,
-            limit: '1000'
+            limit: '1000',
+            units: 'standard'
           });
 
           const url = `${this.noaaBaseUrl}?${params}`;

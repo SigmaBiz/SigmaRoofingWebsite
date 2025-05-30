@@ -403,7 +403,7 @@ export default function HailDamage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Input
+                      <input
                         id="email"
                         type="email"
                         value={formData.email}

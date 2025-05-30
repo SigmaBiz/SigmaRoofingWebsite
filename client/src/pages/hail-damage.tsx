@@ -66,6 +66,55 @@ export default function HailDamage() {
     verified: false
   });
 
+  // Recent hail events from API
+  const { data: recentHailEvents } = useQuery({
+    queryKey: ['/api/recent-hail-events'],
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
+  // Fetch recent projects data
+  const { data: projectsData } = useQuery({
+    queryKey: ['/api/projects'],
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
+  // Fetch Google reviews
+  const { data: reviewsData } = useQuery({
+    queryKey: ['/api/reviews'],
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
+  const contactMutation = useMutation({
+    mutationFn: async (data: ContactForm) => {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to submit');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Assessment Scheduled!",
+        description: "We'll contact you within 2 hours to confirm your appointment.",
+      });
+      // Reset form
+      setFormData({
+        firstName: "", lastName: "", email: "", phone: "", address: "",
+        serviceType: "Storm Damage Assessment", description: "",
+        preferredDate1: "", preferredTime1: "", preferredDate2: "", preferredTime2: ""
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to schedule assessment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Load active hail damage content with daily rotation
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -73,7 +122,6 @@ export default function HailDamage() {
     
     // Set a timeout to prevent infinite loading
     const loadingTimeout = setTimeout(() => {
-      // If still loading after 10 seconds, show default content
       setHailData({
         city: "Oklahoma City",
         date_of_loss: "Recent Storm Event",
@@ -97,7 +145,6 @@ export default function HailDamage() {
             verified: true
           });
         } else {
-          // API failed - show default content to prevent infinite loading
           setHailData({
             city: "Oklahoma City",
             date_of_loss: "Recent Storm Event", 
@@ -109,7 +156,6 @@ export default function HailDamage() {
       })
       .catch(() => {
         clearTimeout(loadingTimeout);
-        // Error occurred - show default content
         setHailData({
           city: "Oklahoma City",
           date_of_loss: "Recent Storm Event",
@@ -119,65 +165,6 @@ export default function HailDamage() {
         });
       });
   }, []);
-
-  // Fetch Google reviews
-  const { data: reviewsData } = useQuery({
-    queryKey: ['/api/reviews'],
-    staleTime: 1000 * 60 * 30, // 30 minutes
-  });
-
-  // Fetch recent large hail events for "Other Events" section
-  const { data: recentHailResponse } = useQuery({
-    queryKey: ['/api/storm-data/recent-large-hail'],
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
-
-  const recentHailEvents = recentHailResponse?.events || [];
-
-  // Contact form submission
-  const contactMutation = useMutation({
-    mutationFn: async (data: ContactForm) => {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to submit form");
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Request Submitted Successfully!",
-        description: "We'll contact you within 24 hours to schedule your free inspection.",
-      });
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        address: "",
-        serviceType: "Storm Damage Assessment",
-        description: "",
-        preferredDate1: "",
-        preferredTime1: "",
-        preferredDate2: "",
-        preferredTime2: ""
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Submission Failed",
-        description: "Please try again or call us directly at (405) 902-1826",
-        variant: "destructive",
-      });
-    }
-  });
 
   // Email validation - accepts any valid email format
   const validateEmail = (email: string): boolean => {
@@ -191,7 +178,7 @@ export default function HailDamage() {
     return phoneDigits.length === 10;
   };
 
-  // Format phone number as user types - same as main contact form
+  // Format phone number as user types
   const formatPhoneNumber = (value: string): string => {
     const phoneNumber = value.replace(/\D/g, '');
     if (phoneNumber.length >= 6) {
@@ -202,112 +189,12 @@ export default function HailDamage() {
     return phoneNumber;
   };
 
-  const validateAppointmentTimes = (date1: string, time1: string, date2: string, time2: string): string | null => {
-    if (date1 === date2 && time1 === time2) {
-      return 'Please select different time slots for your two preferred appointments.';
-    }
-    return null;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Comprehensive validation before submission
-    if (!formData.firstName?.trim()) {
-      toast({ title: "First name is required", variant: "destructive" });
-      return;
-    }
-    if (!formData.lastName?.trim()) {
-      toast({ title: "Last name is required", variant: "destructive" });
-      return;
-    }
-    if (!validateEmail(formData.email)) {
-      toast({ title: "Please enter a valid email address", variant: "destructive" });
-      return;
-    }
-    if (!validatePhone(formData.phone)) {
-      toast({ title: "Please enter a valid phone number", variant: "destructive" });
-      return;
-    }
-    if (!formData.address?.trim()) {
-      toast({ title: "Address is required", variant: "destructive" });
-      return;
-    }
-    if (!formData.address.toLowerCase().includes('oklahoma') && !formData.address.toLowerCase().includes(' ok')) {
-      toast({ title: "Please enter an Oklahoma address", variant: "destructive" });
-      return;
-    }
-    if (!formData.serviceType) {
-      toast({ title: "Please select a service type", variant: "destructive" });
-      return;
-    }
-    if (!formData.description?.trim()) {
-      toast({ title: "Please describe your roofing needs", variant: "destructive" });
-      return;
-    }
-    if (!formData.preferredDate1 || !formData.preferredTime1) {
-      toast({ title: "Please select your first preferred appointment", variant: "destructive" });
-      return;
-    }
-    if (!formData.preferredDate2 || !formData.preferredTime2) {
-      toast({ title: "Please select your second preferred appointment", variant: "destructive" });
-      return;
-    }
-    
-    const appointmentError = validateAppointmentTimes(
-      formData.preferredDate1, 
-      formData.preferredTime1, 
-      formData.preferredDate2, 
-      formData.preferredTime2
-    );
-    if (appointmentError) {
-      toast({ title: appointmentError, variant: "destructive" });
-      return;
-    }
-
-    contactMutation.mutate(formData);
-  };
-
-  // Real-time validation as user types (same as main contact form)
-  const validateField = (field: keyof ContactForm, value: string) => {
-    const newErrors = { ...errors };
-    
-    switch (field) {
-      case 'email':
-        if (value && !validateEmail(value)) {
-          newErrors.email = "Please enter a valid email address from a recognized provider";
-        } else {
-          delete newErrors.email;
-        }
-        break;
-      case 'phone':
-        if (value && !validatePhone(value)) {
-          newErrors.phone = "Please enter a valid 10-digit US phone number";
-        } else {
-          delete newErrors.phone;
-        }
-        break;
-      case 'address':
-        if (value && !value.toLowerCase().includes('oklahoma') && !value.toLowerCase().includes('ok')) {
-          newErrors.address = "We currently only serve properties in Oklahoma";
-        } else {
-          delete newErrors.address;
-        }
-        break;
-    }
-    
-    setErrors(newErrors);
-  };
-
   const handleInputChange = (field: keyof ContactForm, value: string) => {
-    console.log(`Validating ${field}: ${value}`); // Debug log
-    
     let processedValue = value;
     
     // Format phone number on input
     if (field === 'phone') {
       processedValue = formatPhoneNumber(value);
-      console.log(`Formatted phone: ${processedValue}`); // Debug log
     }
     
     setFormData(prev => ({ ...prev, [field]: processedValue }));
@@ -341,16 +228,20 @@ export default function HailDamage() {
       }
     }
     
-    console.log(`Setting errors:`, newErrors); // Debug log
     setErrors(newErrors);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    contactMutation.mutate(formData);
   };
 
   // Show loading only briefly while data loads
   if (!hailData.verified) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading storm data...</p>
         </div>
       </div>
@@ -358,23 +249,23 @@ export default function HailDamage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
+      <header className="bg-white border-b border-gray-100">
+        <div className="container mx-auto px-6 lg:px-12 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">Σ</span>
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center">
+                <Shield className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Sigma Roofing LLC</h1>
-                <p className="text-sm text-gray-600">Licensed #80006734</p>
+                <h1 className="text-2xl font-light text-gray-900">Sigma Roofing</h1>
+                <p className="text-sm text-gray-500">Oklahoma Licensed • Fully Insured</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-lg font-semibold text-emerald-600">(405) 902-1826</p>
-              <p className="text-sm text-gray-600">24/7 Emergency Service</p>
+              <p className="text-xl font-medium text-emerald-600">(405) 902-1826</p>
+              <p className="text-sm text-gray-500">Emergency Service Available</p>
             </div>
           </div>
         </div>
@@ -466,85 +357,46 @@ export default function HailDamage() {
                 </div>
               </div>
 
-            {/* Recent Hail Activity */}
-            {recentHailEvents && recentHailEvents.length > 0 && (
-              <Card className="mb-8">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    <Calendar className="w-6 h-6 text-emerald-600 mr-3" />
-                    <h3 className="text-xl font-bold text-gray-900">Recent Significant Hail Events (2"+ in Last 12 Months)</h3>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    {recentHailEvents.slice(0, 5).map((event: HailEvent, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center">
-                          <MapPin className="w-4 h-4 text-gray-500 mr-2" />
-                          <span className="font-semibold">{event.city}</span>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <Badge variant="destructive">{event.hail_size}</Badge>
-                          <span className="text-sm text-gray-600">{event.date}</span>
-                        </div>
+              {/* Google Reviews Section */}
+              {reviewsData && reviewsData.reviews && (
+                <div className="space-y-8">
+                  <div className="text-center lg:text-left">
+                    <h2 className="text-2xl lg:text-3xl font-light text-gray-900 mb-6">What Our Customers Say</h2>
+                    <div className="flex items-center justify-center lg:justify-start space-x-2 mb-8">
+                      <div className="flex text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 fill-current" />
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-4 p-4 bg-emerald-50 rounded-lg">
-                    <p className="text-emerald-800 font-semibold">
-                      Oklahoma City metro has experienced {recentHailEvents.length} significant hail events in the past year. 
-                      This pattern indicates your roof likely needs professional assessment.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Customer Reviews */}
-            {reviewsData?.reviews && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-6">
-                    <Star className="w-6 h-6 text-yellow-500 mr-3" />
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Customer Reviews</h3>
-                      <div className="flex items-center mt-1">
-                        <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-current" />
-                          ))}
-                        </div>
-                        <span className="ml-2 text-sm text-gray-600">
-                          {reviewsData.businessRating}/5 ({reviewsData.totalReviews} reviews)
-                        </span>
-                      </div>
+                      <span className="text-lg font-medium text-gray-900">
+                        {reviewsData.businessRating}/5.0 ({reviewsData.totalReviews} reviews)
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="grid gap-4">
+                  <div className="grid gap-6">
                     {reviewsData.reviews.slice(0, 3).map((review: Review, index: number) => (
-                      <div key={index} className="border-l-4 border-emerald-500 pl-4">
-                        <div className="flex items-center mb-2">
-                          <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
+                      <div key={index} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                        <div className="flex items-center mb-4">
+                          <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold mr-4">
                             {review.initials}
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900">{review.name}</p>
+                            <p className="font-medium text-gray-900">{review.name}</p>
                             <div className="flex text-yellow-400">
                               {[...Array(review.rating)].map((_, i) => (
-                                <Star key={i} className="w-3 h-3 fill-current" />
+                                <Star key={i} className="w-4 h-4 fill-current" />
                               ))}
                             </div>
                           </div>
                         </div>
-                        <p className="text-gray-700 text-sm">{review.review}</p>
+                        <p className="text-gray-700 leading-relaxed">{review.review}</p>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                </div>
+              )}
+            </div>
 
             {/* Right Column - Contact Form (2 columns wide) */}
             <div className="lg:col-span-2">
@@ -561,178 +413,107 @@ export default function HailDamage() {
                     </div>
                   </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      placeholder="First Name"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      required
-                    />
-                    <Input
-                      placeholder="Last Name"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange("lastName", e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="your.email@example.com"
-                      required
-                      className={`h-12 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-green-500' : ''}`}
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-1" />
-                        {errors.email}
-                      </p>
-                    )}
-                    {validateEmail(formData.email) && formData.email && !errors.email && (
-                      <p className="text-green-600 text-sm">✓ Email verified</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="(405) 555-0123"
-                      required
-                      className={`h-12 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-green-500' : ''}`}
-                    />
-                    {errors.phone && (
-                      <p className="text-red-500 text-sm flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-1" />
-                        {errors.phone}
-                      </p>
-                    )}
-                    {validatePhone(formData.phone) && formData.phone && !errors.phone && (
-                      <p className="text-green-600 text-sm">✓ Phone verified</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <Input
-                      placeholder="Property Address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange("address", e.target.value)}
-                      className={errors.address ? "border-red-500" : ""}
-                      required
-                    />
-                    {errors.address && (
-                      <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-                    )}
-                  </div>
-                  
-                  <Select value={formData.serviceType} onValueChange={(value) => handleInputChange("serviceType", value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Storm Damage Assessment">Storm Damage Assessment</SelectItem>
-                      <SelectItem value="Insurance Claim Assistance">Insurance Claim Assistance</SelectItem>
-                      <SelectItem value="Emergency Repair">Emergency Repair</SelectItem>
-                      <SelectItem value="Full Roof Replacement">Full Roof Replacement</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Textarea
-                    placeholder="Describe any visible damage or concerns..."
-                    value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
-                    rows={3}
-                  />
-
-                  {/* Appointment Scheduling */}
-                  <div className="space-y-6">
-                    <div className="flex items-center">
-                      <Calendar className="w-5 h-5 text-emerald-600 mr-2" />
-                      <h3 className="text-lg font-semibold text-gray-700">Preferred Appointment Times</h3>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        placeholder="First Name"
+                        value={formData.firstName}
+                        onChange={(e) => handleInputChange("firstName", e.target.value)}
+                        className="h-12 rounded-xl border-gray-200"
+                        required
+                      />
+                      <Input
+                        placeholder="Last Name"
+                        value={formData.lastName}
+                        onChange={(e) => handleInputChange("lastName", e.target.value)}
+                        className="h-12 rounded-xl border-gray-200"
+                        required
+                      />
                     </div>
                     
-                    {/* First Appointment */}
-                    <div className="p-4 bg-emerald-50 rounded-lg">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">First Choice Appointment *</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">Date</Label>
-                          <Input
-                            type="date"
-                            value={formData.preferredDate1}
-                            onChange={(e) => handleInputChange("preferredDate1", e.target.value)}
-                            min={new Date().toISOString().split('T')[0]}
-                            required
-                            className="h-12"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">Time Window</Label>
-                          <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange("preferredTime1", value)}>
-                            <SelectTrigger className="h-12">
-                              <SelectValue placeholder="Select time window" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</SelectItem>
-                              <SelectItem value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</SelectItem>
-                              <SelectItem value="12:00 PM - 2:00 PM">12:00 PM - 2:00 PM</SelectItem>
-                              <SelectItem value="2:00 PM - 4:00 PM">2:00 PM - 4:00 PM</SelectItem>
-                              <SelectItem value="4:00 PM - 6:00 PM">4:00 PM - 6:00 PM</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                    <div className="space-y-2">
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        placeholder="your.email@example.com"
+                        className={`h-12 rounded-xl border-gray-200 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-emerald-500' : ''}`}
+                        required
+                      />
+                      {errors.email && (
+                        <p className="text-red-500 text-sm flex items-center">
+                          <AlertTriangle className="w-4 h-4 mr-1" />
+                          {errors.email}
+                        </p>
+                      )}
+                      {validateEmail(formData.email) && formData.email && !errors.email && (
+                        <p className="text-emerald-600 text-sm">✓ Email verified</p>
+                      )}
                     </div>
-
-                    {/* Second Appointment */}
-                    <div className="p-4 bg-slate-50 rounded-lg">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">Second Choice Appointment *</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">Date</Label>
-                          <Input
-                            type="date"
-                            value={formData.preferredDate2}
-                            onChange={(e) => handleInputChange("preferredDate2", e.target.value)}
-                            min={new Date().toISOString().split('T')[0]}
-                            required
-                            className="h-12"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">Time Window</Label>
-                          <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange("preferredTime2", value)}>
-                            <SelectTrigger className="h-12">
-                              <SelectValue placeholder="Select different time" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</SelectItem>
-                              <SelectItem value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</SelectItem>
-                              <SelectItem value="12:00 PM - 2:00 PM">12:00 PM - 2:00 PM</SelectItem>
-                              <SelectItem value="2:00 PM - 4:00 PM">2:00 PM - 4:00 PM</SelectItem>
-                              <SelectItem value="4:00 PM - 6:00 PM">4:00 PM - 6:00 PM</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                    
+                    <div className="space-y-2">
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="(405) 555-0123"
+                        className={`h-12 rounded-xl border-gray-200 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-emerald-500' : ''}`}
+                        required
+                      />
+                      {errors.phone && (
+                        <p className="text-red-500 text-sm flex items-center">
+                          <AlertTriangle className="w-4 h-4 mr-1" />
+                          {errors.phone}
+                        </p>
+                      )}
+                      {validatePhone(formData.phone) && formData.phone && !errors.phone && (
+                        <p className="text-emerald-600 text-sm">✓ Phone verified</p>
+                      )}
                     </div>
-                  </div>
+                    
+                    <div>
+                      <Input
+                        placeholder="Property Address"
+                        value={formData.address}
+                        onChange={(e) => handleInputChange("address", e.target.value)}
+                        className={`h-12 rounded-xl border-gray-200 ${errors.address ? "border-red-500" : ""}`}
+                        required
+                      />
+                      {errors.address && (
+                        <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                      )}
+                    </div>
+                    
+                    <Select value={formData.serviceType} onValueChange={(value) => handleInputChange("serviceType", value)}>
+                      <SelectTrigger className="h-12 rounded-xl border-gray-200">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Storm Damage Assessment">Storm Damage Assessment</SelectItem>
+                        <SelectItem value="Insurance Claim Assistance">Insurance Claim Assistance</SelectItem>
+                        <SelectItem value="Emergency Repair">Emergency Repair</SelectItem>
+                        <SelectItem value="Full Roof Replacement">Full Roof Replacement</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Textarea
+                      placeholder="Describe any visible damage or concerns..."
+                      value={formData.description}
+                      onChange={(e) => handleInputChange("description", e.target.value)}
+                      rows={3}
+                      className="rounded-xl border-gray-200"
+                    />
 
-                  <Button
-                    type="button"
-                    onClick={() => window.location.href = '/#contact'}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 text-lg font-semibold"
-                  >
-                    <Calendar className="w-5 h-5 mr-2" />
-                    Schedule Free Assessment
-                  </Button>
-                </form>
+                    <Button
+                      type="button"
+                      onClick={() => window.location.href = '/#contact'}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 text-lg font-medium rounded-xl"
+                    >
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Schedule Free Assessment
+                    </Button>
+                  </form>
 
                   <div className="mt-8 pt-8 border-t border-gray-200 text-center">
                     <p className="text-sm text-gray-600 mb-4">Need immediate assistance?</p>

@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function HailSimpleForm() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+
+  // Debug component mounting
+  useEffect(() => {
+    console.log('HailSimpleForm mounted');
+    return () => console.log('HailSimpleForm unmounted');
+  }, []);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,20 +29,29 @@ export default function HailSimpleForm() {
     return cleanPhone.length === 10;
   };
 
+  // Modified event handlers with explicit event prevention
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const value = e.target.value;
     setEmail(value);
     console.log('Email changed:', value);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const value = e.target.value;
     setPhone(value);
     console.log('Phone changed:', value);
   };
 
+  // Added form submit handler
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted with:', { email, phone });
+  };
+
   return (
-    <div style={{ 
+    <form onSubmit={handleSubmit} style={{ 
       maxWidth: '600px', 
       margin: '50px auto', 
       padding: '30px',
@@ -126,6 +141,7 @@ export default function HailSimpleForm() {
       </div>
 
       <button
+        type="submit"
         style={{
           width: '100%',
           padding: '15px',
@@ -142,6 +158,6 @@ export default function HailSimpleForm() {
       >
         Submit Free Estimate Request
       </button>
-    </div>
+    </form>
   );
 }

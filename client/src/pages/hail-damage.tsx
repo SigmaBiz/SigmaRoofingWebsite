@@ -204,45 +204,36 @@ export default function HailDamage() {
     
     setFormData(prev => ({ ...prev, [field]: processedValue }));
     
-    // Real-time validation using homepage logic
-    const newErrors = { ...errors };
-    
-    console.log(`Validating ${field} with value: "${processedValue}"`);
-    
-    switch (field) {
-      case 'email':
-        const emailValid = validateEmail(processedValue);
-        console.log(`Email validation result: ${emailValid}`);
-        if (processedValue && !emailValid) {
-          newErrors.email = "Please enter a valid email address from a recognized provider";
-          console.log('Setting email error');
-        } else {
-          delete newErrors.email;
-          console.log('Clearing email error');
-        }
-        break;
-      case 'phone':
-        const phoneValid = validatePhone(processedValue);
-        console.log(`Phone validation result: ${phoneValid}`);
-        if (processedValue && !phoneValid) {
-          newErrors.phone = "Please enter a valid 10-digit US phone number";
-          console.log('Setting phone error');
-        } else {
-          delete newErrors.phone;
-          console.log('Clearing phone error');
-        }
-        break;
-      case 'address':
-        if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
-          newErrors.address = "We currently only serve properties in Oklahoma";
-        } else {
-          delete newErrors.address;
-        }
-        break;
-    }
-    
-    console.log('New errors state:', newErrors);
-    setErrors(newErrors);
+    // Real-time validation - force re-render by creating new object
+    setErrors(prevErrors => {
+      const newErrors = { ...prevErrors };
+      
+      switch (field) {
+        case 'email':
+          if (processedValue && !validateEmail(processedValue)) {
+            newErrors.email = "Please enter a valid email address from a recognized provider";
+          } else {
+            delete newErrors.email;
+          }
+          break;
+        case 'phone':
+          if (processedValue && !validatePhone(processedValue)) {
+            newErrors.phone = "Please enter a valid 10-digit US phone number";
+          } else {
+            delete newErrors.phone;
+          }
+          break;
+        case 'address':
+          if (processedValue && !processedValue.toLowerCase().includes('oklahoma') && !processedValue.toLowerCase().includes('ok')) {
+            newErrors.address = "We currently only serve properties in Oklahoma";
+          } else {
+            delete newErrors.address;
+          }
+          break;
+      }
+      
+      return newErrors;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {

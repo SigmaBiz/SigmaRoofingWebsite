@@ -1,14 +1,9 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle, Mail } from "lucide-react";
+import { AlertTriangle, CheckCircle } from "lucide-react";
 
 interface ContactForm {
   firstName: string;
@@ -121,124 +116,80 @@ export default function HailDamageFixed() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name*</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    placeholder="John"
-                    className="h-12 rounded-xl"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name*</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange("lastName", e.target.value)}
-                    placeholder="Smith"
-                    className="h-12 rounded-xl"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address*</Label>
-                  <Input
-                    id="email"
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email Address*</label>
+                  <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     placeholder="your.email@example.com"
-                    className={`h-12 rounded-xl ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : 'border-gray-200'}`}
+                    className={`w-full px-3 py-2 border rounded-md ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-green-500' : 'border-gray-300'}`}
                     required
                   />
                   {formData.email && (
                     validateEmail(formData.email) ? (
-                      <p className="text-emerald-600 text-sm flex items-center">
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Email verified
-                      </p>
+                      <p className="text-green-600 text-sm mt-1">✓ Valid email</p>
                     ) : (
-                      <p className="text-red-500 text-sm flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-1" />
-                        Please enter a valid email address from a recognized provider
-                      </p>
+                      <p className="text-red-500 text-sm mt-1">✗ Invalid email or domain not allowed</p>
                     )
                   )}
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number*</Label>
-                  <Input
-                    id="phone"
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Phone Number*</label>
+                  <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     placeholder="(405) 555-0123"
-                    className={`h-12 rounded-xl ${formData.phone && !validatePhone(formData.phone) ? 'border-red-500' : validatePhone(formData.phone) ? 'border-emerald-500' : 'border-gray-200'}`}
+                    className={`w-full px-3 py-2 border rounded-md ${formData.phone && !validatePhone(formData.phone) ? 'border-red-500' : validatePhone(formData.phone) ? 'border-green-500' : 'border-gray-300'}`}
                     required
                   />
                   {formData.phone && (
                     validatePhone(formData.phone) ? (
-                      <p className="text-emerald-600 text-sm flex items-center">
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Phone number verified
-                      </p>
+                      <p className="text-green-600 text-sm mt-1">✓ Valid phone</p>
                     ) : (
-                      <p className="text-red-500 text-sm flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-1" />
-                        Phone number must be 10 digits
-                      </p>
+                      <p className="text-red-500 text-sm mt-1">✗ Phone must be 10 digits</p>
                     )
                   )}
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="address">Property Address (Oklahoma)*</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                  placeholder="123 Main Street, Oklahoma City, OK 73101"
-                  className="h-12 rounded-xl"
-                  required
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">First Name*</label>
+                  <input
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange("firstName", e.target.value)}
+                    placeholder="John"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="serviceType">Select Service Type*</Label>
-                <Select value={formData.serviceType} onValueChange={(value) => handleInputChange("serviceType", value)}>
-                  <SelectTrigger className="h-12 rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Storm Damage Assessment">Storm Damage Assessment</SelectItem>
-                    <SelectItem value="Roof Repair">Roof Repair</SelectItem>
-                    <SelectItem value="Roof Replacement">Roof Replacement</SelectItem>
-                    <SelectItem value="Gutter Services">Gutter Services</SelectItem>
-                    <SelectItem value="Roof Inspection">Roof Inspection</SelectItem>
-                    <SelectItem value="Emergency Repairs">Emergency Repairs</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Last Name*</label>
+                  <input
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange("lastName", e.target.value)}
+                    placeholder="Smith"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Describe the storm damage and your roofing needs...</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
-                  placeholder="Please describe the damage you've noticed, when the storm occurred, and any specific concerns..."
-                  className="min-h-24 rounded-xl resize-none"
-                />
+                <div>
+                  <label className="block text-sm font-medium mb-2">Property Address*</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    placeholder="123 Main Street, Oklahoma City, OK 73101"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
               </div>
 
               <Button 

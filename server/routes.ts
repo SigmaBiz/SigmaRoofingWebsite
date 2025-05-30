@@ -602,66 +602,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Verify hail phrase against NOAA data - strict verification only
-  app.get('/api/storm-data/verify-hail-phrase', async (req, res) => {
+  // Get daily hail content with rotation - phrase + verified NOAA storm
+  app.get('/api/storm-data/daily-hail-content', async (req, res) => {
     try {
       const phrase = req.query.phrase as string;
       
-      if (!phrase) {
-        return res.json({ success: false, verified: false, message: 'No phrase provided' });
-      }
+      // Get today's active hail content (rotates once per day)
+      const activeContent = await stormDataService.getDailyHailContent(phrase);
       
-      const verifiedStorm = await stormDataService.verifyHailPhrase(phrase);
-      
-      if (verifiedStorm) {
+      if (activeContent) {
         res.json({
           success: true,
-          verified: true,
-          storm: verifiedStorm
+          storm: activeContent
         });
       } else {
         res.json({
-          success: true,
-          verified: false,
-          message: 'No NOAA-verified hail event ≥2" found matching this phrase in OKC metro'
+          success: false,
+          message: 'No verified NOAA hail content available for today'
         });
       }
       
     } catch (error) {
-      console.error('Error verifying hail phrase:', error);
+      console.error('Error getting daily hail content:', error);
       res.json({
         success: false,
-        verified: false,
-        message: 'Verification service error'
+        message: 'Unable to retrieve storm content'
       });
     }
   });
 
-  // Get verified hail rotation - only NOAA-confirmed events from past 9 months
-  app.get('/api/storm-data/verified-hail-rotation', async (req, res) => {
+  // Get recent large hail events for "Other Events" section - with 3-second timeout fallback
+  app.get('/api/storm-data/recent-large-hail', async (req, res) => {
     try {
-      const rotatedStorm = await stormDataService.getVerifiedHailRotation();
+      // Try NOAA first with 3-second timeout
+      const recentEvents = await Promise.race([
+        stormDataService.getRecentLargeHailEvents(),
+        new Promise(resolve => setTimeout(() => resolve(null), 3000))
+      ]);
       
-      if (rotatedStorm) {
+      if (recentEvents && Array.isArray(recentEvents)) {
         res.json({
           success: true,
-          verified: true,
-          storm: rotatedStorm
+          events: recentEvents,
+          source: 'NOAA'
         });
       } else {
+        // NOAA timeout - provide fallback explanation
         res.json({
-          success: true,
-          verified: false,
-          message: 'No verified NOAA hail events ≥2" in OKC metro from past 9 months'
+          success: false,
+          message: 'NOAA data temporarily unavailable',
+          fallback: true
         });
       }
       
     } catch (error) {
-      console.error('Error getting verified hail rotation:', error);
+      console.error('Error getting recent hail events:', error);
       res.json({
         success: false,
-        verified: false,
-        message: 'Unable to retrieve verified storm data'
+        message: 'Unable to retrieve recent hail data'
       });
     }
   });

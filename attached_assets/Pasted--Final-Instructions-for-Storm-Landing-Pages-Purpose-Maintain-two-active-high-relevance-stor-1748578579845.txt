@@ -1,0 +1,95 @@
+🛠️ Final Instructions for Storm Landing Pages
+
+🎯 Purpose:
+Maintain two active, high-relevance storm landing pages:
+- `/hail-damage`
+- `/tornado-damage`
+
+These pages should only display when tied to **real, confirmed storm events** in the **Oklahoma City metro**. Content should dynamically update based on verified phrases and user activity.
+
+---
+
+📍 ✅ OKC METRO AREA DEFINITION:
+Match storm data and phrases to any of the following cities:
+
+- Oklahoma City
+- Edmond
+- Norman
+- Moore
+- Midwest City
+- Yukon
+- Del City
+- Bethany
+- Mustang
+- Nichols Hills
+- Warr Acres
+
+---
+
+🧪 ✅ DATA REQUIREMENTS:
+
+- All storm triggers must be verified using **NOAA** data only:
+  - SPC/NWS storm reports
+  - NCDC event archive
+  - MRMS/MESH hail data (if used)
+- Do **not** use HailTrace or similar sources to generate or trigger a landing page.
+
+✅ EXCEPTION:
+- For the **historical hail report section only** (see below), you may use other trusted sources **if NOAA response exceeds 3 seconds**.
+
+---
+
+🔁 ✅ PHRASE ROTATION LOGIC:
+
+**"Rotation" means updating the phrase + content shown on the page**, not continuous reload or rebuild.
+
+Rotation occurs:
+1. **Once per day**, if no visits have occurred that day.
+2. **Immediately**, if a new trending phrase with high volume and a NOAA-verified storm appears.
+
+Pick a storm phrase that matches:
+- High Google Trends volume
+- A qualifying NOAA storm (within last 9 months)
+- Hail size ≥ 2” or tornado confirmation
+
+This ensures the page always displays **relevant, verifiable storm content** — no dead pages or false urgency.
+
+---
+
+📄 ✅ `/hail-damage` Page:
+
+**Trigger:** Hail phrase + NOAA hail report ≥ 2" in OKC metro
+
+**Display:**
+- Date of Loss (`DOL`)
+- City (`X`)
+- Hail size (`HS`)
+- Existing pitch logic (including `< 1.5"` disclaimer block)
+
+✅ Optional: “Other Large Hail Events in Your Area”
+- Show **1–5 hailstorms ≥2.0"** in OKC metro from the past 9 months
+- Prefer NOAA data
+- ✅ If NOAA data fetch takes more than 3 seconds → fallback to:
+  - Interactive Hail Maps
+  - Weather.gov summaries
+  - Any other reasonably reliable hail source
+
+---
+
+🌪️ ✅ `/tornado-damage` Page:
+
+**Trigger:** Tornado phrase + NOAA-confirmed tornado in OKC metro
+
+**Display:**
+- Date of Loss (`DOL`)
+- City (`X`)
+- Tornado pitch logic (`T`)
+- CTA → `/request-estimate`
+
+---
+
+📨 CTA:
+All pages must end with a visible call to action pointing to `/request-estimate`. No additional forms or complex routing.
+
+🧠 Developer's Note:
+Prioritize page load speed and SEO-readiness. If a match is not fully verifiable via NOAA, the landing page should not be created. However, **historical storm context (1–5 reports)** may use alternative data sources if retrieval from NOAA is too slow.

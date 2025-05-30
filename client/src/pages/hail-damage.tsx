@@ -64,41 +64,16 @@ export default function HailDamage() {
     verified: false
   });
 
-  // Load verified NOAA hail storm data only
+  // Load active hail damage content with daily rotation
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const phrase = urlParams.get('phrase');
     
-    // Only proceed if we have a phrase to verify against NOAA data
-    if (!phrase) {
-      // Check for rotated verified storms from past 9 months
-      fetch('/api/storm-data/verified-hail-rotation')
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.storm && data.verified) {
-            setHailData({
-              city: data.storm.affected_city,
-              date_of_loss: data.storm.date_of_loss,
-              hail_size: data.storm.hail_size,
-              damage_likely: parseFloat(data.storm.hail_size) >= 2,
-              verified: true
-            });
-          } else {
-            // No verified NOAA data available - don't show page
-            setHailData(prev => ({ ...prev, verified: false }));
-          }
-        })
-        .catch(() => {
-          setHailData(prev => ({ ...prev, verified: false }));
-        });
-      return;
-    }
-    
-    // Verify phrase against NOAA storm events ≥2" in OKC metro
-    fetch(`/api/storm-data/verify-hail-phrase?phrase=${encodeURIComponent(phrase)}`)
+    // Get today's active hail content (phrase + verified NOAA data)
+    fetch(`/api/storm-data/daily-hail-content${phrase ? `?phrase=${encodeURIComponent(phrase)}` : ''}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.verified && data.storm) {
+        if (data.success && data.storm) {
           setHailData({
             city: data.storm.affected_city,
             date_of_loss: data.storm.date_of_loss,
@@ -107,7 +82,7 @@ export default function HailDamage() {
             verified: true
           });
         } else {
-          // Phrase doesn't match verified NOAA event - don't show page
+          // No verified content available - keep loading state
           setHailData(prev => ({ ...prev, verified: false }));
         }
       })
@@ -122,11 +97,13 @@ export default function HailDamage() {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  // Fetch recent hail events (2+ inches in last 12 months)
-  const { data: recentHailEvents } = useQuery({
-    queryKey: ['/api/storm-data/hail-events'],
+  // Fetch recent large hail events for "Other Events" section
+  const { data: recentHailResponse } = useQuery({
+    queryKey: ['/api/storm-data/recent-large-hail'],
     staleTime: 1000 * 60 * 60, // 1 hour
   });
+
+  const recentHailEvents = recentHailResponse?.events || [];
 
   // Contact form submission
   const contactMutation = useMutation({

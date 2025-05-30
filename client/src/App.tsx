@@ -17,6 +17,7 @@ import HailDamageFixed from "@/pages/hail-damage-fixed";
 import HailSimple from "@/pages/hail-simple";
 import TornadoDamage from "@/pages/tornado-damage";
 import TestValidation from "@/pages/test-validation";
+import ValidationTest from "@/pages/validation-test";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/hail-damage" component={HailSimple} />
       <Route path="/tornado-damage" component={TornadoDamage} />
       <Route path="/test-validation" component={TestValidation} />
+      <Route path="/validation-test" component={ValidationTest} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/sitemap" component={Sitemap} />

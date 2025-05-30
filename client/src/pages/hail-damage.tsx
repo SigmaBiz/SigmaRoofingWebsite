@@ -412,6 +412,7 @@ export default function HailDamage() {
                         className={`h-12 rounded-xl border-gray-200 ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : ''}`}
                         required
                       />
+                      <p className="text-blue-500 text-sm">TEST: Email value is "{formData.email}"</p>
                       {formData.email && (
                         validateEmail(formData.email) ? (
                           <p className="text-emerald-600 text-sm">✓ Email verified</p>

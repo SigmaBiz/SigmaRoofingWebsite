@@ -1,0 +1,89 @@
+🛠️ Final Instructions for Hail & Tornado Landing Pages — with Verified NOAA Integration
+
+🎯 Objective:
+Split the previous generic “/storm” page into two precise landing pages:
+
+- `/hail-damage`
+- `/tornado-damage`
+
+These pages should ONLY display when they are tied to **real, verifiable storm events**, not assumed or estimated data.
+
+---
+
+📍 ✅ METRO OKLAHOMA CITY AREA DEFINITION:
+
+Any storm data or matching logic referring to “Oklahoma City” MUST include the broader **metro area**, which consists of:
+
+- Oklahoma City  
+- Edmond  
+- Norman  
+- Moore  
+- Midwest City  
+- Yukon  
+- Del City  
+- Bethany  
+- Mustang  
+- Nichols Hills  
+- Warr Acres
+
+Use this multi-city area when matching NOAA hail or tornado data to Google Trends phrases and building the landing page content.
+
+---
+
+🧪 ✅ DATA REQUIREMENTS: NOAA ONLY
+
+You must exclusively use data from **official NOAA sources** such as:
+- Storm Events Database (https://www.ncdc.noaa.gov/stormevents/)
+- SPC/NWS Hail Reports
+- MRMS/MESH GeoTIFF or CSV (if available through API or download)
+
+Do NOT reference or build pages based on:
+- HailTrace
+- Interactive Hail Maps
+- AccuWeather
+- Third-party aggregator sites
+
+Only **verified NOAA reports** of hail size, storm type, and location may be used to generate or populate a landing page.
+
+---
+
+📄 ✅ `/hail-damage` Page Logic:
+
+Trigger Conditions:
+- Trending phrase from Google Trends includes hail-related terms
+- A NOAA-reported hail event of **2.0 inches or greater** occurred in the OKC metro within the last 12 months
+
+If no new event meets this condition in the past 7 days:
+- Rotate to a verified historical storm within the **last 9 months**, prioritizing:
+   - Highest search volume
+   - Most recent match
+
+Content Requirements:
+- Show: Date of Loss (`DOL`), Hail Size (`HS`), City (`X`)
+- Use existing pitch block logic (conditional display of hail severity messaging)
+- **Include a section titled “Recent Large Hail Events in the Metro”** showing 3–5 NOAA-confirmed hailstorms ≥2” in the past 12 months from any city listed in the OKC metro
+
+---
+
+🌪️ ✅ `/tornado-damage` Page Logic:
+
+Trigger Conditions:
+- Trending phrase involves tornado-related terms
+- Confirmed NOAA tornado report in any part of the OKC metro within a relevant timeframe (within 12 months)
+
+Show:
+- Date of tornado
+- Location (city)
+- Pitch content using existing `T` script block
+
+---
+
+📨 ✅ Shared Features for Both Pages:
+
+- All CTAs route to `/request-estimate`
+- Do not generate or publish a page unless a **verified NOAA event matches the phrase P**
+- Prioritize factual clarity and regional trust-building
+- Pages must be mobile-friendly, fast, and SEO optimized
+
+🧠 Developer Note:
+This structure defines strict logical, geographical, and data constraints. You are free to refactor the code for efficiency, but **the logic, location coverage, and NOAA sourcing must be preserved.**

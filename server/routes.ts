@@ -602,32 +602,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Active hail damage data - uses trending phrases or rotates through past 9 months
-  app.get('/api/storm-data/active-hail', async (req, res) => {
+  // Verify hail phrase against NOAA data - strict verification only
+  app.get('/api/storm-data/verify-hail-phrase', async (req, res) => {
     try {
       const phrase = req.query.phrase as string;
       
-      // Try to get data from rotation system
-      const stormData = await stormDataService.getActiveHailData(phrase);
+      if (!phrase) {
+        return res.json({ success: false, verified: false, message: 'No phrase provided' });
+      }
       
-      res.json({
-        success: true,
-        storm: stormData
-      });
+      const verifiedStorm = await stormDataService.verifyHailPhrase(phrase);
+      
+      if (verifiedStorm) {
+        res.json({
+          success: true,
+          verified: true,
+          storm: verifiedStorm
+        });
+      } else {
+        res.json({
+          success: true,
+          verified: false,
+          message: 'No NOAA-verified hail event ≥2" found matching this phrase in OKC metro'
+        });
+      }
       
     } catch (error) {
-      console.error('Error getting active hail data:', error);
-      // Always provide a response, never block the landing page
+      console.error('Error verifying hail phrase:', error);
       res.json({
-        success: true,
-        storm: {
-          affected_city: "Oklahoma City",
-          date_of_loss: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-          hail_size: "2.5",
-          storm_type: "hail",
-          is_hail_event: true,
-          hail_less_than_1_5: false
-        }
+        success: false,
+        verified: false,
+        message: 'Verification service error'
+      });
+    }
+  });
+
+  // Get verified hail rotation - only NOAA-confirmed events from past 9 months
+  app.get('/api/storm-data/verified-hail-rotation', async (req, res) => {
+    try {
+      const rotatedStorm = await stormDataService.getVerifiedHailRotation();
+      
+      if (rotatedStorm) {
+        res.json({
+          success: true,
+          verified: true,
+          storm: rotatedStorm
+        });
+      } else {
+        res.json({
+          success: true,
+          verified: false,
+          message: 'No verified NOAA hail events ≥2" in OKC metro from past 9 months'
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error getting verified hail rotation:', error);
+      res.json({
+        success: false,
+        verified: false,
+        message: 'Unable to retrieve verified storm data'
       });
     }
   });

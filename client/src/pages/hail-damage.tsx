@@ -64,16 +64,41 @@ export default function HailDamage() {
     verified: false
   });
 
-  // Load active hail storm data (current trending or rotated from past 9 months)
+  // Load verified NOAA hail storm data only
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const phrase = urlParams.get('phrase');
     
-    // Get active hail damage data - either from trending phrase or rotation
-    fetch(`/api/storm-data/active-hail${phrase ? `?phrase=${encodeURIComponent(phrase)}` : ''}`)
+    // Only proceed if we have a phrase to verify against NOAA data
+    if (!phrase) {
+      // Check for rotated verified storms from past 9 months
+      fetch('/api/storm-data/verified-hail-rotation')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.storm && data.verified) {
+            setHailData({
+              city: data.storm.affected_city,
+              date_of_loss: data.storm.date_of_loss,
+              hail_size: data.storm.hail_size,
+              damage_likely: parseFloat(data.storm.hail_size) >= 2,
+              verified: true
+            });
+          } else {
+            // No verified NOAA data available - don't show page
+            setHailData(prev => ({ ...prev, verified: false }));
+          }
+        })
+        .catch(() => {
+          setHailData(prev => ({ ...prev, verified: false }));
+        });
+      return;
+    }
+    
+    // Verify phrase against NOAA storm events ≥2" in OKC metro
+    fetch(`/api/storm-data/verify-hail-phrase?phrase=${encodeURIComponent(phrase)}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.storm) {
+        if (data.success && data.verified && data.storm) {
           setHailData({
             city: data.storm.affected_city,
             date_of_loss: data.storm.date_of_loss,
@@ -82,14 +107,12 @@ export default function HailDamage() {
             verified: true
           });
         } else {
-          // Fallback to default Oklahoma City data if rotation fails
-          setHailData(prev => ({ ...prev, verified: true }));
+          // Phrase doesn't match verified NOAA event - don't show page
+          setHailData(prev => ({ ...prev, verified: false }));
         }
       })
-      .catch(err => {
-        console.error('Failed to load storm data:', err);
-        // Always show page with default data - never block the landing page
-        setHailData(prev => ({ ...prev, verified: true }));
+      .catch(() => {
+        setHailData(prev => ({ ...prev, verified: false }));
       });
   }, []);
 

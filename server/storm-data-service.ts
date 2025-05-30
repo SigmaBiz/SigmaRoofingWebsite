@@ -29,7 +29,8 @@ interface StormData {
 }
 
 export class StormDataService {
-  private spcBaseUrl = 'https://www.spc.noaa.gov/climo/reports/';
+  private noaaBaseUrl = 'https://www.ncdc.noaa.gov/stormevents/json';
+  private apiToken = process.env.NOAA_API_TOKEN || 'qGvezLaGMOBpFrcORsGBjToYCXBjDejd';
   
   // OKC Metro area definition per requirements
   private readonly OKC_METRO_CITIES = [
@@ -38,38 +39,38 @@ export class StormDataService {
   ];
 
   constructor() {
-    console.log('Storm Data Service initialized with SPC CSV access');
+    console.log('Storm Data Service initialized with NOAA API access');
   }
 
   /**
-   * Get daily hail content with rotation - only verified SPC hail reports ≥2"
+   * Get daily hail content with rotation - only verified NOAA storm events ≥2"
    */
   async getDailyHailContent(phrase?: string): Promise<StormData | null> {
     try {
-      // Get verified hail reports from past 9 months using SPC CSV data
-      const hailReports = await this.getVerifiedHailReports(270);
+      // Get verified storm events from NOAA API
+      const stormEvents = await this.getNoaaStormEvents();
       
-      if (hailReports.length === 0) {
-        console.log('No verified SPC hail reports ≥2" found in OKC metro');
+      if (stormEvents.length === 0) {
+        console.log('No verified NOAA hail events ≥2" found in OKC metro');
         return null;
       }
       
       // If phrase provided, try to match it first
       if (phrase) {
-        const matchingReport = hailReports.find(report => 
-          this.phraseMatchesHailReport(phrase, report)
+        const matchingEvent = stormEvents.find(event => 
+          this.phraseMatchesNoaaEvent(phrase, event)
         );
-        if (matchingReport) {
-          return this.processHailReport(matchingReport);
+        if (matchingEvent) {
+          return this.processNoaaEvent(matchingEvent);
         }
       }
       
       // Daily rotation - use current date as seed for consistent daily selection
       const today = new Date().toDateString();
       const dayIndex = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const reportIndex = dayIndex % hailReports.length;
+      const eventIndex = dayIndex % stormEvents.length;
       
-      return this.processHailReport(hailReports[reportIndex]);
+      return this.processNoaaEvent(stormEvents[eventIndex]);
       
     } catch (error) {
       console.error('Error getting daily hail content:', error);
@@ -78,27 +79,201 @@ export class StormDataService {
   }
 
   /**
-   * Get verified hail reports from SPC CSV files
+   * Get verified storm events from NOAA API
+   */
+  async getNoaaStormEvents(): Promise<NOAAStormEvent[]> {
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 270); // 9 months back
+      
+      const params = new URLSearchParams({
+        dataset: 'details',
+        startdate: startDate.toISOString().split('T')[0].replace(/-/g, ''),
+        enddate: endDate.toISOString().split('T')[0].replace(/-/g, ''),
+        state: 'OK',
+        eventtype: 'hail',
+        format: 'json',
+        limit: '1000',
+        token: this.apiToken
+      });
+
+      const url = `${this.noaaBaseUrl}?${params}`;
+      console.log('Fetching NOAA storm events...');
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`NOAA API request failed: ${response.status}`);
+      }
+      
+      const data = await response.json() as any;
+      
+      if (!data.results || !Array.isArray(data.results)) {
+        console.log('No storm events found in NOAA response');
+        return [];
+      }
+      
+      // Filter for ≥2" hail in OKC metro
+      const filteredEvents = data.results.filter((event: NOAAStormEvent) => {
+        const hailSize = this.extractNoaaHailSize(event);
+        return hailSize >= 2.0 && this.isNoaaEventInOKCMetro(event);
+      });
+      
+      console.log(`Found ${filteredEvents.length} verified hail events ≥2" in OKC metro`);
+      return filteredEvents;
+      
+    } catch (error) {
+      console.error('Error fetching NOAA storm events:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Extract hail size from NOAA event data
+   */
+  private extractNoaaHailSize(event: NOAAStormEvent): number {
+    if (event.magnitude && event.magnitude_type?.toLowerCase().includes('inches')) {
+      return event.magnitude;
+    }
+    
+    const narrative = event.event_narrative || '';
+    const sizeMatch = narrative.toLowerCase().match(/(\d+\.?\d*)\s*inch/);
+    if (sizeMatch) {
+      return parseFloat(sizeMatch[1]) || 0;
+    }
+    
+    return 0;
+  }
+
+  /**
+   * Check if NOAA event is in OKC metro area
+   */
+  private isNoaaEventInOKCMetro(event: NOAAStormEvent): boolean {
+    const location = (event.location || '').toLowerCase();
+    const county = (event.county || '').toLowerCase();
+    
+    return this.OKC_METRO_CITIES.some(city => 
+      location.includes(city) || 
+      location.includes(city.replace(' ', '')) ||
+      county.includes(city.split(' ')[0])
+    );
+  }
+
+  /**
+   * Check if phrase matches NOAA event
+   */
+  private phraseMatchesNoaaEvent(phrase: string, event: NOAAStormEvent): boolean {
+    const lowerPhrase = phrase.toLowerCase();
+    const location = (event.location || '').toLowerCase();
+    
+    const hasHailTerms = lowerPhrase.includes('hail') || 
+                        lowerPhrase.includes('storm') || 
+                        lowerPhrase.includes('damage');
+    
+    const hasLocationMatch = this.OKC_METRO_CITIES.some(city => 
+      lowerPhrase.includes(city) || location.includes(city)
+    );
+    
+    return hasHailTerms && hasLocationMatch;
+  }
+
+  /**
+   * Process NOAA event into StormData format
+   */
+  private processNoaaEvent(event: NOAAStormEvent): StormData {
+    const city = this.extractCityFromNoaaLocation(event.location);
+    const hailSize = this.extractNoaaHailSize(event);
+    
+    return {
+      date_of_loss: new Date(event.begin_date).toLocaleDateString(),
+      affected_city: city,
+      storm_type: 'hail',
+      hail_size: `${hailSize}"`,
+      is_hail_event: true,
+      is_tornado_event: false,
+      hail_less_than_1_5: hailSize < 1.5,
+      event_details: `${hailSize}" hail reported in ${city} on ${new Date(event.begin_date).toLocaleDateString()}`,
+      generated_at: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Extract city name from NOAA location format
+   */
+  private extractCityFromNoaaLocation(location: string): string {
+    if (!location) return 'Oklahoma City';
+    
+    const matchedCity = this.OKC_METRO_CITIES.find(city =>
+      location.toLowerCase().includes(city)
+    );
+    
+    if (matchedCity) {
+      return matchedCity.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+    
+    const cityMatch = location.split(/[,()]/)[0].trim();
+    return cityMatch || 'Oklahoma City';
+  }
+
+  /**
+   * Get verified hail reports from SPC CSV files - focused on peak season
    */
   async getVerifiedHailReports(daysBack: number = 30): Promise<any[]> {
     const allReports: any[] = [];
-    const endDate = new Date();
     
-    // Check each day going back the specified number of days
-    for (let i = 0; i < daysBack; i++) {
-      const checkDate = new Date(endDate);
-      checkDate.setDate(endDate.getDate() - i);
-      
+    // Focus on known peak hail dates in Oklahoma (March-June)
+    const targetDates = this.getRecentHailSeasonDates();
+    
+    // Limit to first 10 dates to avoid infinite loading
+    const limitedDates = targetDates.slice(0, 10);
+    
+    for (const date of limitedDates) {
       try {
-        const reports = await this.getHailReportsForDate(checkDate);
-        allReports.push(...reports);
+        const reports = await Promise.race([
+          this.getHailReportsForDate(date),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000))
+        ]) as any[];
+        
+        if (reports && reports.length > 0) {
+          allReports.push(...reports);
+          // Stop after finding first good data set
+          if (allReports.length >= 5) break;
+        }
       } catch (error) {
-        // Continue checking other dates if one fails
-        console.log(`No hail data for ${checkDate.toISOString().split('T')[0]}`);
+        // Skip this date and continue
+        continue;
       }
     }
     
     return allReports;
+  }
+
+  /**
+   * Get strategic dates during hail season for checking
+   */
+  private getRecentHailSeasonDates(): Date[] {
+    const dates: Date[] = [];
+    const currentYear = new Date().getFullYear();
+    
+    // Check recent dates in peak hail season (March-June)
+    const hailSeasonMonths = [5, 4, 3]; // May, April, March (reverse order)
+    
+    for (const month of hailSeasonMonths) {
+      // Check specific high-activity days
+      const targetDays = [15, 20, 10, 25, 5]; // Mid-month typically has more activity
+      
+      for (const day of targetDays) {
+        const date = new Date(currentYear, month - 1, day);
+        if (date <= new Date()) { // Don't check future dates
+          dates.push(date);
+        }
+      }
+    }
+    
+    return dates;
   }
 
   /**
@@ -281,17 +456,17 @@ export class StormDataService {
   }
 
   /**
-   * Get recent large hail events for "Other Events" section using SPC data
+   * Get recent large hail events for "Other Events" section using NOAA API
    */
   async getRecentLargeHailEvents(): Promise<Array<{city: string, hail_size: string, date: string}> | null> {
     try {
-      const hailReports = await this.getVerifiedHailReports(270); // 9 months
+      const stormEvents = await this.getNoaaStormEvents();
       
-      const largeHailEvents = hailReports
-        .map(report => ({
-          city: this.extractCityFromLocation(report.location),
-          hail_size: `${parseFloat(report.size)}" diameter`,
-          date: report.date
+      const largeHailEvents = stormEvents
+        .map(event => ({
+          city: this.extractCityFromNoaaLocation(event.location),
+          hail_size: `${this.extractNoaaHailSize(event)}" diameter`,
+          date: new Date(event.begin_date).toLocaleDateString()
         }))
         .slice(0, 5); // Limit to 5 events as requested
       

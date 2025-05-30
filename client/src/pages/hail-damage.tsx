@@ -405,15 +405,12 @@ export default function HailDamage() {
                     
                     <div className="space-y-2">
                       <input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="your.email@example.com"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                        required
+                        type="text"
+                        onChange={(e) => console.log('DIRECT onChange:', e.target.value)}
+                        placeholder="Test input - type here"
+                        style={{border: '2px solid red', padding: '10px'}}
                       />
-                      <p className="text-blue-500 text-sm">TEST: Email value is "{formData.email}"</p>
+                      <p>If you can type above, the issue is with our form state</p>
                       {formData.email && (
                         validateEmail(formData.email) ? (
                           <p className="text-emerald-600 text-sm">✓ Email verified</p>

@@ -404,16 +404,21 @@ export default function HailDamage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <input
-                        type="text"
-                        onChange={(e) => console.log('DIRECT onChange:', e.target.value)}
-                        placeholder="Test input - type here"
-                        style={{border: '2px solid red', padding: '10px'}}
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        placeholder="your.email@example.com"
+                        className={`h-12 rounded-xl ${formData.email && !validateEmail(formData.email) ? 'border-red-500' : validateEmail(formData.email) ? 'border-emerald-500' : 'border-gray-200'}`}
+                        required
                       />
-                      <p>If you can type above, the issue is with our form state</p>
                       {formData.email && (
                         validateEmail(formData.email) ? (
-                          <p className="text-emerald-600 text-sm">✓ Email verified</p>
+                          <p className="text-emerald-600 text-sm flex items-center">
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Email verified
+                          </p>
                         ) : (
                           <p className="text-red-500 text-sm flex items-center">
                             <AlertTriangle className="w-4 h-4 mr-1" />

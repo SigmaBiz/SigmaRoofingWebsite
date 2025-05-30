@@ -44,8 +44,8 @@ export default function HailSimple() {
       borderRadius: '8px',
       fontFamily: 'Arial, sans-serif'
     }}>
-      <h1 style={{ marginBottom: '30px', color: '#333' }}>
-        Isolated Validation Test
+      <h1 style={{ marginBottom: '30px', color: '#10b981' }}>
+        Get Your Free Hail Damage Estimate
       </h1>
 
       <div style={{ marginBottom: '25px' }}>

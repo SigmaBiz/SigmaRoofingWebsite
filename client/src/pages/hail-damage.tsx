@@ -207,19 +207,29 @@ export default function HailDamage() {
     // Real-time validation using homepage logic
     const newErrors = { ...errors };
     
+    console.log(`Validating ${field} with value: "${processedValue}"`);
+    
     switch (field) {
       case 'email':
-        if (processedValue && !validateEmail(processedValue)) {
+        const emailValid = validateEmail(processedValue);
+        console.log(`Email validation result: ${emailValid}`);
+        if (processedValue && !emailValid) {
           newErrors.email = "Please enter a valid email address from a recognized provider";
+          console.log('Setting email error');
         } else {
           delete newErrors.email;
+          console.log('Clearing email error');
         }
         break;
       case 'phone':
-        if (processedValue && !validatePhone(processedValue)) {
+        const phoneValid = validatePhone(processedValue);
+        console.log(`Phone validation result: ${phoneValid}`);
+        if (processedValue && !phoneValid) {
           newErrors.phone = "Please enter a valid 10-digit US phone number";
+          console.log('Setting phone error');
         } else {
           delete newErrors.phone;
+          console.log('Clearing phone error');
         }
         break;
       case 'address':
@@ -231,6 +241,7 @@ export default function HailDamage() {
         break;
     }
     
+    console.log('New errors state:', newErrors);
     setErrors(newErrors);
   };
 

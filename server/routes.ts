@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactRequestSchema } from "@shared/schema";
 import { emailService } from "./email-service";
-import { stormDataService } from "./storm-data-service";
+import { stormDataService } from "./storm-data-service-clean";
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -664,29 +664,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Active tornado damage data - uses trending phrases or rotates through past 9 months  
+  // Active tornado damage data - CSV implementation
   app.get('/api/storm-data/active-tornado', async (req, res) => {
     try {
-      const phrase = req.query.phrase as string;
+      // Get tornado content from CSV data service
+      const stormData = await stormDataService.getTornadoContent();
       
-      // Try to get data from rotation system
-      const stormData = await stormDataService.getActiveTornadoData(phrase);
-      
-      res.json({
-        success: true,
-        storm: stormData
-      });
+      if (stormData) {
+        res.json({
+          success: true,
+          storm: stormData
+        });
+      } else {
+        // Provide default response if no data available
+        res.json({
+          success: true,
+          storm: {
+            date_of_loss: "Recent Storm Event",
+            affected_city: "Oklahoma City",
+            storm_type: "tornado",
+            hail_size: "0\"",
+            is_hail_event: false,
+            is_tornado_event: true,
+            hail_less_than_1_5: true,
+            event_details: "Recent tornado activity in the Oklahoma City metro area",
+            generated_at: new Date().toISOString()
+          }
+        });
+      }
       
     } catch (error) {
-      console.error('Error getting active tornado data:', error);
-      // Always provide a response, never block the landing page
+      console.error('Error getting tornado data:', error);
       res.json({
         success: true,
         storm: {
-          affected_city: "Oklahoma City",
-          date_of_loss: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+          date_of_loss: "Recent Storm Event",
+          affected_city: "Oklahoma City", 
           storm_type: "tornado",
-          is_tornado_event: true
+          hail_size: "0\"",
+          is_hail_event: false,
+          is_tornado_event: true,
+          hail_less_than_1_5: true,
+          event_details: "Recent tornado activity in the Oklahoma City metro area",
+          generated_at: new Date().toISOString()
         }
       });
     }

@@ -1,0 +1,74 @@
+🚨 FINAL DIRECTIVE FOR STORM LANDING PAGE PROJECT (REPLIT: FOLLOW CAREFULLY)
+
+OBJECTIVE:
+You are no longer permitted to use the NOAA CDO API (https://www.ncei.noaa.gov/cdo-web/api). All storm data must now come from NOAA’s public CSV archive:
+
+🔗 NEW DATA SOURCE:
+https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/
+
+Download the latest file:
+`StormEvents_details-ftp_v1.0_dYYYY_c*.csv.gz`
+
+You will:
+- Decompress this `.gz` file
+- Parse the `.csv` contents
+- Extract relevant hail or tornado events for Oklahoma metro areas
+- Display dynamic content using the storm landing page template
+
+🧼 ABSOLUTE REQUIREMENTS:
+- ❌ DELETE any references to API tokens, fetch() calls, or fallback logic to NOAA API
+- ❌ FLUSH all cache or persistence that tries to reuse API-based defaults
+- ✅ REFRESH completely with CSV-based data pipeline only
+- ✅ ENSURE no requests are made to NOAA’s API moving forward
+
+🧠 CSV PARSING GUIDE:
+Each row in the CSV represents a single storm event with the following relevant columns:
+
+| Column Name           | Use For                            | Example                              |
+|-----------------------|-------------------------------------|--------------------------------------|
+| `EVENT_TYPE`          | Filter: must be "Hail" or "Tornado"| Hail                                 |
+| `STATE`               | Filter: must be "OKLAHOMA"          | OKLAHOMA                             |
+| `CZ_NAME` or `BEGIN_LOCATION` | Match OKC metro area cities | OKLAHOMA CITY / EDMOND / NORMAN     |
+| `BEGIN_DATE_TIME`     | → `date_of_loss` variable           | 05/29/2025 07:00:00 PM              |
+| `MAGNITUDE`           | → `hail_size` (only for hail)       | 2.50                                 |
+| `EVENT_ID`            | optional, for uniqueness            | 1234567                              |
+
+🎯 HAIL LOGIC:
+- Use only hail events with `MAGNITUDE >= 2.0`
+- May go back as far as 12 months
+- Must be within OKC metro area by city match
+
+🎯 TORNADO LOGIC:
+- Only tornado events from the past 14 days
+- Must be verified in NOAA CSV
+- Must be in OKC metro area by location field
+
+📦 OKC METRO CITIES TO MATCH:
+- Oklahoma City
+- Edmond
+- Norman
+- Moore
+- Midwest City
+- Yukon
+- Bethany
+- Del City
+- Mustang
+- Nichols Hills
+
+📆 DATES:
+Normalize date to format `Month Day, Year` (e.g., May 29, 2025)
+
+💡 TEMPLATE USAGE:
+Use extracted values to replace:
+- `{storm_type}` → EVENT_TYPE
+- `{date_of_loss}` → BEGIN_DATE_TIME (normalized)
+- `{affected_city}` → CZ_NAME or BEGIN_LOCATION
+- `{hail_size}` → MAGNITUDE (if hail)
+- `{timestamp}` → current generation timestamp
+
+🧠 CAVEATS:
+- If no match for tornado: do not show page
+- If no recent hail: show fallback from older events (up to 12 months)
+
+✅ Final Note:
+Begin work from scratch if needed. Legacy fallback logic must be purged. This is a clean break from API use — CSV-only, moving forward.

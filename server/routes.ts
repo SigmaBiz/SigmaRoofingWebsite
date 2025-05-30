@@ -764,23 +764,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <p><strong>Location:</strong> ${event.affected_city}</p>
             <p><strong>Hail Size:</strong> ${event.hail_size}</p>
 
-            <p>In response to the trending topic <strong>"${phrase}"</strong>, we're providing localized, verified updates for residents affected by recent hail storms. This is not just a headline — it's a real event confirmed by NOAA affecting your neighborhood.</p>
+            <p>In light of the recent <strong>${event.storm_type}</strong> on <strong>${event.date_of_loss}</strong> in <strong>${event.affected_city}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
 
             ${severityText}
 
             <div class="highlight">
-              <p>Hailstones as large as <strong>${event.hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later. Don't wait — <strong>schedule an inspection today</strong>.</p>
+              <p>Hailstones as large as <strong>${event.hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>
             </div>
 
-            <p>We specialize in helping homeowners just like you. Our full-service storm damage process includes:</p>
-            <ul>
-              <li>✅ Free roof inspection within 24 hours</li>
-              <li>✅ Emergency tarping and water mitigation</li>
-              <li>✅ Full insurance claim documentation</li>
-              <li>✅ Local, licensed, and fully insured team</li>
-            </ul>
+            <p>Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
 
-            <p>Don't wait until small issues become costly repairs. If you've searched <strong>"${phrase}"</strong> recently — you're not alone. We're here to answer that call.</p>
+            <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
           </div>
 
           <div class="emergency">

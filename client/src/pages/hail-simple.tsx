@@ -1,26 +1,9 @@
 import React, { useState } from 'react';
 
-interface FormState {
-  email: string;
-  phone: string;
-}
-
-interface FormErrors {
-  email?: string;
-  phone?: string;
-}
-
 export default function HailSimpleForm() {
-  // Form state
-  const [form, setForm] = useState<FormState>({
-    email: '',
-    phone: ''
-  });
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
-  // Error state
-  const [errors, setErrors] = useState<FormErrors>({});
-
-  // Validation functions
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) return false;
@@ -40,124 +23,125 @@ export default function HailSimpleForm() {
     return cleanPhone.length === 10;
   };
 
-  // Event handlers
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    // Update form state
-    setForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    console.log('Email changed:', value);
+  };
 
-    // Clear existing error for this field
-    setErrors(prev => ({
-      ...prev,
-      [name]: undefined
-    }));
-
-    // Validate and set new error if needed
-    if (name === 'email' && value) {
-      if (!validateEmail(value)) {
-        setErrors(prev => ({
-          ...prev,
-          email: 'Please enter a valid email from a recognized provider'
-        }));
-      }
-    }
-
-    if (name === 'phone' && value) {
-      if (!validatePhone(value)) {
-        setErrors(prev => ({
-          ...prev,
-          phone: 'Please enter a valid 10-digit phone number'
-        }));
-      }
-    }
-
-    // Debug log
-    console.log(`${name} changed:`, value);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPhone(value);
+    console.log('Phone changed:', value);
   };
 
   return (
-    <div style={{ maxWidth: '500px', margin: '40px auto', padding: '20px' }}>
-      <h1 style={{ marginBottom: '20px', fontSize: '24px' }}>
-        Storm Damage Assessment Form
+    <div style={{ 
+      maxWidth: '600px', 
+      margin: '50px auto', 
+      padding: '30px',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      <h1 style={{ marginBottom: '30px', color: '#10b981', fontSize: '28px' }}>
+        Get Your Free Hail Damage Estimate
       </h1>
+      <p style={{ marginBottom: '30px', color: '#666', lineHeight: '1.5' }}>
+        Professional storm damage assessment in Oklahoma. Fill out our secure form for a detailed estimate within 24 hours.
+      </p>
 
-      <form>
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '8px' }}>
-            Email Address *
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="your.email@example.com"
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: `2px solid ${
-                !form.email ? '#ccc' :
-                errors.email ? 'red' :
-                validateEmail(form.email) ? 'green' : 'red'
-              }`,
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-          />
-          {form.email && (
-            <div style={{
-              color: errors.email ? 'red' : validateEmail(form.email) ? 'green' : 'red',
-              fontSize: '14px',
-              marginTop: '4px'
-            }}>
-              {errors.email || (validateEmail(form.email) ? '✓ Valid email' : '✗ Invalid email or domain')}
-            </div>
-          )}
-        </div>
+      <div style={{ marginBottom: '25px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: 'bold' 
+        }}>
+          Email Address *
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={handleEmailChange}
+          placeholder="your.email@example.com"
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: `3px solid ${
+              !email ? '#ccc' : 
+              validateEmail(email) ? '#10b981' : '#dc3545'
+            }`,
+            borderRadius: '4px',
+            fontSize: '16px',
+            boxSizing: 'border-box'
+          }}
+        />
+        {email && (
+          <div style={{
+            marginTop: '5px',
+            fontSize: '14px',
+            color: validateEmail(email) ? '#10b981' : '#dc3545',
+            fontWeight: 'bold'
+          }}>
+            {validateEmail(email) ? '✓ Valid email address' : '✗ Please enter a valid email from a recognized provider'}
+          </div>
+        )}
+      </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '8px' }}>
-            Phone Number *
-          </label>
-          <input
-            type="tel"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="(555) 555-5555"
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: `2px solid ${
-                !form.phone ? '#ccc' :
-                errors.phone ? 'red' :
-                validatePhone(form.phone) ? 'green' : 'red'
-              }`,
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-          />
-          {form.phone && (
-            <div style={{
-              color: errors.phone ? 'red' : validatePhone(form.phone) ? 'green' : 'red',
-              fontSize: '14px',
-              marginTop: '4px'
-            }}>
-              {errors.phone || (validatePhone(form.phone) ? '✓ Valid phone' : '✗ Must be 10 digits')}
-            </div>
-          )}
-        </div>
+      <div style={{ marginBottom: '25px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: 'bold' 
+        }}>
+          Phone Number *
+        </label>
+        <input
+          type="tel"
+          value={phone}
+          onChange={handlePhoneChange}
+          placeholder="(555) 555-5555"
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: `3px solid ${
+              !phone ? '#ccc' : 
+              validatePhone(phone) ? '#10b981' : '#dc3545'
+            }`,
+            borderRadius: '4px',
+            fontSize: '16px',
+            boxSizing: 'border-box'
+          }}
+        />
+        {phone && (
+          <div style={{
+            marginTop: '5px',
+            fontSize: '14px',
+            color: validatePhone(phone) ? '#10b981' : '#dc3545',
+            fontWeight: 'bold'
+          }}>
+            {validatePhone(phone) ? '✓ Valid 10-digit phone number' : '✗ Please enter a valid 10-digit US phone number'}
+          </div>
+        )}
+      </div>
 
-        {/* Debug output */}
-        <div style={{ marginTop: '20px', padding: '10px', background: '#f5f5f5' }}>
-          <pre>Form State: {JSON.stringify(form, null, 2)}</pre>
-          <pre>Errors: {JSON.stringify(errors, null, 2)}</pre>
-        </div>
-      </form>
+      <button
+        style={{
+          width: '100%',
+          padding: '15px',
+          backgroundColor: '#10b981',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          fontSize: '18px',
+          fontWeight: 'bold',
+          cursor: 'pointer'
+        }}
+        onMouseOver={(e) => e.target.style.backgroundColor = '#059669'}
+        onMouseOut={(e) => e.target.style.backgroundColor = '#10b981'}
+      >
+        Submit Free Estimate Request
+      </button>
     </div>
   );
 }

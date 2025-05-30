@@ -29,17 +29,27 @@ interface StormData {
 }
 
 export class StormDataService {
-  private noaaBaseUrl = 'https://www.ncdc.noaa.gov/stormevents/json';
+  private noaaBaseUrl = 'https://www.ncei.noaa.gov/cdo-web/api/v2/data';
   private apiToken = process.env.NOAA_API_TOKEN || 'qGvezLaGMOBpFrcORsGBjToYCXBjDejd';
   
-  // OKC Metro area definition per requirements
+  // OKC Metro area FIPS codes for precise location matching
+  private readonly OKC_METRO_FIPS = [
+    '40109', // Oklahoma County
+    '40027', // Cleveland County  
+    '40017', // Canadian County
+    '40125', // Pottawatomie County
+    '40083', // Logan County
+    '40087'  // McClain County
+  ];
+
+  // OKC Metro area cities for display names
   private readonly OKC_METRO_CITIES = [
     'oklahoma city', 'edmond', 'norman', 'moore', 'midwest city',
     'yukon', 'del city', 'bethany', 'mustang', 'nichols hills', 'warr acres'
   ];
 
   constructor() {
-    console.log('Storm Data Service initialized with NOAA API access');
+    console.log('Storm Data Service initialized with NOAA CDO Web API access');
   }
 
   /**
@@ -79,45 +89,60 @@ export class StormDataService {
   }
 
   /**
-   * Get verified storm events from NOAA API
+   * Get verified storm events from NOAA CDO Web API
    */
   async getNoaaStormEvents(): Promise<NOAAStormEvent[]> {
     try {
+      const allEvents: NOAAStormEvent[] = [];
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(endDate.getDate() - 270); // 9 months back
       
-      const params = new URLSearchParams({
-        dataset: 'details',
-        startdate: startDate.toISOString().split('T')[0].replace(/-/g, ''),
-        enddate: endDate.toISOString().split('T')[0].replace(/-/g, ''),
-        state: 'OK',
-        eventtype: 'hail',
-        format: 'json',
-        limit: '1000',
-        token: this.apiToken
-      });
+      const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const endDateStr = endDate.toISOString().split('T')[0];
+      
+      // Loop through each OKC metro county FIPS code
+      for (const fips of this.OKC_METRO_FIPS) {
+        try {
+          const params = new URLSearchParams({
+            datasetid: 'STORMEVENTS',
+            datatypeid: 'HAIL',
+            locationid: `FIPS:${fips}`,
+            startdate: startDateStr,
+            enddate: endDateStr,
+            limit: '1000'
+          });
 
-      const url = `${this.noaaBaseUrl}?${params}`;
-      console.log('Fetching NOAA storm events...');
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`NOAA API request failed: ${response.status}`);
+          const url = `${this.noaaBaseUrl}?${params}`;
+          console.log(`Fetching NOAA storm events for FIPS ${fips}...`);
+          
+          const response = await fetch(url, {
+            headers: {
+              'token': this.apiToken
+            }
+          });
+          
+          if (!response.ok) {
+            console.log(`NOAA API request failed for FIPS ${fips}: ${response.status}`);
+            continue; // Try next county
+          }
+          
+          const data = await response.json() as any;
+          
+          if (data.results && Array.isArray(data.results)) {
+            allEvents.push(...data.results);
+          }
+          
+        } catch (error) {
+          console.log(`Error fetching data for FIPS ${fips}:`, error);
+          continue; // Try next county
+        }
       }
       
-      const data = await response.json() as any;
-      
-      if (!data.results || !Array.isArray(data.results)) {
-        console.log('No storm events found in NOAA response');
-        return [];
-      }
-      
-      // Filter for ≥2" hail in OKC metro
-      const filteredEvents = data.results.filter((event: NOAAStormEvent) => {
-        const hailSize = this.extractNoaaHailSize(event);
-        return hailSize >= 2.0 && this.isNoaaEventInOKCMetro(event);
+      // Filter for ≥2" hail events
+      const filteredEvents = allEvents.filter((event: any) => {
+        const hailSize = this.extractHailSizeFromCDO(event);
+        return hailSize >= 2.0;
       });
       
       console.log(`Found ${filteredEvents.length} verified hail events ≥2" in OKC metro`);
@@ -127,6 +152,25 @@ export class StormDataService {
       console.error('Error fetching NOAA storm events:', error);
       return [];
     }
+  }
+
+  /**
+   * Extract hail size from CDO API event data
+   */
+  private extractHailSizeFromCDO(event: any): number {
+    // CDO API stores hail size in the value field (in hundredths of inches)
+    if (event.value && typeof event.value === 'number') {
+      return event.value / 100; // Convert from hundredths to inches
+    }
+    
+    // Fallback to checking attributes or description
+    const attributes = event.attributes || '';
+    const sizeMatch = attributes.toLowerCase().match(/(\d+\.?\d*)\s*inch/);
+    if (sizeMatch) {
+      return parseFloat(sizeMatch[1]) || 0;
+    }
+    
+    return 0;
   }
 
   /**
@@ -179,23 +223,68 @@ export class StormDataService {
   }
 
   /**
-   * Process NOAA event into StormData format
+   * Process CDO API event into StormData format
    */
-  private processNoaaEvent(event: NOAAStormEvent): StormData {
-    const city = this.extractCityFromNoaaLocation(event.location);
-    const hailSize = this.extractNoaaHailSize(event);
+  private processNoaaEvent(event: any): StormData {
+    const city = this.extractCityFromCDOLocation(event);
+    const hailSize = this.extractHailSizeFromCDO(event);
     
     return {
-      date_of_loss: new Date(event.begin_date).toLocaleDateString(),
+      date_of_loss: new Date(event.date).toLocaleDateString(),
       affected_city: city,
       storm_type: 'hail',
       hail_size: `${hailSize}"`,
       is_hail_event: true,
       is_tornado_event: false,
       hail_less_than_1_5: hailSize < 1.5,
-      event_details: `${hailSize}" hail reported in ${city} on ${new Date(event.begin_date).toLocaleDateString()}`,
+      event_details: `${hailSize}" hail reported in ${city} on ${new Date(event.date).toLocaleDateString()}`,
       generated_at: new Date().toISOString()
     };
+  }
+
+  /**
+   * Extract city name from CDO API location data
+   */
+  private extractCityFromCDOLocation(event: any): string {
+    // CDO API provides station name or location info
+    const stationName = event.station || '';
+    const locationId = event.locationid || '';
+    
+    // Try to match with known metro cities
+    const matchedCity = this.OKC_METRO_CITIES.find(city =>
+      stationName.toLowerCase().includes(city) ||
+      locationId.toLowerCase().includes(city)
+    );
+    
+    if (matchedCity) {
+      return matchedCity.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+    
+    // Extract FIPS code to determine county
+    if (locationId.includes('FIPS:')) {
+      const fips = locationId.replace('FIPS:', '');
+      return this.getFipsCountyName(fips);
+    }
+    
+    return 'Oklahoma City';
+  }
+
+  /**
+   * Get county name from FIPS code
+   */
+  private getFipsCountyName(fips: string): string {
+    const fipsMap: { [key: string]: string } = {
+      '40109': 'Oklahoma City',
+      '40027': 'Norman', 
+      '40017': 'Yukon',
+      '40125': 'Shawnee',
+      '40083': 'Guthrie',
+      '40087': 'Purcell'
+    };
+    
+    return fipsMap[fips] || 'Oklahoma City';
   }
 
   /**

@@ -1,0 +1,74 @@
+🔧 PROJECT CONTEXT & EXECUTION PLAN:
+
+You are building a dynamic storm damage landing page system for a roofing company. This project must:
+
+1. Pull trending search phrases from Google Trends daily
+2. Filter those trends into two categories: "hail" and "tornado"
+3. Cross-check hail-related phrases against NOAA storm reports to confirm:
+   - Event is hail
+   - Hail size ≥ 2.0"
+   - Location is in the Oklahoma City metro area (clustered ZIPs/FIPS)
+   - Report occurred within the last 12 months (priority to 1 week)
+4. Cross-check tornado phrases against NOAA storm reports to confirm:
+   - It was an actual tornado
+   - Occurred within the last 14 days
+   - Located in the OKC metro
+5. Only render a **tornado landing page** if those criteria are met.
+6. Always render a **hail landing page** if matching phrase is found.
+7. Do NOT use the NOAA API directly — instead, download and parse daily or weekly CSVs from [https://www.ncei.noaa.gov/pub/data/swdi/stormevents/](https://www.ncei.noaa.gov/pub/data/swdi/stormevents/)
+8. Page content should update dynamically based on matched trend + event.
+
+---
+
+🧠 SMART LOGIC EXPECTATIONS:
+
+- Extract search intent from trending Google phrases (e.g., "roof damage in Norman")
+- Match to verified storm data to determine `storm_type`, `date_of_loss`, `hail_size`, `affected_city`
+- Use fallback defaults only if NOAA data is unavailable
+- Incorporate phrase value into URL so that pages are pre-rendered or loaded via query param
+
+---
+
+📄 LANDING PAGE TEMPLATE CODE (Hail & Tornado Shared):
+
+<!-- STORM LANDING PAGE PITCH -->
+
+<h1>Thank You for visiting us today!</h1>
+
+<div class="main-pitch">
+  <p>In light of the recent <strong>{storm_type}</strong> on <strong>{date_of_loss}</strong> in <strong>{affected_city}</strong> that swept through your area, we know you are concerned and we are here to help.</p>
+
+  <!-- For smaller hail events -->
+  <p>Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage.</p>
+
+  <!-- For larger storm events -->
+  <p>Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem.</p>
+
+  <!-- For specific hail size -->
+  <p>Hailstones as large as <strong>{hail_size}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later.</p>
+
+  <!-- For tornado events -->
+  <p>Winds from this <strong>{storm_type}</strong> event damaged homes directly in its path — and even nearby structures saw uplifted shingles, fallen limbs, and structural stress. If you're within range, your roof may be more vulnerable than it appears.</p>
+
+  <p>Our expertise is at your disposal in managing any damages — verified or potential — and ensuring the safety of your home.</p>
+
+  <p>Whether you need immediate tarping or just a roof inspection, we have experts ready to put your mind back at ease.</p>
+</div>
+
+<!-- Emergency Contact Section -->
+<div class="emergency-section">
+  <h2>Emergency Storm Damage?</h2>
+  <p>If you have immediate safety concerns or active leaks, call us now for emergency services.</p>
+  <button>Emergency: (405) 902-1826</button>
+</div>
+
+<!-- Data Source Indicator -->
+<div class="data-source">
+  <strong>Storm Data Source:</strong> Real-time data from NOAA Storm Events Database | Generated: {timestamp}
+</div>
+
+---
+
+📌 REMINDER FOR AI:
+
+You are free to optimize the data pipelines, page rendering logic, and automation as long as it meets the intent and business objectives. Prioritize clarity, SEO performance, and real-time usefulness for leads. You may use Node.js, React, Tailwind, and any background cron/job system necessary.

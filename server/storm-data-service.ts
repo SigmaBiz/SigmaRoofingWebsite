@@ -29,7 +29,7 @@ interface StormData {
 }
 
 export class StormDataService {
-  private baseUrl = 'https://www.ncdc.noaa.gov/stormevents/json';
+  private spcBaseUrl = 'https://www.spc.noaa.gov/climo/reports/';
   
   // OKC Metro area definition per requirements
   private readonly OKC_METRO_CITIES = [
@@ -38,54 +38,198 @@ export class StormDataService {
   ];
 
   constructor() {
-    console.log('Storm Data Service initialized');
+    console.log('Storm Data Service initialized with SPC CSV access');
   }
 
   /**
-   * Get daily hail content with rotation - only verified NOAA storms ≥2"
+   * Get daily hail content with rotation - only verified SPC hail reports ≥2"
    */
   async getDailyHailContent(phrase?: string): Promise<StormData | null> {
     try {
-      // Get NOAA storm events from past 9 months
-      const storms = await this.getRecentOklahomaStorms(270);
+      // Get verified hail reports from past 9 months using SPC CSV data
+      const hailReports = await this.getVerifiedHailReports(270);
       
-      // Filter for hail events ≥2" in OKC metro
-      const validHailStorms = storms.filter(storm => {
-        const eventType = storm.event_type?.toLowerCase() || '';
-        if (!eventType.includes('hail')) return false;
-        
-        const hailSize = this.extractHailSize(storm);
-        if (hailSize < 2.0) return false;
-        
-        return this.isInOKCMetro(storm);
-      });
-      
-      if (validHailStorms.length === 0) {
-        console.log('No verified NOAA hail events ≥2" found in OKC metro');
+      if (hailReports.length === 0) {
+        console.log('No verified SPC hail reports ≥2" found in OKC metro');
         return null;
       }
       
       // If phrase provided, try to match it first
       if (phrase) {
-        const matchingStorm = validHailStorms.find(storm => 
-          this.phraseMatchesStorm(phrase, storm)
+        const matchingReport = hailReports.find(report => 
+          this.phraseMatchesHailReport(phrase, report)
         );
-        if (matchingStorm) {
-          return this.processStormEvent(matchingStorm);
+        if (matchingReport) {
+          return this.processHailReport(matchingReport);
         }
       }
       
       // Daily rotation - use current date as seed for consistent daily selection
       const today = new Date().toDateString();
       const dayIndex = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const stormIndex = dayIndex % validHailStorms.length;
+      const reportIndex = dayIndex % hailReports.length;
       
-      return this.processStormEvent(validHailStorms[stormIndex]);
+      return this.processHailReport(hailReports[reportIndex]);
       
     } catch (error) {
       console.error('Error getting daily hail content:', error);
       return null;
     }
+  }
+
+  /**
+   * Get verified hail reports from SPC CSV files
+   */
+  async getVerifiedHailReports(daysBack: number = 30): Promise<any[]> {
+    const allReports: any[] = [];
+    const endDate = new Date();
+    
+    // Check each day going back the specified number of days
+    for (let i = 0; i < daysBack; i++) {
+      const checkDate = new Date(endDate);
+      checkDate.setDate(endDate.getDate() - i);
+      
+      try {
+        const reports = await this.getHailReportsForDate(checkDate);
+        allReports.push(...reports);
+      } catch (error) {
+        // Continue checking other dates if one fails
+        console.log(`No hail data for ${checkDate.toISOString().split('T')[0]}`);
+      }
+    }
+    
+    return allReports;
+  }
+
+  /**
+   * Get hail reports for a specific date from SPC CSV
+   */
+  async getHailReportsForDate(date: Date): Promise<any[]> {
+    const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
+    const url = `${this.spcBaseUrl}${dateStr}_rpts_hail.csv`;
+    
+    try {
+      console.log(`Fetching SPC hail data: ${url}`);
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`SPC CSV request failed: ${response.status}`);
+      }
+      
+      const csvText = await response.text();
+      const reports = this.parseHailCSV(csvText, date);
+      
+      // Filter for OKC metro and ≥2" hail
+      return reports.filter(report => 
+        this.isHailReportInOKCMetro(report) && 
+        parseFloat(report.size) >= 2.0
+      );
+      
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Parse SPC hail CSV data
+   */
+  private parseHailCSV(csvText: string, date: Date): any[] {
+    const lines = csvText.trim().split('\n');
+    if (lines.length < 2) return [];
+    
+    // Skip header line and parse data
+    return lines.slice(1).map(line => {
+      const columns = line.split(',');
+      if (columns.length < 6) return null;
+      
+      return {
+        date: date.toLocaleDateString(),
+        time: columns[0]?.trim() || '',
+        size: columns[1]?.trim() || '0',
+        location: columns[2]?.trim() || '',
+        county: columns[3]?.trim() || '',
+        state: columns[4]?.trim() || '',
+        comments: columns[5]?.trim() || ''
+      };
+    }).filter(report => report !== null);
+  }
+
+  /**
+   * Check if hail report is in OKC metro area
+   */
+  private isHailReportInOKCMetro(report: any): boolean {
+    const location = (report.location || '').toLowerCase();
+    const county = (report.county || '').toLowerCase();
+    
+    // Check if in Oklahoma
+    if (report.state !== 'OK') return false;
+    
+    // Check for metro cities
+    return this.OKC_METRO_CITIES.some(city => 
+      location.includes(city) || 
+      location.includes(city.replace(' ', '')) ||
+      county.includes(city.split(' ')[0])
+    );
+  }
+
+  /**
+   * Check if phrase matches hail report
+   */
+  private phraseMatchesHailReport(phrase: string, report: any): boolean {
+    const lowerPhrase = phrase.toLowerCase();
+    const location = (report.location || '').toLowerCase();
+    
+    const hasHailTerms = lowerPhrase.includes('hail') || 
+                        lowerPhrase.includes('storm') || 
+                        lowerPhrase.includes('damage');
+    
+    const hasLocationMatch = this.OKC_METRO_CITIES.some(city => 
+      lowerPhrase.includes(city) || location.includes(city)
+    );
+    
+    return hasHailTerms && hasLocationMatch;
+  }
+
+  /**
+   * Process hail report into StormData format
+   */
+  private processHailReport(report: any): StormData {
+    const city = this.extractCityFromLocation(report.location);
+    const hailSize = parseFloat(report.size) || 2.0;
+    
+    return {
+      date_of_loss: report.date,
+      affected_city: city,
+      storm_type: 'hail',
+      hail_size: `${hailSize}"`,
+      is_hail_event: true,
+      is_tornado_event: false,
+      hail_less_than_1_5: hailSize < 1.5,
+      event_details: `${hailSize}" hail reported in ${city} on ${report.date}`,
+      generated_at: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Extract city name from SPC location format
+   */
+  private extractCityFromLocation(location: string): string {
+    if (!location) return 'Oklahoma City';
+    
+    // Find matching metro city
+    const matchedCity = this.OKC_METRO_CITIES.find(city =>
+      location.toLowerCase().includes(city)
+    );
+    
+    if (matchedCity) {
+      return matchedCity.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+    
+    // Extract location before any direction indicators
+    const cityMatch = location.split(/\s+(N|S|E|W|NE|NW|SE|SW)\s+/)[0].trim();
+    return cityMatch || 'Oklahoma City';
   }
 
   /**
@@ -137,26 +281,17 @@ export class StormDataService {
   }
 
   /**
-   * Get recent large hail events for "Other Events" section
+   * Get recent large hail events for "Other Events" section using SPC data
    */
   async getRecentLargeHailEvents(): Promise<Array<{city: string, hail_size: string, date: string}> | null> {
     try {
-      const storms = await this.getRecentOklahomaStorms(270); // 9 months
+      const hailReports = await this.getVerifiedHailReports(270); // 9 months
       
-      const largeHailEvents = storms
-        .filter(storm => {
-          const eventType = storm.event_type?.toLowerCase() || '';
-          if (!eventType.includes('hail')) return false;
-          
-          const hailSize = this.extractHailSize(storm);
-          if (hailSize < 2.0) return false;
-          
-          return this.isInOKCMetro(storm);
-        })
-        .map(storm => ({
-          city: this.extractCityName(storm.location),
-          hail_size: `${this.extractHailSize(storm)}" diameter`,
-          date: new Date(storm.begin_date).toLocaleDateString()
+      const largeHailEvents = hailReports
+        .map(report => ({
+          city: this.extractCityFromLocation(report.location),
+          hail_size: `${parseFloat(report.size)}" diameter`,
+          date: report.date
         }))
         .slice(0, 5); // Limit to 5 events as requested
       

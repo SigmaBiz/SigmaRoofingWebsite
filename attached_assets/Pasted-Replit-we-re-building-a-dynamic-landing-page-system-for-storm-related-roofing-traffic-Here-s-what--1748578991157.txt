@@ -1,0 +1,37 @@
+Replit, we're building a dynamic landing page system for storm-related roofing traffic. Here's what we need you to do for the hail-based landing page setup:
+
+1. **Storm Phrase Rotation**  
+   - The landing page should rotate to a new qualifying hail-related trending phrase only if:
+     - There were no visits that day, OR
+     - A new qualifying phrase shows a major surge in interest.
+   - Frequency for now: once per day if no activity, or immediately on surge.
+
+2. **Metro OKC Area**  
+   - When validating location matches to a storm report, understand that "metro Oklahoma City" includes:
+     - Oklahoma City, Edmond, Norman, Moore, Yukon, Mustang, Bethany, Del City, Midwest City, and surrounding suburbs.
+   - Please do not assume just "Oklahoma City" alone satisfies the entire metro definition.
+
+3. **NOAA Data — Use SPC CSVs (No API Key Needed)**  
+   - Pull hail report data directly from the Storm Prediction Center (SPC) at:
+     ```
+     https://www.spc.noaa.gov/climo/reports/YYYYMMDD_rpts_hail.csv
+     ```
+   - Replace `YYYYMMDD` with the date of the storm.
+   - This URL is **public** and does **not** require an API key.
+   - Be careful not to use future dates or the wrong format (e.g. `20250528` is correct for May 28, 2025).
+   - If you are getting a `400 Bad Request`, it’s likely due to using the wrong date format or a future date.
+
+4. **Qualifying Criteria for the Landing Page**
+   - Do **not** create a landing page unless the trending hail phrase matches a verified NOAA SPC hail report **within the last 12 months** AND the hail size is **2 inches or greater** in the metro area.
+   - If no valid match is found, rotate to a previously verified high-volume hail phrase within the last 9 months (1–5 top ones).
+
+5. **Optional: Local Hail History Report**
+   - Try to include 1–5 past hail events from the same metro area (2"+) within the last 9 months, **if and only if** the NOAA data loads in under 3 seconds.
+   - If the load takes longer, skip this step and proceed with just the main storm.
+
+6. **Hail Size Variable Usage**
+   - Parse the largest reported hail size (in inches) for the storm date and use that to populate the `{{HS}}` and logic such as `{{#if HS_less_than_1_5}}`.
+
+7. **Script and Page Logic**
+   - Keep the original dynamic script logic for the storm pitch (we’ve marked it up previously).
+   - Use that pitch and dynamically insert values from the SPC CSV (e.g., `DOL`, `HS`, `X`).

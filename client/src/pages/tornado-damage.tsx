@@ -394,11 +394,12 @@ export default function TornadoDamage() {
                   </div>
 
                   <Button
-                    type="submit"
+                    type="button"
+                    onClick={() => window.location.href = '/#contact'}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 text-lg font-semibold"
-                    disabled={contactMutation.isPending}
                   >
-                    {contactMutation.isPending ? "Submitting..." : "Schedule Free Assessment"}
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Schedule Free Assessment
                   </Button>
                 </form>
 

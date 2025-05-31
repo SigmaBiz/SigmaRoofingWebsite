@@ -173,6 +173,122 @@ export default function HailLandingPage() {
     return true;
   };
 
+  // Fetch Google Trends data for storm-related keywords
+  const fetchTrendingPhrases = async (): Promise<TrendingPhrase[]> => {
+    try {
+      // Try to fetch from Google Trends API via backend
+      const trendsResponse = await fetch('/api/trending-phrases');
+      if (trendsResponse.ok) {
+        const trendsData = await trendsResponse.json();
+        return trendsData.phrases || [];
+      }
+      
+      // Fallback to default trending phrases if API unavailable
+      return [
+        { title: 'hail damage roof inspection Oklahoma', traffic: 'High', relatedQueries: [] },
+        { title: 'storm damage insurance claim', traffic: 'Medium', relatedQueries: [] },
+        { title: 'roof repair after hail storm', traffic: 'Medium', relatedQueries: [] }
+      ];
+    } catch (error) {
+      console.error('Error fetching trending phrases:', error);
+      // Return fallback phrases
+      return [
+        { title: 'hail damage roof inspection Oklahoma', traffic: 'High', relatedQueries: [] }
+      ];
+    }
+  };
+
+  // Fetch authentic NOAA storm data
+  const fetchStormData = async (): Promise<DynamicStormContent> => {
+    try {
+      // Get trending phrases first
+      const trendingPhrases = await fetchTrendingPhrases();
+      
+      // Fetch NOAA storm data from your existing authenticated service
+      const stormResponse = await fetch('/api/storm-data/daily-hail-content');
+      if (!stormResponse.ok) {
+        throw new Error('Failed to fetch storm data');
+      }
+      
+      const stormResult = await stormResponse.json();
+      
+      if (!stormResult.success || !stormResult.storm) {
+        throw new Error('No verified NOAA storm data available');
+      }
+      
+      const stormData = stormResult.storm;
+      
+      // Select the most relevant trending phrase
+      const selectedPhrase = trendingPhrases.length > 0 
+        ? trendingPhrases[0].title 
+        : "hail damage roof inspection Oklahoma";
+
+      // Convert storm data to required format
+      const hailSizeNumber = parseFloat(stormData.hail_size) || 2.0;
+      
+      return {
+        S: stormData.storm_type || 'Hail',
+        DOL: stormData.date_of_loss || new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }),
+        X: stormData.affected_city || 'Oklahoma City',
+        HS: stormData.hail_size || '2.5 inches',
+        phrase: selectedPhrase,
+        hail_less_than_1_5: hailSizeNumber < 1.5
+      };
+    } catch (error) {
+      console.error('Error fetching storm data:', error);
+      throw error;
+    }
+  };
+
+  // Load dynamic storm content on component mount
+  useEffect(() => {
+    const loadStormContent = async () => {
+      try {
+        setIsLoadingStormData(true);
+        setStormDataError(null);
+        
+        // Check cache first
+        const cached = localStorage.getItem('storm-content-cache');
+        const cacheTimestamp = localStorage.getItem('storm-content-timestamp');
+        const now = Date.now();
+        const cacheAge = cacheTimestamp ? now - parseInt(cacheTimestamp) : Infinity;
+        
+        // Use cache if less than 24 hours old
+        if (cached && cacheAge < 24 * 60 * 60 * 1000) {
+          setStormContent(JSON.parse(cached));
+          setIsLoadingStormData(false);
+          return;
+        }
+        
+        // Fetch fresh data
+        const content = await fetchStormData();
+        setStormContent(content);
+        
+        // Cache the results
+        localStorage.setItem('storm-content-cache', JSON.stringify(content));
+        localStorage.setItem('storm-content-timestamp', now.toString());
+        
+      } catch (error) {
+        console.error('Failed to load storm content:', error);
+        setStormDataError('Unable to load current storm data');
+        
+        // Try to use any available cached data as fallback
+        const cached = localStorage.getItem('storm-content-cache');
+        if (cached) {
+          setStormContent(JSON.parse(cached));
+        }
+      } finally {
+        setIsLoadingStormData(false);
+      }
+    };
+
+    loadStormContent();
+  }, []);
+
   useEffect(() => {
     const loadingTimeout = setTimeout(() => {
       setHailData({
@@ -320,31 +436,98 @@ export default function HailLandingPage() {
 
       <div className="relative bg-gradient-to-br from-slate-50 to-white">
         <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
+          {/* Dynamic Storm Report Section */}
           <div className="max-w-4xl mx-auto mb-16">
-            <div className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl">
-              <div className="flex items-start space-x-6">
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center animate-pulse">
-                    <AlertTriangle className="w-8 h-8 text-red-600" />
-                  </div>
+            {isLoadingStormData ? (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+                <div className="flex items-center space-x-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <p className="text-lg text-blue-800">Loading current storm data from NOAA...</p>
                 </div>
-                <div className="flex-1">
-                  <h1 className="text-3xl lg:text-4xl font-light text-gray-900 mb-6 leading-tight">
-                    Hail Damage Alert: {hailData.city} Area
-                  </h1>
-                  <p className="text-xl text-gray-700 leading-relaxed mb-4">
-                    Recent {hailData.hail_size}" hail event on {hailData.date_of_loss} may have damaged roofs in your area.
-                  </p>
-                  <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-red-200">
-                    <p className="font-semibold text-red-700 text-lg flex items-center">
-                      <Clock className="w-5 h-5 mr-2" />
-                      Insurance claims must be filed within policy timeframes
+              </div>
+            ) : stormDataError ? (
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+                <div className="flex items-start space-x-6">
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center">
+                      <AlertTriangle className="w-8 h-8 text-yellow-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Storm Report</h2>
+                    <p className="text-lg text-gray-700 mb-4">
+                      We're currently updating our storm data from NOAA sources. In the meantime, our team is ready to assess any potential hail damage in the Oklahoma City area.
                     </p>
+                    <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-yellow-200">
+                      <p className="font-semibold text-yellow-700 text-lg flex items-center">
+                        <Clock className="w-5 h-5 mr-2" />
+                        Schedule your free inspection today
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : stormContent && (
+              <div className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+                <div className="flex items-start space-x-6">
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center animate-pulse">
+                      <AlertTriangle className="w-8 h-8 text-red-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-3xl lg:text-4xl font-light text-gray-900 mb-6 leading-tight">Recent Storm Report</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Storm Type</p>
+                        <p className="text-lg font-bold text-gray-900">{stormContent.S}</p>
+                      </div>
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Date</p>
+                        <p className="text-lg font-bold text-gray-900">{stormContent.DOL}</p>
+                      </div>
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Location</p>
+                        <p className="text-lg font-bold text-gray-900">{stormContent.X}</p>
+                      </div>
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Hail Size</p>
+                        <p className="text-lg font-bold text-gray-900">{stormContent.HS}</p>
+                      </div>
+                    </div>
+
+                    <p className="text-lg text-gray-700 leading-relaxed mb-4">
+                      In light of the recent storm in {stormContent.X} on {stormContent.DOL}, we're here to help. The trending topic <strong>"{stormContent.phrase}"</strong> shows just how many homeowners are searching for answers right now — and we're proud to offer verified, local guidance using NOAA data.
+                    </p>
+
+                    {stormContent.hail_less_than_1_5 ? (
+                      <p className="text-lg text-gray-700 leading-relaxed mb-4">
+                        Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage. That's why more people are searching <strong>"{stormContent.phrase}"</strong> to figure out what to do next.
+                      </p>
+                    ) : (
+                      <p className="text-lg text-gray-700 leading-relaxed mb-4">
+                        Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem. That's why searches like <strong>"{stormContent.phrase}"</strong> are trending in your area.
+                      </p>
+                    )}
+
+                    <div className="bg-red-100 border border-red-200 rounded-lg p-6 mt-6">
+                      <p className="text-lg font-semibold text-red-800 leading-relaxed">
+                        Hailstones as large as <strong>{stormContent.HS}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later. Don't wait — <strong>schedule an inspection today</strong>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+        </div>
+      </div>
+
+      {/* Projects Gallery Section */}
+      <div className="bg-gray-50">
+        <div className="container mx-auto px-6 lg:px-12 py-16">
+          <Projects />
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle, Mail } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { getWebsiteImages } from "@/lib/imageService";
 import Projects from "@/components/projects";
 
 interface ContactForm {
@@ -82,6 +83,9 @@ export default function HailLandingPage() {
   const [stormContent, setStormContent] = useState<DynamicStormContent | null>(null);
   const [isLoadingStormData, setIsLoadingStormData] = useState(true);
   const [stormDataError, setStormDataError] = useState<string | null>(null);
+  
+  // Visual enhancement states
+  const [images, setImages] = useState<any>({});
 
   const [hailData, setHailData] = useState({
     city: "Oklahoma City",
@@ -290,6 +294,9 @@ export default function HailLandingPage() {
   }, []);
 
   useEffect(() => {
+    // Load images for visual enhancements
+    getWebsiteImages().then(setImages);
+    
     const loadingTimeout = setTimeout(() => {
       setHailData({
         city: "Oklahoma City",
@@ -408,7 +415,14 @@ export default function HailLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div 
+      className="min-h-screen parallax-bg"
+      style={{
+        backgroundImage: images.hailLandingPageBackground 
+          ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${images.hailLandingPageBackground})`
+          : 'linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%)'
+      }}
+    >
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -436,7 +450,7 @@ export default function HailLandingPage() {
         </div>
       </header>
 
-      <div className="relative bg-gradient-to-br from-slate-50 to-white">
+      <div className="relative">
         <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
           {/* Dynamic Storm Report Section */}
           <div className="max-w-4xl mx-auto mb-16">
@@ -470,10 +484,10 @@ export default function HailLandingPage() {
                 </div>
               </div>
             ) : stormContent && (
-              <div className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+              <div className="glass-card hover-lift bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl">
                 <div className="flex items-start space-x-6">
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center animate-pulse">
+                    <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center alert-icon-glow">
                       <AlertTriangle className="w-8 h-8 text-red-600" />
                     </div>
                   </div>
@@ -481,21 +495,24 @@ export default function HailLandingPage() {
                     <h2 className="text-3xl lg:text-4xl font-light text-gray-900 mb-6 leading-tight">Recent Storm Report</h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div className="bg-white/70 rounded-lg p-4">
+                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
                         <p className="text-sm font-medium text-gray-600 mb-1">Storm Type</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.S}</p>
                       </div>
-                      <div className="bg-white/70 rounded-lg p-4">
+                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
                         <p className="text-sm font-medium text-gray-600 mb-1">Date</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.DOL}</p>
                       </div>
-                      <div className="bg-white/70 rounded-lg p-4">
+                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
                         <p className="text-sm font-medium text-gray-600 mb-1">Location</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.X}</p>
                       </div>
-                      <div className="bg-white/70 rounded-lg p-4">
+                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
                         <p className="text-sm font-medium text-gray-600 mb-1">Hail Size</p>
-                        <p className="text-lg font-bold text-gray-900">{stormContent.HS}</p>
+                        <div className="flex items-center space-x-3">
+                          <p className="text-lg font-bold text-gray-900">{stormContent.HS}</p>
+                          <div className="size-indicator w-6 h-6 bg-red-500 rounded-full opacity-80"></div>
+                        </div>
                       </div>
                     </div>
 
@@ -534,7 +551,7 @@ export default function HailLandingPage() {
                     element.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className="inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+                className="cta-pulse inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200"
               >
                 <CheckCircle className="mr-3 h-6 w-6" />
                 Get Free Storm Damage Inspection Now

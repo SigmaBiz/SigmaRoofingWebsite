@@ -91,23 +91,26 @@ export class MemStorage implements IStorage {
   }
 
   async updateWebsiteImages(images: InsertWebsiteImages): Promise<WebsiteImages> {
+    // Get existing images to preserve them
+    const existing = this.websiteImages || {};
+    
     const updatedImages: WebsiteImages = {
       id: 1,
-      heroBackground: images.heroBackground || null,
-      heroFeatureImage: images.heroFeatureImage || null,
-      residentialRoofingImage: images.residentialRoofingImage || null,
-      roofRepairImage: images.roofRepairImage || null,
-      roofInspectionImage: images.roofInspectionImage || null,
-      gutterServiceImage: images.gutterServiceImage || null,
-      stormDamageImage: images.stormDamageImage || null,
-      paintingServiceImage: images.paintingServiceImage || null,
-      teamPhoto: images.teamPhoto || null,
-      companyLogo: images.companyLogo || null,
-      processStep1Image: images.processStep1Image || null,
-      processStep2Image: images.processStep2Image || null,
-      processStep3Image: images.processStep3Image || null,
-      processStep4Image: images.processStep4Image || null,
-      testimonialBackground: images.testimonialBackground || null,
+      heroBackground: images.heroBackground || existing.heroBackground || null,
+      heroFeatureImage: images.heroFeatureImage || existing.heroFeatureImage || null,
+      residentialRoofingImage: images.residentialRoofingImage || existing.residentialRoofingImage || null,
+      roofRepairImage: images.roofRepairImage || existing.roofRepairImage || null,
+      roofInspectionImage: images.roofInspectionImage || existing.roofInspectionImage || null,
+      gutterServiceImage: images.gutterServiceImage || existing.gutterServiceImage || null,
+      stormDamageImage: images.stormDamageImage || existing.stormDamageImage || null,
+      paintingServiceImage: images.paintingServiceImage || existing.paintingServiceImage || null,
+      teamPhoto: images.teamPhoto || existing.teamPhoto || null,
+      companyLogo: images.companyLogo || existing.companyLogo || null,
+      processStep1Image: images.processStep1Image || existing.processStep1Image || null,
+      processStep2Image: images.processStep2Image || existing.processStep2Image || null,
+      processStep3Image: images.processStep3Image || existing.processStep3Image || null,
+      processStep4Image: images.processStep4Image || existing.processStep4Image || null,
+      testimonialBackground: images.testimonialBackground || existing.testimonialBackground || null,
       updatedAt: new Date(),
     };
     this.websiteImages = updatedImages;

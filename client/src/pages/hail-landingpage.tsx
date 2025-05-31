@@ -71,7 +71,7 @@ export default function HailLandingPage() {
 
   // Contact form submission mutation
   const contactMutation = useMutation({
-    mutationFn: (data: ContactForm) => apiRequest('/api/contact', 'POST', data),
+    mutationFn: (data: ContactForm) => apiRequest('POST', '/api/contact', data),
   });
 
   const validateEmail = (email: string): boolean => {

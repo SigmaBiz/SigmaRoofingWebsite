@@ -135,10 +135,21 @@ export default function HailLandingPage() {
     }
   };
 
-  // Check if time slot is available
-  const isSlotAvailable = (date: string, time: string): boolean => {
+  // Check if time slot is available and doesn't conflict with other selections
+  const isSlotAvailable = (date: string, time: string, isSecondChoice = false): boolean => {
     const slotKey = `${date}-${time}`;
-    return !bookedSlots.includes(slotKey);
+    
+    // Check if slot is already booked
+    if (bookedSlots.includes(slotKey)) {
+      return false;
+    }
+    
+    // Check if it conflicts with the first choice (for second choice only)
+    if (isSecondChoice && formData.preferredDate1 === date && formData.preferredTime1 === time) {
+      return false;
+    }
+    
+    return true;
   };
 
   useEffect(() => {
@@ -654,28 +665,19 @@ export default function HailLandingPage() {
                             >
                               <option value="">Select time</option>
                               <option value="08:00" disabled={!isSlotAvailable(formData.preferredDate1, '08:00')}>
-                                8:00 AM {!isSlotAvailable(formData.preferredDate1, '08:00') ? '(Booked)' : ''}
-                              </option>
-                              <option value="09:00" disabled={!isSlotAvailable(formData.preferredDate1, '09:00')}>
-                                9:00 AM {!isSlotAvailable(formData.preferredDate1, '09:00') ? '(Booked)' : ''}
+                                8:00 AM - 10:00 AM {!isSlotAvailable(formData.preferredDate1, '08:00') ? '(Booked)' : ''}
                               </option>
                               <option value="10:00" disabled={!isSlotAvailable(formData.preferredDate1, '10:00')}>
-                                10:00 AM {!isSlotAvailable(formData.preferredDate1, '10:00') ? '(Booked)' : ''}
+                                10:00 AM - 12:00 PM {!isSlotAvailable(formData.preferredDate1, '10:00') ? '(Booked)' : ''}
                               </option>
-                              <option value="11:00" disabled={!isSlotAvailable(formData.preferredDate1, '11:00')}>
-                                11:00 AM {!isSlotAvailable(formData.preferredDate1, '11:00') ? '(Booked)' : ''}
-                              </option>
-                              <option value="13:00" disabled={!isSlotAvailable(formData.preferredDate1, '13:00')}>
-                                1:00 PM {!isSlotAvailable(formData.preferredDate1, '13:00') ? '(Booked)' : ''}
+                              <option value="12:00" disabled={!isSlotAvailable(formData.preferredDate1, '12:00')}>
+                                12:00 PM - 2:00 PM {!isSlotAvailable(formData.preferredDate1, '12:00') ? '(Booked)' : ''}
                               </option>
                               <option value="14:00" disabled={!isSlotAvailable(formData.preferredDate1, '14:00')}>
-                                2:00 PM {!isSlotAvailable(formData.preferredDate1, '14:00') ? '(Booked)' : ''}
-                              </option>
-                              <option value="15:00" disabled={!isSlotAvailable(formData.preferredDate1, '15:00')}>
-                                3:00 PM {!isSlotAvailable(formData.preferredDate1, '15:00') ? '(Booked)' : ''}
+                                2:00 PM - 4:00 PM {!isSlotAvailable(formData.preferredDate1, '14:00') ? '(Booked)' : ''}
                               </option>
                               <option value="16:00" disabled={!isSlotAvailable(formData.preferredDate1, '16:00')}>
-                                4:00 PM {!isSlotAvailable(formData.preferredDate1, '16:00') ? '(Booked)' : ''}
+                                4:00 PM - 6:00 PM {!isSlotAvailable(formData.preferredDate1, '16:00') ? '(Booked)' : ''}
                               </option>
                             </select>
                           </div>
@@ -699,29 +701,20 @@ export default function HailLandingPage() {
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                             >
                               <option value="">Select time</option>
-                              <option value="08:00" disabled={!isSlotAvailable(formData.preferredDate2, '08:00')}>
-                                8:00 AM {!isSlotAvailable(formData.preferredDate2, '08:00') ? '(Booked)' : ''}
+                              <option value="08:00" disabled={!isSlotAvailable(formData.preferredDate2, '08:00', true)}>
+                                8:00 AM - 10:00 AM {!isSlotAvailable(formData.preferredDate2, '08:00', true) ? '(Booked/Selected)' : ''}
                               </option>
-                              <option value="09:00" disabled={!isSlotAvailable(formData.preferredDate2, '09:00')}>
-                                9:00 AM {!isSlotAvailable(formData.preferredDate2, '09:00') ? '(Booked)' : ''}
+                              <option value="10:00" disabled={!isSlotAvailable(formData.preferredDate2, '10:00', true)}>
+                                10:00 AM - 12:00 PM {!isSlotAvailable(formData.preferredDate2, '10:00', true) ? '(Booked/Selected)' : ''}
                               </option>
-                              <option value="10:00" disabled={!isSlotAvailable(formData.preferredDate2, '10:00')}>
-                                10:00 AM {!isSlotAvailable(formData.preferredDate2, '10:00') ? '(Booked)' : ''}
+                              <option value="12:00" disabled={!isSlotAvailable(formData.preferredDate2, '12:00', true)}>
+                                12:00 PM - 2:00 PM {!isSlotAvailable(formData.preferredDate2, '12:00', true) ? '(Booked/Selected)' : ''}
                               </option>
-                              <option value="11:00" disabled={!isSlotAvailable(formData.preferredDate2, '11:00')}>
-                                11:00 AM {!isSlotAvailable(formData.preferredDate2, '11:00') ? '(Booked)' : ''}
+                              <option value="14:00" disabled={!isSlotAvailable(formData.preferredDate2, '14:00', true)}>
+                                2:00 PM - 4:00 PM {!isSlotAvailable(formData.preferredDate2, '14:00', true) ? '(Booked/Selected)' : ''}
                               </option>
-                              <option value="13:00" disabled={!isSlotAvailable(formData.preferredDate2, '13:00')}>
-                                1:00 PM {!isSlotAvailable(formData.preferredDate2, '13:00') ? '(Booked)' : ''}
-                              </option>
-                              <option value="14:00" disabled={!isSlotAvailable(formData.preferredDate2, '14:00')}>
-                                2:00 PM {!isSlotAvailable(formData.preferredDate2, '14:00') ? '(Booked)' : ''}
-                              </option>
-                              <option value="15:00" disabled={!isSlotAvailable(formData.preferredDate2, '15:00')}>
-                                3:00 PM {!isSlotAvailable(formData.preferredDate2, '15:00') ? '(Booked)' : ''}
-                              </option>
-                              <option value="16:00" disabled={!isSlotAvailable(formData.preferredDate2, '16:00')}>
-                                4:00 PM {!isSlotAvailable(formData.preferredDate2, '16:00') ? '(Booked)' : ''}
+                              <option value="16:00" disabled={!isSlotAvailable(formData.preferredDate2, '16:00', true)}>
+                                4:00 PM - 6:00 PM {!isSlotAvailable(formData.preferredDate2, '16:00', true) ? '(Booked/Selected)' : ''}
                               </option>
                             </select>
                           </div>

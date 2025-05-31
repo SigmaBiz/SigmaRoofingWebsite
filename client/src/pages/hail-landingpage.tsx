@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle, Mail } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ContactForm {
   firstName: string;
@@ -67,6 +68,11 @@ export default function HailLandingPage() {
   });
 
   const reviews: Review[] = reviewsData?.reviews || [];
+
+  // Contact form submission mutation
+  const contactMutation = useMutation({
+    mutationFn: (data: ContactForm) => apiRequest('/api/contact', 'POST', data),
+  });
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -143,10 +149,10 @@ export default function HailLandingPage() {
     setSubmitMessage(null);
 
     try {
-      console.log('Simulating API call...');
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Submitting to SendGrid email service...');
+      const result = await contactMutation.mutateAsync(formData);
       
-      console.log('API call successful');
+      console.log('Form submitted successfully:', result);
       setSubmitMessage({
         type: 'success',
         text: "Request submitted successfully! We'll contact you within 2 hours to schedule your free inspection."
@@ -168,7 +174,7 @@ export default function HailLandingPage() {
       setErrors({});
       
     } catch (error) {
-      console.log('API call failed:', error);
+      console.log('Form submission failed:', error);
       setSubmitMessage({
         type: 'error',
         text: 'Submission failed. Please try again or call us directly at (405) 902-1826'

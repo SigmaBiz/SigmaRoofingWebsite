@@ -414,10 +414,10 @@ export default function HailLandingPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">B</span>
+                <span className="text-white font-bold text-lg">S</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">BBAV Roofing LLC</h1>
+                <h1 className="text-xl font-bold text-gray-900">Sigma Roofing LLC</h1>
                 <p className="text-sm text-gray-600">Licensed & Insured</p>
               </div>
             </div>
@@ -520,6 +520,38 @@ export default function HailLandingPage() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Strategic Call-to-Action Section */}
+          <div className="max-w-4xl mx-auto mb-12">
+            <div className="text-center">
+              <a 
+                href="tel:4059021826"
+                className="inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+              >
+                <Phone className="mr-3 h-6 w-6" />
+                Get Free Storm Damage Inspection Now
+              </a>
+              <p className="text-gray-600 mt-3 text-lg">
+                Quick response • Insurance assistance • No obligation
+              </p>
+            </div>
+            
+            {/* Urgency Message */}
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-xl p-6 mt-8 shadow-md">
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-amber-600" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-amber-800">
+                    ⚡ High demand after recent storms - Our crews are booking fast. Call now to secure your spot.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

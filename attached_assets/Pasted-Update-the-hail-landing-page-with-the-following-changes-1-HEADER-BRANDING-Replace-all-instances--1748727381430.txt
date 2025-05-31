@@ -1,0 +1,23 @@
+Update the hail landing page with the following changes:
+
+1. HEADER BRANDING: Replace all instances of "BBAV Roofing LLC" with "Sigma Roofing LLC" in the header. Keep the same header structure but change the company name and ensure the logo shows "S" for Sigma instead of "B". Maintain the same green color scheme (emerald-600).
+
+2. PHONE NUMBER: Update the phone number throughout the page from (405) 902-1826 to whatever Sigma Roofing's actual phone number is. Make sure this is consistent everywhere.
+
+3. ADD CALL-TO-ACTION BUTTON: Immediately after the "Recent Storm Report" card (the yellow card with storm details), add a prominent CTA button with these specifications:
+  - Large, green button (emerald-600) that stands out
+  - Text: "Get Free Storm Damage Inspection Now"
+  - Include a phone icon on the left side of the text
+  - Make it a clickable phone link (tel:) 
+  - Add hover effects for better interaction
+  - Below the button add supporting text: "Quick response • Insurance assistance • No obligation"
+
+4. ADD URGENCY MESSAGE: Right after the CTA button, add a yellow/amber alert box that creates urgency with a message like "High demand after recent storms - Our crews are booking fast. Call now to secure your spot." Include a lightning emoji or similar icon.
+
+5. POSITIONING RATIONALE: The CTA button must be placed RIGHT AFTER the storm report card because visitors to this landing page are already "warm" leads - they searched for storm damage help and need immediate action options. Don't make them scroll to find how to contact you.
+
+6. CONSISTENCY CHECK: Ensure all company references throughout the page say "Sigma Roofing LLC" not BBAV. This includes footer, testimonials, or any other sections.
+
+7. LOGO: If Sigma Roofing has an actual logo image file, replace the letter-based logo with the image. Otherwise keep the "S" in the green square.
+
+Make these changes to create brand consistency with the main website and capture warm leads immediately with the strategically placed CTA button.

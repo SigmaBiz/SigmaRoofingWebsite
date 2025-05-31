@@ -24,6 +24,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/hail" component={HailDamage} />
       <Route path="/hail-damage" component={HailSimple} />
       <Route path="/hail-damage-complex" component={HailDamage} />
       <Route path="/tornado-damage" component={TornadoDamage} />

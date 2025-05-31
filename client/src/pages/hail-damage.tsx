@@ -434,6 +434,14 @@ export default function HailDamage() {
                             errors.email ? 'border-red-500' : 'border-gray-300'
                           }`}
                         />
+                        <p className="text-xs text-gray-500 mt-1">Value: "{formData.email}"</p>
+                        {formData.email && (
+                          validateEmail(formData.email) ? (
+                            <p className="text-green-600 text-sm">✓ Valid email</p>
+                          ) : (
+                            <p className="text-red-500 text-sm">✗ Invalid email or domain not allowed</p>
+                          )
+                        )}
                         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                       </div>
 
@@ -448,6 +456,14 @@ export default function HailDamage() {
                             errors.phone ? 'border-red-500' : 'border-gray-300'
                           }`}
                         />
+                        <p className="text-xs text-gray-500 mt-1">Value: "{formData.phone}"</p>
+                        {formData.phone && (
+                          validatePhone(formData.phone) ? (
+                            <p className="text-green-600 text-sm">✓ Valid phone</p>
+                          ) : (
+                            <p className="text-red-500 text-sm">✗ Phone must be 10 digits</p>
+                          )
+                        )}
                         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                       </div>
 

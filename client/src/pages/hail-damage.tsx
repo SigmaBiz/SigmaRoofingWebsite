@@ -430,6 +430,7 @@ export default function HailDamage() {
                           type="email"
                           value={formData.email}
                           onChange={(e) => updateFormData('email', e.target.value)}
+                          placeholder="test@gmail.com"
                           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                             errors.email ? 'border-red-500' : 'border-gray-300'
                           }`}

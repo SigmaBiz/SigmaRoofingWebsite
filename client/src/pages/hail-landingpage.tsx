@@ -450,7 +450,7 @@ export default function HailLandingPage() {
         </div>
       </header>
 
-      <div className="relative">
+      <div className="relative z-10">
         <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
           {/* Dynamic Storm Report Section */}
           <div className="max-w-4xl mx-auto mb-16">
@@ -624,13 +624,13 @@ export default function HailLandingPage() {
       </div>
 
       {/* Projects Gallery Section */}
-      <div className="bg-gray-50">
+      <div className="bg-gray-50 relative z-10">
         <div className="container mx-auto px-6 lg:px-12 py-16">
           <Projects />
         </div>
       </div>
 
-      <div className="bg-white">
+      <div className="bg-white relative z-10">
         <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
           <div className="grid lg:grid-cols-5 gap-16">
             <div className="lg:col-span-3 space-y-16">

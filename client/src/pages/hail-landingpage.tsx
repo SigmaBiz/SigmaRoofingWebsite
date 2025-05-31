@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle, Mail } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface ContactForm {
   firstName: string;
@@ -22,6 +23,14 @@ interface Review {
   review: string;
   date: string;
   initials: string;
+}
+
+interface ReviewsResponse {
+  success: boolean;
+  reviews: Review[];
+  businessRating: number;
+  totalReviews: number;
+  businessName: string;
 }
 
 export default function HailLandingPage() {
@@ -51,32 +60,13 @@ export default function HailLandingPage() {
     verified: false
   });
 
-  const reviews: Review[] = [
-    {
-      name: "Sarah Johnson",
-      role: "Homeowner",
-      rating: 5,
-      review: "BBAV Roofing did an amazing job after the hail storm. They handled everything with our insurance company and the new roof looks fantastic!",
-      date: "2 weeks ago",
-      initials: "SJ"
-    },
-    {
-      name: "Mike Chen",
-      role: "Property Manager",
-      rating: 5,
-      review: "Professional, timely, and fair pricing. They completed our roof replacement ahead of schedule and the quality is excellent.",
-      date: "1 month ago",
-      initials: "MC"
-    },
-    {
-      name: "Lisa Rodriguez",
-      role: "Homeowner",
-      rating: 5,
-      review: "The team was courteous and cleaned up perfectly after the job. Highly recommend for any roofing needs!",
-      date: "3 weeks ago",
-      initials: "LR"
-    }
-  ];
+  // Fetch real Google Business reviews
+  const { data: reviewsData, isLoading: reviewsLoading } = useQuery<ReviewsResponse>({
+    queryKey: ['/api/reviews'],
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  const reviews: Review[] = reviewsData?.reviews || [];
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -332,35 +322,69 @@ export default function HailLandingPage() {
                     <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center">
                       <Star className="w-6 h-6 text-emerald-600" />
                     </div>
-                    <h2 className="text-3xl font-light text-gray-900">What Our Customers Say</h2>
+                    <div>
+                      <h2 className="text-3xl font-light text-gray-900">What Our Customers Say</h2>
+                      {reviewsData?.businessRating && (
+                        <div className="flex items-center space-x-2 mt-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`w-4 h-4 ${i < Math.floor(reviewsData.businessRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                            ))}
+                          </div>
+                          <span className="text-lg font-semibold text-gray-900">{reviewsData.businessRating}</span>
+                          <span className="text-gray-600">({reviewsData.totalReviews} reviews)</span>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Google Verified</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
-                <div className="grid gap-6">
-                  {reviews.slice(0, 3).map((review, index) => (
-                    <div key={index} className="border-0 shadow-sm bg-gray-50 rounded-lg">
-                      <div className="p-6">
-                        <div className="flex items-start space-x-4">
-                          <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                            <span className="text-emerald-600 font-semibold">{review.initials}</span>
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <h4 className="font-semibold text-gray-900">{review.name}</h4>
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                ))}
-                              </div>
+                {reviewsLoading ? (
+                  <div className="grid gap-6">
+                    {[...Array(3)].map((_, index) => (
+                      <div key={index} className="border-0 shadow-sm bg-gray-50 rounded-lg animate-pulse">
+                        <div className="p-6">
+                          <div className="flex items-start space-x-4">
+                            <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                            <div className="flex-1 space-y-2">
+                              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                              <div className="h-3 bg-gray-200 rounded w-full"></div>
+                              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
                             </div>
-                            <p className="text-gray-600 mb-2">"{review.review}"</p>
-                            <p className="text-sm text-gray-500">{review.date}</p>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid gap-6">
+                    {reviews.slice(0, 3).map((review, index) => (
+                      <div key={index} className="border-0 shadow-sm bg-gray-50 rounded-lg">
+                        <div className="p-6">
+                          <div className="flex items-start space-x-4">
+                            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                              <span className="text-emerald-600 font-semibold">{review.initials}</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <h4 className="font-semibold text-gray-900">{review.name}</h4>
+                                <div className="flex">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                                  ))}
+                                </div>
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{review.role}</span>
+                              </div>
+                              <p className="text-gray-600 mb-2">"{review.review}"</p>
+                              <p className="text-sm text-gray-500">{review.date}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

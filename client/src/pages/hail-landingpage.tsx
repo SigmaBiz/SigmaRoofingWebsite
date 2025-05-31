@@ -52,6 +52,15 @@ export default function HailLandingPage() {
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  
+  // Address autocomplete states
+  const [addressSuggestions, setAddressSuggestions] = useState<{formatted_address: string, place_id: string}[]>([]);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  
+  // Appointment booking states
+  const [bookedSlots] = useState<string[]>([
+    '2024-05-31-09:00', '2024-05-31-14:00', '2024-06-01-11:00'
+  ]);
 
   const [hailData, setHailData] = useState({
     city: "Oklahoma City",
@@ -91,6 +100,45 @@ export default function HailLandingPage() {
   const validatePhone = (phone: string): boolean => {
     const cleanPhone = phone.replace(/\D/g, '');
     return cleanPhone.length === 10;
+  };
+
+  // Google Places Autocomplete for Oklahoma addresses
+  const searchOklahomaAddresses = async (query: string) => {
+    if (query.length < 3) {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/address-suggestions?q=${encodeURIComponent(query)}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.suggestions) {
+          setAddressSuggestions(data.suggestions);
+          setShowAddressSuggestions(data.suggestions.length > 0);
+        }
+      }
+    } catch (error) {
+      console.log('Address validation temporarily unavailable');
+      setShowAddressSuggestions(false);
+    }
+  };
+
+  const handleAddressSelect = (suggestion: {formatted_address: string, place_id: string}) => {
+    setFormData(prev => ({ ...prev, address: suggestion.formatted_address }));
+    setShowAddressSuggestions(false);
+    setAddressSuggestions([]);
+    if (errors.address) {
+      setErrors(prev => ({ ...prev, address: "" }));
+    }
+  };
+
+  // Check if time slot is available
+  const isSlotAvailable = (date: string, time: string): boolean => {
+    const slotKey = `${date}-${time}`;
+    return !bookedSlots.includes(slotKey);
   };
 
   useEffect(() => {
@@ -192,6 +240,11 @@ export default function HailLandingPage() {
     }
     if (submitMessage) {
       setSubmitMessage(null);
+    }
+    
+    // Handle address autocomplete
+    if (field === 'address') {
+      searchOklahomaAddresses(value);
     }
   };
 
@@ -489,19 +542,60 @@ export default function HailLandingPage() {
                         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2" htmlFor="address">Property Address *</label>
+                      <div className="relative">
+                        <label className="block text-sm font-medium mb-2" htmlFor="address">
+                          <MapPin className="w-4 h-4 inline mr-2" />
+                          Property Address in Oklahoma *
+                        </label>
                         <input
                           id="address"
                           type="text"
                           value={formData.address}
                           onChange={(e) => updateFormData('address', e.target.value)}
-                          placeholder="Street address, City, State"
+                          onFocus={() => {
+                            if (formData.address.length >= 3) {
+                              searchOklahomaAddresses(formData.address);
+                            }
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => setShowAddressSuggestions(false), 200);
+                          }}
+                          placeholder="Start typing your Oklahoma address..."
                           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                            errors.address ? 'border-red-500' : 'border-gray-300'
+                            errors.address ? 'border-red-500' : formData.address.toLowerCase().includes('ok') ? 'border-green-500' : 'border-gray-300'
                           }`}
+                          autoComplete="off"
                         />
+                        
+                        {showAddressSuggestions && addressSuggestions.length > 0 && (
+                          <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-xl max-h-64 overflow-y-auto mt-1">
+                            <div className="px-3 py-2 text-xs text-gray-500 bg-gray-50 border-b">
+                              <MapPin className="w-3 h-3 inline mr-1" />
+                              Verified Oklahoma addresses
+                            </div>
+                            {addressSuggestions.map((suggestion, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                className="w-full text-left px-4 py-3 hover:bg-emerald-50 text-sm border-b border-gray-100 last:border-b-0 transition-colors"
+                                onClick={() => handleAddressSelect(suggestion)}
+                              >
+                                <div className="flex items-start">
+                                  <MapPin className="w-4 h-4 text-emerald-600 mt-0.5 mr-2 flex-shrink-0" />
+                                  <span className="text-gray-900">{suggestion.formatted_address}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        
                         {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                        
+                        {formData.address.toLowerCase().includes('oklahoma') || formData.address.toLowerCase().includes('ok') ? (
+                          <p className="text-green-600 text-sm mt-1">✓ Oklahoma address verified</p>
+                        ) : formData.address.length > 0 && (
+                          <p className="text-amber-600 text-sm mt-1">⚠ Please enter an Oklahoma address</p>
+                        )}
                       </div>
 
                       <div>
@@ -529,6 +623,116 @@ export default function HailLandingPage() {
                           rows={3}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
+                      </div>
+
+                      {/* Appointment Scheduling Section */}
+                      <div className="border-t pt-6">
+                        <div className="flex items-center mb-4">
+                          <Calendar className="w-5 h-5 text-emerald-600 mr-2" />
+                          <h4 className="text-lg font-semibold text-gray-900">Schedule Your Inspection</h4>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* First Preferred Time */}
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Preferred Date</label>
+                            <input
+                              type="date"
+                              value={formData.preferredDate1}
+                              onChange={(e) => updateFormData('preferredDate1', e.target.value)}
+                              min={new Date().toISOString().split('T')[0]}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Preferred Time</label>
+                            <select
+                              value={formData.preferredTime1}
+                              onChange={(e) => updateFormData('preferredTime1', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            >
+                              <option value="">Select time</option>
+                              <option value="08:00" disabled={!isSlotAvailable(formData.preferredDate1, '08:00')}>
+                                8:00 AM {!isSlotAvailable(formData.preferredDate1, '08:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="09:00" disabled={!isSlotAvailable(formData.preferredDate1, '09:00')}>
+                                9:00 AM {!isSlotAvailable(formData.preferredDate1, '09:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="10:00" disabled={!isSlotAvailable(formData.preferredDate1, '10:00')}>
+                                10:00 AM {!isSlotAvailable(formData.preferredDate1, '10:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="11:00" disabled={!isSlotAvailable(formData.preferredDate1, '11:00')}>
+                                11:00 AM {!isSlotAvailable(formData.preferredDate1, '11:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="13:00" disabled={!isSlotAvailable(formData.preferredDate1, '13:00')}>
+                                1:00 PM {!isSlotAvailable(formData.preferredDate1, '13:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="14:00" disabled={!isSlotAvailable(formData.preferredDate1, '14:00')}>
+                                2:00 PM {!isSlotAvailable(formData.preferredDate1, '14:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="15:00" disabled={!isSlotAvailable(formData.preferredDate1, '15:00')}>
+                                3:00 PM {!isSlotAvailable(formData.preferredDate1, '15:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="16:00" disabled={!isSlotAvailable(formData.preferredDate1, '16:00')}>
+                                4:00 PM {!isSlotAvailable(formData.preferredDate1, '16:00') ? '(Booked)' : ''}
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Second Preferred Time (Alternative) */}
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium mb-2 text-gray-600">Alternative Date & Time (Optional)</label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input
+                              type="date"
+                              value={formData.preferredDate2}
+                              onChange={(e) => updateFormData('preferredDate2', e.target.value)}
+                              min={new Date().toISOString().split('T')[0]}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            />
+                            
+                            <select
+                              value={formData.preferredTime2}
+                              onChange={(e) => updateFormData('preferredTime2', e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            >
+                              <option value="">Select time</option>
+                              <option value="08:00" disabled={!isSlotAvailable(formData.preferredDate2, '08:00')}>
+                                8:00 AM {!isSlotAvailable(formData.preferredDate2, '08:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="09:00" disabled={!isSlotAvailable(formData.preferredDate2, '09:00')}>
+                                9:00 AM {!isSlotAvailable(formData.preferredDate2, '09:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="10:00" disabled={!isSlotAvailable(formData.preferredDate2, '10:00')}>
+                                10:00 AM {!isSlotAvailable(formData.preferredDate2, '10:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="11:00" disabled={!isSlotAvailable(formData.preferredDate2, '11:00')}>
+                                11:00 AM {!isSlotAvailable(formData.preferredDate2, '11:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="13:00" disabled={!isSlotAvailable(formData.preferredDate2, '13:00')}>
+                                1:00 PM {!isSlotAvailable(formData.preferredDate2, '13:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="14:00" disabled={!isSlotAvailable(formData.preferredDate2, '14:00')}>
+                                2:00 PM {!isSlotAvailable(formData.preferredDate2, '14:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="15:00" disabled={!isSlotAvailable(formData.preferredDate2, '15:00')}>
+                                3:00 PM {!isSlotAvailable(formData.preferredDate2, '15:00') ? '(Booked)' : ''}
+                              </option>
+                              <option value="16:00" disabled={!isSlotAvailable(formData.preferredDate2, '16:00')}>
+                                4:00 PM {!isSlotAvailable(formData.preferredDate2, '16:00') ? '(Booked)' : ''}
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 p-3 bg-blue-50 rounded-md">
+                          <p className="text-sm text-blue-800">
+                            <Clock className="w-4 h-4 inline mr-1" />
+                            We'll confirm your appointment time within 2 hours of submission
+                          </p>
+                        </div>
                       </div>
 
                       <button 

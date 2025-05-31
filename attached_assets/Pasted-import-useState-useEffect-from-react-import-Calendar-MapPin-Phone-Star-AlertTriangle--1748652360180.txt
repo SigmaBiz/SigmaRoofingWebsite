@@ -141,12 +141,7 @@ export default function HailDamage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Form submission attempted');
-    console.log('Form data:', formData);
-    
     if (!validateForm()) {
-      console.log('Form validation failed');
-      console.log('Validation errors:', errors);
       setSubmitMessage({
         type: 'error',
         text: 'Please fill in all required fields correctly.'
@@ -154,16 +149,13 @@ export default function HailDamage() {
       return;
     }
     
-    console.log('Form validation passed');
     setIsSubmitting(true);
     setSubmitMessage(null);
 
     try {
-      console.log('Simulating API call...');
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      console.log('API call successful');
       setSubmitMessage({
         type: 'success',
         text: "Request submitted successfully! We'll contact you within 2 hours to schedule your free inspection."
@@ -186,7 +178,6 @@ export default function HailDamage() {
       setErrors({});
       
     } catch (error) {
-      console.log('API call failed:', error);
       setSubmitMessage({
         type: 'error',
         text: 'Submission failed. Please try again or call us directly at (405) 902-1826'
@@ -197,7 +188,6 @@ export default function HailDamage() {
   };
 
   const updateFormData = (field: keyof ContactForm, value: string) => {
-    console.log(`Updating ${field} to:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -423,6 +413,7 @@ export default function HailDamage() {
                         </div>
                       </div>
 
+                      {/* Enhanced Email Field with Real-time Validation */}
                       <div>
                         <label className="block text-sm font-medium mb-2" htmlFor="email">Email Address *</label>
                         <input
@@ -433,10 +424,20 @@ export default function HailDamage() {
                           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                             errors.email ? 'border-red-500' : 'border-gray-300'
                           }`}
+                          placeholder="test@gmail.com"
                         />
+                        <p className="text-xs text-gray-500 mt-1">Value: "{formData.email}"</p>
+                        {formData.email && (
+                          validateEmail(formData.email) ? (
+                            <p className="text-green-600 text-sm">✓ Valid email</p>
+                          ) : (
+                            <p className="text-red-500 text-sm">✗ Invalid email or domain not allowed</p>
+                          )
+                        )}
                         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                       </div>
 
+                      {/* Enhanced Phone Field with Real-time Validation */}
                       <div>
                         <label className="block text-sm font-medium mb-2" htmlFor="phone">Phone Number *</label>
                         <input
@@ -447,7 +448,16 @@ export default function HailDamage() {
                           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                             errors.phone ? 'border-red-500' : 'border-gray-300'
                           }`}
+                          placeholder="(555) 123-4567"
                         />
+                        <p className="text-xs text-gray-500 mt-1">Value: "{formData.phone}"</p>
+                        {formData.phone && (
+                          validatePhone(formData.phone) ? (
+                            <p className="text-green-600 text-sm">✓ Valid phone</p>
+                          ) : (
+                            <p className="text-red-500 text-sm">✗ Phone must be 10 digits</p>
+                          )
+                        )}
                         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                       </div>
 
@@ -458,10 +468,10 @@ export default function HailDamage() {
                           type="text"
                           value={formData.address}
                           onChange={(e) => updateFormData('address', e.target.value)}
-                          placeholder="Street address, City, State"
                           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                             errors.address ? 'border-red-500' : 'border-gray-300'
                           }`}
+                          placeholder="Street address, City, State"
                         />
                         {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                       </div>
@@ -487,16 +497,16 @@ export default function HailDamage() {
                           id="description"
                           value={formData.description}
                           onChange={(e) => updateFormData('description', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                           placeholder="Describe any visible damage or concerns..."
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
                       </div>
 
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-md transition duration-200"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-md transition-colors text-lg"
                       >
                         {isSubmitting ? 'Submitting...' : 'Schedule Free Inspection'}
                       </button>

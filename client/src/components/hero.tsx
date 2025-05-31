@@ -1,31 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { getWebsiteImages } from "@/lib/imageService";
 
 export default function Hero() {
-  const [heroBackground, setHeroBackground] = useState("");
-
-  // Load images from admin panel
-  const { data: websiteImages } = useQuery({
-    queryKey: ['/api/website-images'],
-    staleTime: 1000 * 60 * 5 // 5 minutes
-  });
+  const [images, setImages] = useState<any>({});
 
   useEffect(() => {
-    // Load from admin panel first, then fall back to localStorage
-    if (websiteImages && websiteImages.images) {
-      if (websiteImages.images.heroBackground) {
-        setHeroBackground(websiteImages.images.heroBackground);
-      }
-    } else {
-      // Fallback to localStorage
-      const savedHeroBackground = localStorage.getItem('heroBackground');
-      if (savedHeroBackground) {
-        setHeroBackground(savedHeroBackground);
-      }
-    }
-  }, [websiteImages]);
+    getWebsiteImages().then(setImages);
+  }, []);
 
   const scrollToContact = () => {
     const element = document.getElementById("contact");
@@ -39,13 +22,13 @@ export default function Hero() {
       id="home" 
       className="relative min-h-screen flex items-center"
       style={{
-        backgroundImage: heroBackground ? `url(${heroBackground})` : undefined,
+        backgroundImage: images.heroBackground ? `url(${images.heroBackground})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       }}
     >
-      {!heroBackground && <div className="hero-bg absolute inset-0" />}
+      {!images.heroBackground && <div className="hero-bg absolute inset-0" />}
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-white text-center">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">

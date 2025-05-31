@@ -1,0 +1,157 @@
+You are implementing a persistent image storage system for the admin panel. The goal is to ensure all uploaded images remain permanently saved until manually replaced through the admin interface.
+
+CRITICAL REQUIREMENT: All images uploaded through the admin panel must persist indefinitely until a new image is uploaded to replace them. This includes all 6 project gallery images and all website section images (hero, services, about, process, testimonials).
+
+STEP 1: Create or verify /api/website-images.ts exists with this exact code:
+
+import { NextRequest, NextResponse } from 'next/server';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+const dataFilePath = path.join(process.cwd(), 'data', 'website-images.json');
+
+export async function GET(request: NextRequest) {
+ try {
+   await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+   const data = await fs.readFile(dataFilePath, 'utf-8');
+   return NextResponse.json({ success: true, images: JSON.parse(data) });
+ } catch (error) {
+   return NextResponse.json({ success: true, images: {} });
+ }
+}
+
+export async function POST(request: NextRequest) {
+ try {
+   const images = await request.json();
+   await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+   await fs.writeFile(dataFilePath, JSON.stringify(images, null, 2));
+   return NextResponse.json({ success: true });
+ } catch (error) {
+   return NextResponse.json({ success: false, error: 'Failed to save images' }, { status: 500 });
+ }
+}
+
+STEP 2: Create utils/imageService.ts with this exact code:
+
+interface WebsiteImages {
+ heroBackground?: string;
+ residentialRoofingImage?: string;
+ roofRepairImage?: string;
+ roofInspectionImage?: string;
+ gutterServiceImage?: string;
+ stormDamageImage?: string;
+ paintingServiceImage?: string;
+ teamPhoto?: string;
+ companyLogo?: string;
+ processStep1Image?: string;
+ processStep2Image?: string;
+ processStep3Image?: string;
+ processStep4Image?: string;
+ testimonialBackground?: string;
+}
+
+export async function getWebsiteImages(): Promise<WebsiteImages> {
+ try {
+   const response = await fetch('/api/website-images');
+   if (response.ok) {
+     const data = await response.json();
+     if (data.success && data.images) {
+       return data.images;
+     }
+   }
+ } catch (error) {
+   console.log('API fetch failed, using localStorage');
+ }
+ 
+ const images: WebsiteImages = {};
+ const imageKeys = [
+   'heroBackground', 'residentialRoofingImage', 'roofRepairImage',
+   'roofInspectionImage', 'gutterServiceImage', 'stormDamageImage',
+   'paintingServiceImage', 'teamPhoto', 'companyLogo',
+   'processStep1Image', 'processStep2Image', 'processStep3Image',
+   'processStep4Image', 'testimonialBackground'
+ ];
+ 
+ imageKeys.forEach(key => {
+   const value = localStorage.getItem(key);
+   if (value) {
+     images[key as keyof WebsiteImages] = value;
+   }
+ });
+ 
+ return images;
+}
+
+export function getProjectsData() {
+ const saved = localStorage.getItem('adminProjects');
+ if (saved) {
+   try {
+     return JSON.parse(saved);
+   } catch (error) {
+     console.error('Error parsing projects data');
+   }
+ }
+ return [];
+}
+
+STEP 3: Update ALL components that display images. For hero.tsx, services.tsx, about.tsx, process.tsx, and testimonials.tsx, add this pattern at the top of each component:
+
+import { useEffect, useState } from 'react';
+import { getWebsiteImages } from '@/utils/imageService';
+
+// Inside the component function:
+const [images, setImages] = useState<any>({});
+
+useEffect(() => {
+ getWebsiteImages().then(setImages);
+}, []);
+
+// Then replace hardcoded image URLs with:
+// For hero background: style={{ backgroundImage: `url(${images.heroBackground || '/images/default-hero.jpg'})` }}
+// For service images: src={images.residentialRoofingImage || '/images/default-residential.jpg'}
+// Apply this pattern for ALL image references
+
+STEP 4: Update projects.tsx to load saved projects:
+
+import { useEffect, useState } from 'react';
+import { getProjectsData } from '@/utils/imageService';
+
+// Inside the Projects component:
+const [displayProjects, setDisplayProjects] = useState([]);
+
+useEffect(() => {
+ const projects = getProjectsData();
+ if (projects.length > 0) {
+   setDisplayProjects(projects);
+ }
+}, []);
+
+STEP 5: Create the data directory in your project root if it doesn't exist:
+mkdir -p data
+
+STEP 6: Verify admin.tsx already has these key functions working:
+- useEffect that loads savedImages from API on mount
+- handleSaveWebsiteImages that saves to both API and localStorage
+- saveCurrentProject that saves project data to localStorage
+
+STEP 7: For each component, ensure fallback images exist in public/images/ directory:
+- default-hero.jpg
+- default-residential.jpg
+- default-repair.jpg
+- default-inspection.jpg
+- default-gutter.jpg
+- default-storm.jpg
+- default-painting.jpg
+- default-team.jpg
+- default-logo.png
+- default-process-1.jpg through default-process-4.jpg
+- default-testimonial-bg.jpg
+
+VERIFICATION: After implementation, test by:
+1. Upload an image through admin panel
+2. Refresh the page - image should persist
+3. Restart the server - image should persist
+4. Clear browser cache (not localStorage) - image should persist
+5. Only when a NEW image is uploaded should the old one be replaced
+
+IMPORTANT: Never clear localStorage unless explicitly replacing an image. Always check both API and localStorage for images. The admin panel already has most of this logic - just verify it works correctly and update the display components to use the saved images.

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Home, PaintBucket, Hammer, ShieldCheck, Droplets, CloudRain, CheckCircle, Eye, Zap } from "lucide-react";
+import { getWebsiteImages } from "@/lib/imageService";
 
 const services = [
   {
@@ -58,15 +59,15 @@ export default function Services() {
   const [serviceImages, setServiceImages] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
-    // Load all service images from localStorage
-    const images: {[key: string]: string} = {};
-    services.forEach(service => {
-      const imageUrl = localStorage.getItem(service.imageKey);
-      if (imageUrl) {
-        images[service.imageKey] = imageUrl;
-      }
+    getWebsiteImages().then(images => {
+      const serviceImageData: {[key: string]: string} = {};
+      services.forEach(service => {
+        if (images[service.imageKey as keyof typeof images]) {
+          serviceImageData[service.imageKey] = images[service.imageKey as keyof typeof images] as string;
+        }
+      });
+      setServiceImages(serviceImageData);
     });
-    setServiceImages(images);
   }, []);
 
   return (

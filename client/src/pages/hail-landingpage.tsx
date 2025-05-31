@@ -413,9 +413,11 @@ export default function HailLandingPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
+              <img 
+                src="/sigma-logo.png" 
+                alt="Sigma Roofing LLC Logo" 
+                className="w-12 h-12 object-contain"
+              />
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Sigma Roofing LLC</h1>
                 <p className="text-sm text-gray-600">Licensed & Insured</p>
@@ -525,13 +527,18 @@ export default function HailLandingPage() {
           {/* Strategic Call-to-Action Section */}
           <div className="max-w-4xl mx-auto mb-12">
             <div className="text-center">
-              <a 
-                href="tel:4059021826"
+              <button 
+                onClick={() => {
+                  const element = document.getElementById("contact-form");
+                  if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
                 className="inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200"
               >
-                <Phone className="mr-3 h-6 w-6" />
+                <CheckCircle className="mr-3 h-6 w-6" />
                 Get Free Storm Damage Inspection Now
-              </a>
+              </button>
               <p className="text-gray-600 mt-3 text-lg">
                 Quick response • Insurance assistance • No obligation
               </p>
@@ -696,7 +703,7 @@ export default function HailLandingPage() {
 
             <div className="lg:col-span-2">
               <div className="sticky top-8">
-                <div className="border-0 shadow-xl bg-white rounded-lg">
+                <div id="contact-form" className="border-0 shadow-xl bg-white rounded-lg">
                   <div className="p-8">
                     <div className="text-center mb-8">
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Storm Damage Inspection</h3>

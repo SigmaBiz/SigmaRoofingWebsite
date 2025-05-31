@@ -453,6 +453,7 @@ export default function HailDamage() {
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => updateFormData('phone', e.target.value)}
+                          placeholder="(555) 123-4567"
                           className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                             errors.phone ? 'border-red-500' : 'border-gray-300'
                           }`}

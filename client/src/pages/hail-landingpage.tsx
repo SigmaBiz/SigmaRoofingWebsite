@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle, Mail } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import Projects from "@/components/projects";
 
 interface ContactForm {
   firstName: string;
@@ -34,6 +35,21 @@ interface ReviewsResponse {
   businessName: string;
 }
 
+interface DynamicStormContent {
+  S: string; // Storm type
+  DOL: string; // Date of loss
+  X: string; // Location
+  HS: string; // Hail size
+  phrase: string; // Trending phrase
+  hail_less_than_1_5: boolean;
+}
+
+interface TrendingPhrase {
+  title: string;
+  traffic: string;
+  relatedQueries: string[];
+}
+
 export default function HailLandingPage() {
   const [formData, setFormData] = useState<ContactForm>({
     firstName: "",
@@ -61,6 +77,11 @@ export default function HailLandingPage() {
   const [bookedSlots] = useState<string[]>([
     '2024-05-31-09:00', '2024-05-31-14:00', '2024-06-01-11:00'
   ]);
+
+  // Dynamic storm content states
+  const [stormContent, setStormContent] = useState<DynamicStormContent | null>(null);
+  const [isLoadingStormData, setIsLoadingStormData] = useState(true);
+  const [stormDataError, setStormDataError] = useState<string | null>(null);
 
   const [hailData, setHailData] = useState({
     city: "Oklahoma City",

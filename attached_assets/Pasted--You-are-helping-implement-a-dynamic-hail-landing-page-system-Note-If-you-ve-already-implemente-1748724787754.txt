@@ -1,0 +1,130 @@
+```
+You are helping implement a dynamic hail landing page system. Note: If you've already implemented any of these components, please verify they work as described and move on to the next instruction.
+
+## PROJECT GOAL
+Update the existing hail-landingpage.tsx to dynamically display recent storm data from NOAA combined with trending search phrases from Google Trends. The page should update daily with the most recent major storm (≥2" hail or tornado) and a related trending search term.
+
+## CRITICAL REQUIREMENTS - DO NOT MODIFY
+1. DO NOT alter any existing lead form generation code or its features
+2. DO NOT modify any Google Reviews integrations
+3. PRESERVE all existing FAQ section functionality
+4. MAINTAIN all existing page functionality while adding dynamic content
+
+## IMPLEMENTATION STEPS
+
+### Step 1: Create Google Trends Data Fetcher
+Create `utils/googleTrendsService.ts` with:
+- Use 'google-trends-api' npm package
+- Function: getTrendingSearches(location: 'US-OK') - gets real-time trending searches in Oklahoma
+- Function: getSearchVolume(keywords: string[], timeRange: '7d' | '30d' | '12m') - gets relative search volume
+- Function: filterStormRelatedTrends(trends: array) - filters for storm/hail/roof related keywords
+- Add error handling with fallback to mock data
+- Cache results for 24 hours
+
+### Step 2: NOAA CSV Parser Enhancement
+Update `utils/noaaDataParser.ts` to:
+- Filter storms: hail size >= 2.0 inches OR tornado events
+- Location: within 50 miles of OKC (lat/long: 35.4676, -97.5164)
+- Date: within last 30 days (prioritize most recent)
+- Extract fields:
+  - S: Storm type ('Hail' or 'Tornado')
+  - DOL: Date of loss (format: "March 15, 2024")
+  - X: Specific location/city name
+  - HS: Hail size (format: "2.5 inches" or "baseball-sized")
+- Return sorted array by date (most recent first)
+
+### Step 3: Dynamic Content Manager
+Create `utils/dynamicContentManager.ts` that:
+- Combines NOAA storm data with Google Trends data
+- Matching logic: find trending phrases from last 14 days, match with storms from last 30 days
+- Prioritize by: recency > search volume > hail size
+- Generate content object: {S, DOL, X, HS, phrase, hail_less_than_1_5: boolean}
+- Cache matched pair for 24 hours
+
+### Step 4: Update Hail Landing Page
+Modify `hail-landingpage.tsx` to:
+- Import dynamicContentManager
+- Use React hooks: useState for content, useEffect to load data, loading state
+- PRESERVE existing components: Header, FAQ, Contact form, and all lead generation functionality
+- ADD the Projects component from home.tsx (import it just like home.tsx does)
+- Insert the Projects component AFTER the dynamic storm content but BEFORE the FAQ section
+- Replace ONLY the storm report content area with this dynamic template:
+
+<h2>Recent Storm Report</h2>
+<p><strong>Storm Type:</strong> {content.S}</p>
+<p><strong>Date:</strong> {content.DOL}</p>
+<p><strong>Location:</strong> {content.X}</p>
+<p><strong>Hail Size:</strong> {content.HS}</p>
+<p>
+  In light of the recent storm in {content.X} on {content.DOL}, we're here to help. The trending topic <strong>"{content.phrase}"</strong> shows just how many homeowners are searching for answers right now — and we're proud to offer verified, local guidance using NOAA data.
+</p>
+{content.hail_less_than_1_5 ? (
+<p>
+  Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage. That's why more people are searching <strong>"{content.phrase}"</strong> to figure out what to do next.
+</p>
+) : (
+<p>
+  Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem. That's why searches like <strong>"{content.phrase}"</strong> are trending in your area.
+</p>
+)}
+<div className="highlight">
+  <p>
+    Hailstones as large as <strong>{content.HS}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later. Don't wait — <a href="/request-estimate"><strong>schedule an inspection today</strong></a>.
+  </p>
+</div>
+
+Add error boundary with fallback to static content.
+
+### Step 5: Integrate Projects Section
+- Import the Projects component at the top of hail-landingpage.tsx: `import Projects from "@/components/projects";`
+- Add the Projects component to the page structure AFTER the dynamic storm content
+- Ensure it displays the same recent projects gallery as shown on the home page
+- The Projects component should work automatically if admin has saved projects via admin.tsx
+
+### Step 6: Mock Data for Testing
+Create `data/mockStormData.json`:
+{
+  "storms": [
+    {
+      "event_type": "Hail",
+      "date": "2024-03-20",
+      "location": "Moore, OK",
+      "size": 2.75,
+      "magnitude": "tennis ball"
+    }
+  ],
+  "trendingPhrases": [
+    "hail damage roof repair cost",
+    "insurance claim storm damage",
+    "emergency roof repair near me"
+  ]
+}
+
+### Step 7: Caching Strategy
+Create `utils/cacheManager.ts`:
+- Use localStorage or memory cache
+- Cache structure: {lastUpdated, stormData, trendingPhrases, matchedContent}
+- Refresh if > 24 hours old
+- Use stale cache if fetch fails
+
+## PAGE STRUCTURE ORDER
+1. Header (existing)
+2. Hero/Banner section (if exists)
+3. Dynamic Storm Report (new)
+4. Projects Gallery (imported from home page)
+5. FAQ Section (existing - DO NOT MODIFY)
+6. Contact/Lead Form (existing - DO NOT MODIFY)
+7. Footer (existing)
+
+## REQUIRED PACKAGES
+Install: google-trends-api papaparse date-fns axios
+
+## KEY REQUIREMENTS
+- DO NOT break existing functionality
+- Always fallback to static content on error
+- Cache for 24-hour minimum
+- Keep core SEO content static
+- Test with mock data first
+- Page should update automatically once per day
+- Preserve all existing lead generation and review features
+```

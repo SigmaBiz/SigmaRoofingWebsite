@@ -13,6 +13,7 @@ import GooglePhotosTest from "@/pages/google-photos-test";
 import DynamicLanding from "@/pages/dynamic-landing";
 import StormLanding from "@/pages/storm-landing";
 import HailDamage from "@/pages/hail-damage";
+import HailLandingPage from "@/pages/hail-landingpage";
 import TornadoDamage from "@/pages/tornado-damage";
 import NotFound from "@/pages/not-found";
 
@@ -21,6 +22,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/hail-damage" component={HailDamage} />
+      <Route path="/hail-landingpage" component={HailLandingPage} />
       <Route path="/tornado-damage" component={TornadoDamage} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />

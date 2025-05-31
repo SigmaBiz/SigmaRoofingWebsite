@@ -354,7 +354,7 @@ export default function HailDamage() {
                 </div>
                 
                 <div className="grid gap-6">
-                  {reviews.slice(0, 3).map((review: any, index: number) => (
+                  {Array.isArray(reviews) && reviews.slice(0, 3).map((review: any, index: number) => (
                     <Card key={index} className="border-0 shadow-sm bg-gray-50">
                       <CardContent className="p-6">
                         <div className="flex items-start space-x-4">

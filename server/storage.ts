@@ -111,6 +111,12 @@ export class MemStorage implements IStorage {
       processStep3Image: images.processStep3Image || existing.processStep3Image || null,
       processStep4Image: images.processStep4Image || existing.processStep4Image || null,
       testimonialBackground: images.testimonialBackground || existing.testimonialBackground || null,
+      hailLandingPageBackground: images.hailLandingPageBackground || existing.hailLandingPageBackground || null,
+      sectionBreakImage1: images.sectionBreakImage1 || existing.sectionBreakImage1 || null,
+      sectionBreakImage2: images.sectionBreakImage2 || existing.sectionBreakImage2 || null,
+      trustBadge1: images.trustBadge1 || existing.trustBadge1 || null,
+      trustBadge2: images.trustBadge2 || existing.trustBadge2 || null,
+      trustBadge3: images.trustBadge3 || existing.trustBadge3 || null,
       updatedAt: new Date(),
     };
     this.websiteImages = updatedImages;

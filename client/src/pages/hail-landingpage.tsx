@@ -562,7 +562,7 @@ export default function HailLandingPage() {
             </div>
             
             {/* Urgency Message */}
-            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-xl p-6 mt-8 shadow-md">
+            <div className="urgency-glow bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-xl p-6 mt-8 shadow-md">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
@@ -577,6 +577,49 @@ export default function HailLandingPage() {
               </div>
             </div>
           </div>
+
+          {/* Trust Indicators Section */}
+          <div className="max-w-6xl mx-auto mb-16">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-white text-shadow-lg mb-4">Trusted by Oklahoma Homeowners</h3>
+              <p className="text-gray-200 text-shadow-md">NOAA-verified data • Insurance approved • Licensed professionals</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {images.trustBadge1 && (
+                <div className="glass-card hover-lift float-badge text-center p-6 rounded-xl">
+                  <img src={images.trustBadge1} alt="Trust Badge 1" className="w-24 h-24 mx-auto mb-4 object-contain" />
+                  <p className="text-white text-shadow-md font-semibold">NOAA Verified Data</p>
+                </div>
+              )}
+              {images.trustBadge2 && (
+                <div className="glass-card hover-lift float-badge text-center p-6 rounded-xl" style={{animationDelay: '0.5s'}}>
+                  <img src={images.trustBadge2} alt="Trust Badge 2" className="w-24 h-24 mx-auto mb-4 object-contain" />
+                  <p className="text-white text-shadow-md font-semibold">Insurance Approved</p>
+                </div>
+              )}
+              {images.trustBadge3 && (
+                <div className="glass-card hover-lift float-badge text-center p-6 rounded-xl" style={{animationDelay: '1s'}}>
+                  <img src={images.trustBadge3} alt="Trust Badge 3" className="w-24 h-24 mx-auto mb-4 object-contain" />
+                  <p className="text-white text-shadow-md font-semibold">BBB Rated</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section Break Image */}
+          {images.sectionBreakImage1 && (
+            <div 
+              className="parallax-bg min-h-80 flex items-center justify-center mb-16"
+              style={{
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${images.sectionBreakImage1})`
+              }}
+            >
+              <div className="text-center">
+                <h3 className="text-4xl font-bold text-white text-shadow-lg mb-4">Storm Damage Restoration Experts</h3>
+                <p className="text-xl text-gray-200 text-shadow-md">Professional assessment • Insurance claims • Quality repairs</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -720,11 +763,11 @@ export default function HailLandingPage() {
 
             <div className="lg:col-span-2">
               <div className="sticky top-8">
-                <div id="contact-form" className="border-0 shadow-xl bg-white rounded-lg">
+                <div id="contact-form" className="glass-card hover-lift border-0 shadow-xl rounded-lg">
                   <div className="p-8">
                     <div className="text-center mb-8">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Storm Damage Inspection</h3>
-                      <p className="text-gray-600">Get your roof assessed by certified professionals</p>
+                      <h3 className="text-2xl font-bold text-white text-shadow-lg mb-2">Free Storm Damage Inspection</h3>
+                      <p className="text-gray-200 text-shadow-md">Get your roof assessed by certified professionals</p>
                     </div>
 
                     {submitMessage && (

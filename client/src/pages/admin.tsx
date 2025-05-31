@@ -44,6 +44,14 @@ interface WebsiteImages {
   
   // Testimonials
   testimonialBackground: string;
+  
+  // Hail Landing Page Enhancements
+  hailLandingPageBackground: string;
+  sectionBreakImage1: string;
+  sectionBreakImage2: string;
+  trustBadge1: string;
+  trustBadge2: string;
+  trustBadge3: string;
 }
 
 export default function Admin() {
@@ -82,7 +90,13 @@ export default function Admin() {
     processStep2Image: "",
     processStep3Image: "",
     processStep4Image: "",
-    testimonialBackground: ""
+    testimonialBackground: "",
+    hailLandingPageBackground: "",
+    sectionBreakImage1: "",
+    sectionBreakImage2: "",
+    trustBadge1: "",
+    trustBadge2: "",
+    trustBadge3: ""
   });
 
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -446,6 +460,58 @@ export default function Admin() {
                     description="Background image for customer testimonials section"
                     currentValue={websiteImages.testimonialBackground}
                   />
+                </CardContent>
+              </Card>
+
+              {/* Hail Landing Page Enhancements */}
+              <Card>
+                <CardHeader className="bg-orange-600 text-white">
+                  <CardTitle className="flex items-center">
+                    <Eye className="w-5 h-5 mr-2" />
+                    Hail Landing Page Visual Enhancements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <ImageUploadField
+                    label="Hail Landing Page Background"
+                    field="hailLandingPageBackground"
+                    description="Dramatic storm damage background for hail landing page"
+                    currentValue={websiteImages.hailLandingPageBackground}
+                  />
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <ImageUploadField
+                      label="Section Break Image 1"
+                      field="sectionBreakImage1"
+                      description="First visual break between sections"
+                      currentValue={websiteImages.sectionBreakImage1}
+                    />
+                    <ImageUploadField
+                      label="Section Break Image 2"
+                      field="sectionBreakImage2"
+                      description="Second visual break between sections"
+                      currentValue={websiteImages.sectionBreakImage2}
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <ImageUploadField
+                      label="Trust Badge 1"
+                      field="trustBadge1"
+                      description="First trust indicator badge"
+                      currentValue={websiteImages.trustBadge1}
+                    />
+                    <ImageUploadField
+                      label="Trust Badge 2"
+                      field="trustBadge2"
+                      description="Second trust indicator badge"
+                      currentValue={websiteImages.trustBadge2}
+                    />
+                    <ImageUploadField
+                      label="Trust Badge 3"
+                      field="trustBadge3"
+                      description="Third trust indicator badge"
+                      currentValue={websiteImages.trustBadge3}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 

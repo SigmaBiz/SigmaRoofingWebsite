@@ -710,6 +710,7 @@ export default function HailLandingPage() {
           </div>
         </div>
       </div>
+    </div>
 
       {/* Projects Gallery Section with Lazy Loading */}
       <div className="bg-gray-50">

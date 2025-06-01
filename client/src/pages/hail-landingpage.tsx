@@ -101,6 +101,10 @@ interface AddressSuggestion {
   place_id: string;
 }
 
+interface LandingPageImages {
+  stormReportBackground: string;
+}
+
 // Form reducer for better state management
 type FormAction = 
   | { type: 'UPDATE_FIELD'; field: keyof ContactForm; value: string }
@@ -259,6 +263,44 @@ function useStormData() {
   return { stormContent, isLoadingStormData, stormDataError };
 }
 
+// Custom hook for landing page images
+function useLandingPageImages() {
+  const [images, setImages] = useState<LandingPageImages>({
+    stormReportBackground: ''
+  });
+
+  useEffect(() => {
+    // Try to load from API first
+    const loadImages = async () => {
+      try {
+        const response = await fetch('/api/website-images');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.images?.stormReportBackground) {
+            setImages(prev => ({
+              ...prev,
+              stormReportBackground: data.images.stormReportBackground
+            }));
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load images from API:', error);
+      }
+      
+      // Fallback to localStorage
+      const savedBackground = localStorage.getItem('stormReportBackground');
+      if (savedBackground) {
+        setImages(prev => ({ ...prev, stormReportBackground: savedBackground }));
+      }
+    };
+
+    loadImages();
+  }, []);
+
+  return images;
+}
+
 // Memoized components
 const ReviewCard = memo<{ review: Review }>(({ review }) => (
   <div className="border-0 shadow-sm bg-gray-50 rounded-lg">
@@ -301,6 +343,9 @@ export default function HailLandingPage() {
 
   // Use custom hook for storm data
   const { stormContent, isLoadingStormData, stormDataError } = useStormData();
+  
+  // Use custom hook for landing page images
+  const landingPageImages = useLandingPageImages();
 
   const [hailData, setHailData] = useState({
     city: "Oklahoma City",
@@ -531,18 +576,32 @@ export default function HailLandingPage() {
       </header>
 
       <div className="relative bg-gradient-to-br from-slate-50 to-white">
-        <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
-          {/* Dynamic Storm Report Section */}
-          <div className="max-w-4xl mx-auto mb-16">
+        {/* Storm Report Section with Background Image */}
+        <div 
+          className="relative bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: landingPageImages.stormReportBackground 
+              ? `url(${landingPageImages.stormReportBackground})`
+              : 'none'
+          }}
+        >
+          {/* Dark overlay for better text readability */}
+          {landingPageImages.stormReportBackground && (
+            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60" />
+          )}
+          
+          <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24 relative z-10">
+            {/* Dynamic Storm Report Section */}
+            <div className="max-w-4xl mx-auto mb-16">
             {isLoadingStormData ? (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-2xl p-8 lg:p-12 shadow-xl backdrop-blur-sm bg-opacity-95">
                 <div className="flex items-center space-x-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   <p className="text-lg text-blue-800">Loading current storm data from NOAA...</p>
                 </div>
               </div>
             ) : stormDataError ? (
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-2xl p-8 lg:p-12 shadow-xl backdrop-blur-sm bg-opacity-95">
                 <div className="flex items-start space-x-6">
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center">
@@ -564,7 +623,7 @@ export default function HailLandingPage() {
                 </div>
               </div>
             ) : stormContent && (
-              <div className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+              <div className={`bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl ${landingPageImages.stormReportBackground ? 'backdrop-blur-sm bg-opacity-95' : ''}`}>
                 <div className="flex items-start space-x-6">
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center animate-pulse">
@@ -651,6 +710,7 @@ export default function HailLandingPage() {
           </div>
         </div>
       </div>
+    </div>
 
       {/* Projects Gallery Section with Lazy Loading */}
       <div className="bg-gray-50">

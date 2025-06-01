@@ -23,7 +23,7 @@ export default function Header() {
             <img 
               src={sigmaLogo} 
               alt="Sigma Roofing LLC Logo" 
-              className="w-12 h-12 object-contain"
+              className="w-16 h-16 object-contain"
             />
             <div>
               <h1 className="font-bold text-xl text-sigma-charcoal">Sigma Roofing LLC</h1>

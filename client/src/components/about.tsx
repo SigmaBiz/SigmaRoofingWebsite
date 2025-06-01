@@ -96,11 +96,27 @@ export default function About() {
           <div>
             <h2 className="font-bold text-4xl text-white mb-6">About Sigma Roofing LLC</h2>
             <p className="text-lg text-gray-200 mb-6">
-              With over 15 years of experience serving the Edmond, Oklahoma area, Sigma Roofing LLC has built a reputation for quality workmanship, reliability, and customer satisfaction. We are a fully licensed and insured roofing contractor committed to protecting your most valuable investment.
+              Right after graduating from The University of Oklahoma with an engineering degree our founder entered the roofing industry and in the span of ten years discovered it's far more sophisticated than most realize—from the extensive range of materials and systems available to today's storm restoration processes that demand specialized expertise-roofing is our calling and we can proudly say we are an Oklahoma Local Roofing Contractor.
             </p>
-            <p className="text-lg text-gray-200">
-              Our team of certified roofing professionals uses only the highest quality materials and follows industry best practices to ensure your roof stands the test of time. From minor repairs to complete roof replacements, we deliver exceptional results on every project.
+            <p className="text-lg text-gray-200 mb-6">
+              Roofing is hard work but we make it easy for you. These core values are what we believe in and drive our process.
             </p>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-white mb-4">CARING • CRAFTSMANSHIP • COMMITMENT</h3>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-lg text-gray-200">
+                <span className="font-bold text-white">Caring</span> for our homeowners is what allows us to see their "vision" and we are just there to bring it to life.
+              </p>
+              <p className="text-lg text-gray-200">
+                <span className="font-bold text-white">Craftsmanship</span> is a display of the pride we take in our work as a production focused company.
+              </p>
+              <p className="text-lg text-gray-200">
+                <span className="font-bold text-white">Commitment</span> means we say what we mean and we mean what we say. Nothing more, nothing less.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

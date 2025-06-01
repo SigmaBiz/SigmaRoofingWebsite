@@ -9,7 +9,7 @@ const services = [
     icon: Home,
     title: "Residential Roofing",
     description: "Complete residential roofing services including new installations, repairs, and maintenance for all roof types.",
-    features: ["Asphalt Shingles", "Metal Roofing", "Tile Roofing", "Storm Damage Repair"],
+    features: ["Asphalt Shingles", "Metal Roofing", "Wood Shingles", "Storm Damage Repair"],
     imageKey: "residentialRoofingImage",
     iconColor: "bg-blue-500"
   },
@@ -109,8 +109,16 @@ const ServiceCard = memo(({ service, imageUrl }: { service: any; imageUrl?: stri
               </li>
             ))}
           </ul>
-          <Button variant="link" className="text-sigma-emerald font-semibold p-0 h-auto hover:text-emerald-600">
-            Learn More →
+          <Button 
+            onClick={() => {
+              const contactSection = document.getElementById('contact');
+              if (contactSection) {
+                contactSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="bg-sigma-emerald hover:bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-300"
+          >
+            Get Help
           </Button>
         </div>
       </CardContent>

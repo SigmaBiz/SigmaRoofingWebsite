@@ -547,31 +547,29 @@ export default function HailLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      <header className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50">
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-emerald-50 rounded-xl shadow-md">
-                <img 
-                  src="/sigma-logo.png" 
-                  alt="Sigma Roofing LLC Logo" 
-                  className="w-10 h-10 object-contain"
-                />
-              </div>
+              <img 
+                src="/sigma-logo.png" 
+                alt="Sigma Roofing LLC Logo" 
+                className="w-12 h-12 object-contain"
+              />
               <div>
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight">Sigma Roofing LLC</h1>
-                <p className="text-sm text-emerald-600 font-medium">Licensed & Insured</p>
+                <h1 className="text-xl font-bold text-gray-900">Sigma Roofing LLC</h1>
+                <p className="text-sm text-gray-600">Licensed & Insured</p>
               </div>
             </div>
             <div className="text-right">
               <a 
                 href="tel:4059021826" 
-                className="text-lg font-bold text-emerald-600 hover:text-emerald-700 transition-all duration-200 hover:scale-105 inline-block"
+                className="text-lg font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
               >
                 (405) 902-1826
               </a>
-              <p className="text-sm text-gray-600 font-medium">24/7 Emergency Service</p>
+              <p className="text-sm text-gray-600">24/7 Emergency Service</p>
             </div>
           </div>
         </div>
@@ -587,23 +585,23 @@ export default function HailLandingPage() {
               : 'none'
           }}
         >
-          {/* Subtle overlay for better text readability while keeping background visible */}
+          {/* Dark overlay for better text readability */}
           {landingPageImages.stormReportBackground && (
-            <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60" />
           )}
           
           <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24 relative z-10">
             {/* Dynamic Storm Report Section */}
             <div className="max-w-4xl mx-auto mb-16">
             {isLoadingStormData ? (
-              <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border-l-4 border-blue-500 rounded-2xl p-8 lg:p-12 shadow-xl backdrop-blur-md bg-opacity-90 border border-white/20">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-2xl p-8 lg:p-12 shadow-xl backdrop-blur-sm bg-opacity-95">
                 <div className="flex items-center space-x-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   <p className="text-lg text-blue-800">Loading current storm data from NOAA...</p>
                 </div>
               </div>
             ) : stormDataError ? (
-              <div className="bg-gradient-to-r from-yellow-50/80 to-orange-50/80 border-l-4 border-yellow-500 rounded-2xl p-8 lg:p-12 shadow-xl backdrop-blur-md bg-opacity-90 border border-white/20">
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-2xl p-8 lg:p-12 shadow-xl backdrop-blur-sm bg-opacity-95">
                 <div className="flex items-start space-x-6">
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center">
@@ -625,7 +623,7 @@ export default function HailLandingPage() {
                 </div>
               </div>
             ) : stormContent && (
-              <div className={`bg-gradient-to-r from-red-50/80 via-orange-50/80 to-yellow-50/80 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl backdrop-blur-md bg-opacity-90 border border-white/20 ${landingPageImages.stormReportBackground ? 'backdrop-blur-md' : ''}`}>
+              <div className={`bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl ${landingPageImages.stormReportBackground ? 'backdrop-blur-sm bg-opacity-95' : ''}`}>
                 <div className="flex items-start space-x-6">
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center animate-pulse">
@@ -636,20 +634,20 @@ export default function HailLandingPage() {
                     <h2 className="text-3xl lg:text-4xl font-light text-gray-900 mb-6 leading-tight">Recent Storm Report</h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/30 shadow-lg">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Storm Type</p>
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Storm Type</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.S}</p>
                       </div>
-                      <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/30 shadow-lg">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Date</p>
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Date</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.DOL}</p>
                       </div>
-                      <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/30 shadow-lg">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Location</p>
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Location</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.X}</p>
                       </div>
-                      <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-white/30 shadow-lg">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Hail Size</p>
+                      <div className="bg-white/70 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Hail Size</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.HS}</p>
                       </div>
                     </div>
@@ -684,21 +682,21 @@ export default function HailLandingPage() {
             <div className="text-center">
               <button 
                 onClick={scrollToForm}
-                className="inline-flex items-center justify-center px-10 py-5 text-xl font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 rounded-2xl shadow-2xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200 border border-emerald-500/20 backdrop-blur-sm"
+                className="inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200"
               >
-                <CheckCircle className="mr-3 h-7 w-7 animate-pulse" />
+                <CheckCircle className="mr-3 h-6 w-6" />
                 Get Free Storm Damage Inspection Now
               </button>
-              <p className="text-gray-100 mt-4 text-lg font-medium backdrop-blur-sm bg-black/20 rounded-lg px-4 py-2 mx-auto inline-block">
+              <p className="text-gray-600 mt-3 text-lg">
                 Quick response • Insurance assistance • No obligation
               </p>
             </div>
             
             {/* Urgency Message */}
-            <div className="bg-gradient-to-r from-amber-50/80 to-yellow-50/80 border-l-4 border-amber-500 rounded-xl p-6 mt-8 shadow-2xl backdrop-blur-md border border-white/30">
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-xl p-6 mt-8 shadow-md">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-amber-100/80 rounded-full flex items-center justify-center animate-bounce shadow-lg">
+                  <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
                     <AlertTriangle className="w-6 h-6 text-amber-600" />
                   </div>
                 </div>
@@ -715,9 +713,8 @@ export default function HailLandingPage() {
     </div>
 
       {/* Projects Gallery Section with Lazy Loading */}
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/20 to-blue-50/20"></div>
-        <div className="container mx-auto px-6 lg:px-12 py-16 relative z-10">
+      <div className="bg-gray-50">
+        <div className="container mx-auto px-6 lg:px-12 py-16">
           <Suspense fallback={
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
@@ -841,7 +838,7 @@ export default function HailLandingPage() {
 
             <div className="lg:col-span-2">
               <div className="sticky top-8">
-                <div id="contact-form" className="border-0 shadow-2xl bg-white/95 backdrop-blur-md rounded-2xl border border-gray-200/50">
+                <div id="contact-form" className="border-0 shadow-xl bg-white rounded-lg">
                   <div className="p-8">
                     <div className="text-center mb-8">
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Storm Damage Inspection</h3>
@@ -1088,16 +1085,9 @@ export default function HailLandingPage() {
                       <button 
                         type="submit" 
                         disabled={isSubmitting}
-                        className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+                        className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-6 rounded-md transition duration-200"
                       >
-                        {isSubmitting ? (
-                          <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                            Submitting...
-                          </div>
-                        ) : (
-                          'Schedule Free Inspection'
-                        )}
+                        {isSubmitting ? 'Submitting...' : 'Schedule Free Inspection'}
                       </button>
 
                       <div className="text-center">

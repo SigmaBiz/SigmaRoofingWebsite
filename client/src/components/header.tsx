@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, Phone } from "lucide-react";
+import sigmaLogo from "@assets/Untitled design.png";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,7 +21,7 @@ export default function Header() {
           {/* Company Logo and Name */}
           <div className="flex items-center space-x-3">
             <img 
-              src="@assets/Untitled design.png" 
+              src={sigmaLogo} 
               alt="Sigma Roofing LLC Logo" 
               className="w-12 h-12 object-contain"
             />

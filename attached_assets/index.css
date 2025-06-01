@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 11% 98%; /* Light blue-gray */
+  --foreground: 210 11% 15%; /* Deep charcoal */
+  --muted: 210 11% 94%;
+  --muted-foreground: 210 11% 40%; /* Medium gray-blue */
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 11% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 11% 15%;
+  --border: 210 11% 88%;
+  --input: 210 11% 91%;
+  --primary: 158 64% 52%; /* Vibrant emerald */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 92%; /* Light blue accent */
+  --secondary-foreground: 210 11% 15%;
+  --accent: 45 100% 95%; /* Warm accent */
+  --accent-foreground: 210 11% 15%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 158 64% 52%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 222 84% 5%;
+  --foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --popover: 222 84% 5%;
+  --popover-foreground: 210 40% 98%;
+  --card: 222 84% 5%;
+  --card-foreground: 210 40% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --primary: 43 74% 52%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 43 74% 52%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Open Sans', sans-serif;
+    position: relative;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--logo-pattern);
+    background-repeat: repeat;
+    background-size: 120px 120px;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Custom styles for roofing website */
+.sigma-emerald {
+  color: #10b981;
+}
+
+.sigma-white {
+  color: #ffffff;
+}
+
+.sigma-charcoal {
+  color: #333333;
+}
+
+.sigma-light-gray {
+  color: #6b7280;
+}
+
+.bg-sigma-emerald {
+  background-color: #10b981;
+}
+
+.bg-sigma-white {
+  background-color: #ffffff;
+}
+
+.bg-sigma-charcoal {
+  background-color: #333333;
+}
+
+.bg-sigma-light-gray {
+  background-color: #f9fafb;
+}
+
+.border-sigma-emerald {
+  border-color: #10b981;
+}
+
+.hero-bg {
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+@media (max-width: 768px) {
+  .hero-bg {
+    background-attachment: scroll;
+  }
+}

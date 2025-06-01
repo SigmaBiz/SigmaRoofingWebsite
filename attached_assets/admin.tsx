@@ -34,6 +34,7 @@ interface WebsiteImages {
   
   // About Section
   teamPhoto: string;
+  companyLogo: string;
   visionImage: string;
   
   // Process Section
@@ -80,6 +81,7 @@ export default function Admin() {
     stormDamageImage: "",
     paintingServiceImage: "",
     teamPhoto: "",
+    companyLogo: "",
     visionImage: "",
     processStep1Image: "",
     processStep2Image: "",
@@ -404,6 +406,14 @@ export default function Admin() {
                       field="visionImage"
                       description="Image representing your company vision and goals"
                       currentValue={websiteImages.visionImage}
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-1 gap-6">
+                    <ImageUploadField
+                      label="Company Logo"
+                      field="companyLogo"
+                      description="Sigma Roofing logo for branding (optional - displays below the two main images)"
+                      currentValue={websiteImages.companyLogo}
                     />
                   </div>
                 </CardContent>

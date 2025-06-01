@@ -70,11 +70,12 @@ export default function About() {
   });
 
   // Memoized image URLs to prevent unnecessary re-renders
-  const { teamPhoto, visionImage } = useMemo(() => {
+  const { teamPhoto, companyLogo, visionImage } = useMemo(() => {
     // First check API response
     if (websiteImages?.success && websiteImages?.images) {
       return {
         teamPhoto: websiteImages.images.teamPhoto || localStorage.getItem('teamPhoto') || '',
+        companyLogo: websiteImages.images.companyLogo || localStorage.getItem('companyLogo') || '',
         visionImage: websiteImages.images.visionImage || localStorage.getItem('visionImage') || ''
       };
     }
@@ -82,6 +83,7 @@ export default function About() {
     // Fallback to localStorage with single batch read
     return {
       teamPhoto: localStorage.getItem('teamPhoto') || '',
+      companyLogo: localStorage.getItem('companyLogo') || '',
       visionImage: localStorage.getItem('visionImage') || ''
     };
   }, [websiteImages]);
@@ -126,7 +128,19 @@ export default function About() {
               <p className="text-center text-gray-200 text-sm font-semibold">Our Vision</p>
             </div>
             
-
+            {/* Company Logo with Lazy Loading - Only show if available and we have both main images */}
+            {companyLogo && (teamPhoto || visionImage) && (
+              <div className="space-y-2 md:col-span-2 flex justify-center">
+                <div className="max-w-sm">
+                  <LazyImage
+                    src={companyLogo}
+                    alt="Sigma Roofing Company Logo"
+                    className="rounded-lg shadow-lg w-full h-32 object-contain bg-white p-4"
+                  />
+                  <p className="text-center text-gray-200 text-sm font-semibold mt-2">Company Logo</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

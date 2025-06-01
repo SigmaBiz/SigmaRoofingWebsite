@@ -35,6 +35,7 @@ interface WebsiteImages {
   // About Section
   teamPhoto: string;
   companyLogo: string;
+  visionImage: string;
   
   // Process Section
   processStep1Image: string;
@@ -81,6 +82,7 @@ export default function Admin() {
     paintingServiceImage: "",
     teamPhoto: "",
     companyLogo: "",
+    visionImage: "",
     processStep1Image: "",
     processStep2Image: "",
     processStep3Image: "",
@@ -394,15 +396,23 @@ export default function Admin() {
                 <CardContent className="p-6 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <ImageUploadField
-                      label="Team Photo"
+                      label="Our Values Image"
                       field="teamPhoto"
-                      description="Professional photo of your team"
+                      description="Image representing your company values and team"
                       currentValue={websiteImages.teamPhoto}
                     />
                     <ImageUploadField
+                      label="Our Vision Image"
+                      field="visionImage"
+                      description="Image representing your company vision and goals"
+                      currentValue={websiteImages.visionImage}
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-1 gap-6">
+                    <ImageUploadField
                       label="Company Logo"
                       field="companyLogo"
-                      description="Sigma Roofing logo for branding"
+                      description="Sigma Roofing logo for branding (optional - displays below the two main images)"
                       currentValue={websiteImages.companyLogo}
                     />
                   </div>

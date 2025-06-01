@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ interface WebsiteImages {
   // About Section
   teamPhoto: string;
   companyLogo: string;
+  visionImage: string;
   
   // Process Section
   processStep1Image: string;
@@ -81,6 +82,7 @@ export default function Admin() {
     paintingServiceImage: "",
     teamPhoto: "",
     companyLogo: "",
+    visionImage: "",
     processStep1Image: "",
     processStep2Image: "",
     processStep3Image: "",
@@ -174,7 +176,7 @@ export default function Admin() {
     }
 
     const isDuplicate = Object.entries(allProjects).some(([projectKey, project]) => {
-      return project.imageUrl === newUrl && projectKey !== currentProject;
+      return (project as ProjectForm).imageUrl === newUrl && projectKey !== currentProject;
     });
     
     setDuplicateWarnings(prev => ({ ...prev, [currentProject]: isDuplicate }));
@@ -197,12 +199,12 @@ export default function Admin() {
     
     // Update the project gallery for the website
     const projectArray = Object.entries(allProjects)
-      .filter(([_, project]) => project.imageUrl !== "")
+      .filter(([_, project]) => (project as ProjectForm).imageUrl !== "")
       .map(([_, project], index) => ({
-        image: project.imageUrl,
-        title: project.title || `Project ${index + 1}`,
-        description: project.description || `Custom project managed through admin panel`,
-        category: project.category || "Admin Project"
+        image: (project as ProjectForm).imageUrl,
+        title: (project as ProjectForm).title || `Project ${index + 1}`,
+        description: (project as ProjectForm).description || `Custom project managed through admin panel`,
+        category: (project as ProjectForm).category || "Admin Project"
       }));
 
     localStorage.setItem('adminProjects', JSON.stringify(projectArray));
@@ -228,7 +230,7 @@ export default function Admin() {
         // Also save to localStorage as backup
         Object.entries(websiteImages).forEach(([key, value]) => {
           if (value) {
-            localStorage.setItem(key, value);
+            localStorage.setItem(key, value as string);
           }
         });
         
@@ -279,7 +281,7 @@ export default function Admin() {
             src={currentValue} 
             alt={label} 
             className="w-full h-32 object-cover"
-            onError={(e) => {
+            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               e.currentTarget.style.display = 'none';
             }}
           />
@@ -394,15 +396,23 @@ export default function Admin() {
                 <CardContent className="p-6 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <ImageUploadField
-                      label="Team Photo"
+                      label="Our Values Image"
                       field="teamPhoto"
-                      description="Professional photo of your team"
+                      description="Image representing your company values and team"
                       currentValue={websiteImages.teamPhoto}
                     />
                     <ImageUploadField
+                      label="Our Vision Image"
+                      field="visionImage"
+                      description="Image representing your company vision and goals"
+                      currentValue={websiteImages.visionImage}
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-1 gap-6">
+                    <ImageUploadField
                       label="Company Logo"
                       field="companyLogo"
-                      description="Sigma Roofing logo for branding"
+                      description="Sigma Roofing logo for branding (optional - displays below the two main images)"
                       currentValue={websiteImages.companyLogo}
                     />
                   </div>

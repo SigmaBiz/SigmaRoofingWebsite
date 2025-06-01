@@ -70,24 +70,27 @@ export default function About() {
   });
 
   // Memoized image URLs to prevent unnecessary re-renders
-  const { teamPhoto, companyLogo } = useMemo(() => {
+  const { teamPhoto, companyLogo, visionImage } = useMemo(() => {
     // First check API response
     if (websiteImages?.success && websiteImages?.images) {
       return {
         teamPhoto: websiteImages.images.teamPhoto || localStorage.getItem('teamPhoto') || '',
-        companyLogo: websiteImages.images.companyLogo || localStorage.getItem('companyLogo') || ''
+        companyLogo: websiteImages.images.companyLogo || localStorage.getItem('companyLogo') || '',
+        visionImage: websiteImages.images.visionImage || localStorage.getItem('visionImage') || ''
       };
     }
     
     // Fallback to localStorage with single batch read
     return {
       teamPhoto: localStorage.getItem('teamPhoto') || '',
-      companyLogo: localStorage.getItem('companyLogo') || ''
+      companyLogo: localStorage.getItem('companyLogo') || '',
+      visionImage: localStorage.getItem('visionImage') || ''
     };
   }, [websiteImages]);
 
-  // Fallback image URL
+  // Fallback image URLs
   const fallbackTeamPhoto = "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+  const fallbackVisionImage = "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
   return (
     <section id="about" className="py-20 bg-sigma-emerald">
       <div className="container mx-auto px-4">
@@ -103,26 +106,39 @@ export default function About() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Team Photo with Lazy Loading */}
+            {/* Values Image with Lazy Loading */}
             <div className="space-y-2">
               <LazyImage
                 src={teamPhoto || fallbackTeamPhoto}
-                alt={teamPhoto ? "Sigma Roofing team" : "Professional roofing team at work"}
+                alt={teamPhoto ? "Sigma Roofing values" : "Professional roofing team at work"}
                 className="rounded-lg shadow-lg w-full h-64 object-cover"
                 fallback={fallbackTeamPhoto}
               />
-              <p className="text-center text-gray-200 text-sm">Our Professional Team</p>
+              <p className="text-center text-gray-200 text-sm font-semibold">Our Values</p>
             </div>
             
-            {/* Company Logo with Lazy Loading */}
-            {companyLogo && (
-              <div className="space-y-2">
-                <LazyImage
-                  src={companyLogo}
-                  alt="Sigma Roofing Company Logo"
-                  className="rounded-lg shadow-lg w-full h-64 object-cover"
-                />
-                <p className="text-center text-gray-200 text-sm">Company Logo</p>
+            {/* Vision Image with Lazy Loading */}
+            <div className="space-y-2">
+              <LazyImage
+                src={visionImage || fallbackVisionImage}
+                alt={visionImage ? "Sigma Roofing vision" : "Professional roofing vision and goals"}
+                className="rounded-lg shadow-lg w-full h-64 object-cover"
+                fallback={fallbackVisionImage}
+              />
+              <p className="text-center text-gray-200 text-sm font-semibold">Our Vision</p>
+            </div>
+            
+            {/* Company Logo with Lazy Loading - Only show if available and we have both main images */}
+            {companyLogo && (teamPhoto || visionImage) && (
+              <div className="space-y-2 md:col-span-2 flex justify-center">
+                <div className="max-w-sm">
+                  <LazyImage
+                    src={companyLogo}
+                    alt="Sigma Roofing Company Logo"
+                    className="rounded-lg shadow-lg w-full h-32 object-contain bg-white p-4"
+                  />
+                  <p className="text-center text-gray-200 text-sm font-semibold mt-2">Company Logo</p>
+                </div>
               </div>
             )}
           </div>

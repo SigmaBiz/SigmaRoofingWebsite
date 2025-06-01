@@ -20,7 +20,7 @@ export default function Header() {
           {/* Company Logo and Name */}
           <div className="flex items-center space-x-3">
             <img 
-              src="/sigma-logo.png" 
+              src="@assets/Untitled design.png" 
               alt="Sigma Roofing LLC Logo" 
               className="w-12 h-12 object-contain"
             />

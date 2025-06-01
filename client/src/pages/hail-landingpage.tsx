@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { getWebsiteImages } from "@/lib/imageService";
 import Projects from "@/components/projects";
+import { RecentStormReport } from "@/components/RecentStormReportSection";
 
 interface ContactForm {
   firstName: string;
@@ -436,7 +437,13 @@ export default function HailLandingPage() {
         backgroundImage: images.hailLandingPageBackground 
           ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${images.hailLandingPageBackground})`
           : 'linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%)',
-        ...backgroundImageStyles,
+        backgroundSize: 'contain',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
         minHeight: '100vh',
         maxWidth: '100vw',
         position: 'relative'
@@ -471,104 +478,13 @@ export default function HailLandingPage() {
 
       <div className="relative z-10">
         <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
-          {/* Dynamic Storm Report Section */}
-          <div className="max-w-4xl mx-auto mb-16">
-            {isLoadingStormData ? (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-2xl p-8 lg:p-12 shadow-xl">
-                <div className="flex items-center space-x-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="text-lg text-blue-800">Loading current storm data from NOAA...</p>
-                </div>
-              </div>
-            ) : stormDataError ? (
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-2xl p-8 lg:p-12 shadow-xl">
-                <div className="flex items-start space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center">
-                      <AlertTriangle className="w-8 h-8 text-yellow-600" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Storm Report</h2>
-                    <p className="text-lg text-gray-700 mb-4">
-                      We're currently updating our storm data from NOAA sources. In the meantime, our team is ready to assess any potential hail damage in the Oklahoma City area.
-                    </p>
-                    <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-yellow-200">
-                      <p className="font-semibold text-yellow-700 text-lg flex items-center">
-                        <Clock className="w-5 h-5 mr-2" />
-                        Schedule your free inspection today
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : stormContent && (
-              <div 
-                className="glass-card hover-lift bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl"
-                style={{
-                  backgroundImage: images.sectionBreakImage2 
-                    ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${images.sectionBreakImage2})`
-                    : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-                }}
-              >
-                <div className="flex items-start space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center alert-icon-glow">
-                      <AlertTriangle className="w-8 h-8 text-red-600" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-3xl lg:text-4xl font-light text-gray-900 mb-6 leading-tight">Recent Storm Report</h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Storm Type</p>
-                        <p className="text-lg font-bold text-gray-900">{stormContent.S}</p>
-                      </div>
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Date</p>
-                        <p className="text-lg font-bold text-gray-900">{stormContent.DOL}</p>
-                      </div>
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Location</p>
-                        <p className="text-lg font-bold text-gray-900">{stormContent.X}</p>
-                      </div>
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Hail Size</p>
-                        <div className="flex items-center space-x-3">
-                          <p className="text-lg font-bold text-gray-900">{stormContent.HS}</p>
-                          <div className="size-indicator w-6 h-6 bg-red-500 rounded-full opacity-80"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                      In light of the recent storm in {stormContent.X} on {stormContent.DOL}, we're here to help. The trending topic <strong>"{stormContent.phrase}"</strong> shows just how many homeowners are searching for answers right now — and we're proud to offer verified, local guidance using NOAA data.
-                    </p>
-
-                    {stormContent.hail_less_than_1_5 ? (
-                      <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                        Hail in this size range may seem minor — and sometimes it is. But prolonged storms or repeated impacts can strip protective granules from shingles, silently shaving years off your roof's lifespan. Even "smaller" hail can leave behind costly, hidden damage. That's why more people are searching <strong>"{stormContent.phrase}"</strong> to figure out what to do next.
-                      </p>
-                    ) : (
-                      <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                        Storms like this bring serious risk — not just to your roof, but to the safety, comfort, and value of your home. Severe impacts often fracture shingles, dislodge flashing, and void warranties — damage that can go unseen until it becomes a major problem. That's why searches like <strong>"{stormContent.phrase}"</strong> are trending in your area.
-                      </p>
-                    )}
-
-                    <div className="bg-red-100 border border-red-200 rounded-lg p-6 mt-6">
-                      <p className="text-lg font-semibold text-red-800 leading-relaxed">
-                        Hailstones as large as <strong>{stormContent.HS}</strong> were reported in your area. This level of impact is known to crack shingles, dent metal panels, and cause leaks that may not show until months later. Don't wait — <strong>schedule an inspection today</strong>.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Dynamic Storm Report Section with Fixed Scaling */}
+          <RecentStormReport
+            isLoadingStormData={isLoadingStormData}
+            stormDataError={stormDataError}
+            stormContent={stormContent}
+            backgroundImage={images.sectionBreakImage2}
+          />
 
           {/* Strategic Call-to-Action Section */}
           <div className="max-w-4xl mx-auto mb-12">

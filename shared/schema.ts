@@ -81,12 +81,6 @@ export const websiteImages = pgTable("website_images", {
   processStep3Image: text("process_step3_image"),
   processStep4Image: text("process_step4_image"),
   testimonialBackground: text("testimonial_background"),
-  hailLandingPageBackground: text("hail_landing_page_background"),
-  sectionBreakImage1: text("section_break_image1"),
-  sectionBreakImage2: text("section_break_image2"),
-  trustBadge1: text("trust_badge1"),
-  trustBadge2: text("trust_badge2"),
-  trustBadge3: text("trust_badge3"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

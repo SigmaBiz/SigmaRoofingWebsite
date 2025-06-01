@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Calendar, MapPin, Phone, Star, AlertTriangle, Shield, Clock, CheckCircle, Mail } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { getWebsiteImages } from "@/lib/imageService";
 import Projects from "@/components/projects";
 
 interface ContactForm {
@@ -83,9 +82,6 @@ export default function HailLandingPage() {
   const [stormContent, setStormContent] = useState<DynamicStormContent | null>(null);
   const [isLoadingStormData, setIsLoadingStormData] = useState(true);
   const [stormDataError, setStormDataError] = useState<string | null>(null);
-  
-  // Visual enhancement states
-  const [images, setImages] = useState<any>({});
 
   const [hailData, setHailData] = useState({
     city: "Oklahoma City",
@@ -294,13 +290,6 @@ export default function HailLandingPage() {
   }, []);
 
   useEffect(() => {
-    // Load images for visual enhancements
-    getWebsiteImages().then((loadedImages) => {
-      console.log('Loaded images:', loadedImages);
-      console.log('Hail background:', loadedImages?.hailLandingPageBackground);
-      setImages(loadedImages);
-    });
-    
     const loadingTimeout = setTimeout(() => {
       setHailData({
         city: "Oklahoma City",
@@ -407,17 +396,6 @@ export default function HailLandingPage() {
     }
   };
 
-  // Background image styles for proper scaling
-  const backgroundImageStyles = {
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    backgroundAttachment: 'fixed',
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden'
-  };
-
   if (!hailData.verified) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -430,18 +408,7 @@ export default function HailLandingPage() {
   }
 
   return (
-    <div 
-      className="min-h-screen parallax-bg"
-      style={{
-        backgroundImage: images.hailLandingPageBackground 
-          ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${images.hailLandingPageBackground})`
-          : 'linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%)',
-        ...backgroundImageStyles,
-        minHeight: '100vh',
-        maxWidth: '100vw',
-        position: 'relative'
-      }}
-    >
+    <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -469,7 +436,7 @@ export default function HailLandingPage() {
         </div>
       </header>
 
-      <div className="relative z-10">
+      <div className="relative bg-gradient-to-br from-slate-50 to-white">
         <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
           {/* Dynamic Storm Report Section */}
           <div className="max-w-4xl mx-auto mb-16">
@@ -503,20 +470,10 @@ export default function HailLandingPage() {
                 </div>
               </div>
             ) : stormContent && (
-              <div 
-                className="glass-card hover-lift bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl"
-                style={{
-                  backgroundImage: images.sectionBreakImage2 
-                    ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${images.sectionBreakImage2})`
-                    : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-                }}
-              >
+              <div className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl">
                 <div className="flex items-start space-x-6">
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center alert-icon-glow">
+                    <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center animate-pulse">
                       <AlertTriangle className="w-8 h-8 text-red-600" />
                     </div>
                   </div>
@@ -524,24 +481,21 @@ export default function HailLandingPage() {
                     <h2 className="text-3xl lg:text-4xl font-light text-gray-900 mb-6 leading-tight">Recent Storm Report</h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
+                      <div className="bg-white/70 rounded-lg p-4">
                         <p className="text-sm font-medium text-gray-600 mb-1">Storm Type</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.S}</p>
                       </div>
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
+                      <div className="bg-white/70 rounded-lg p-4">
                         <p className="text-sm font-medium text-gray-600 mb-1">Date</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.DOL}</p>
                       </div>
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
+                      <div className="bg-white/70 rounded-lg p-4">
                         <p className="text-sm font-medium text-gray-600 mb-1">Location</p>
                         <p className="text-lg font-bold text-gray-900">{stormContent.X}</p>
                       </div>
-                      <div className="storm-data-box hover-lift rounded-lg p-4 shadow-md">
+                      <div className="bg-white/70 rounded-lg p-4">
                         <p className="text-sm font-medium text-gray-600 mb-1">Hail Size</p>
-                        <div className="flex items-center space-x-3">
-                          <p className="text-lg font-bold text-gray-900">{stormContent.HS}</p>
-                          <div className="size-indicator w-6 h-6 bg-red-500 rounded-full opacity-80"></div>
-                        </div>
+                        <p className="text-lg font-bold text-gray-900">{stormContent.HS}</p>
                       </div>
                     </div>
 
@@ -580,7 +534,7 @@ export default function HailLandingPage() {
                     element.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className="cta-pulse inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+                className="inline-flex items-center justify-center px-8 py-4 text-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-emerald-200"
               >
                 <CheckCircle className="mr-3 h-6 w-6" />
                 Get Free Storm Damage Inspection Now
@@ -591,7 +545,7 @@ export default function HailLandingPage() {
             </div>
             
             {/* Urgency Message */}
-            <div className="urgency-glow bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-xl p-6 mt-8 shadow-md">
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-500 rounded-xl p-6 mt-8 shadow-md">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
@@ -606,64 +560,17 @@ export default function HailLandingPage() {
               </div>
             </div>
           </div>
-
-          {/* Trust Indicators Section */}
-          <div className="max-w-6xl mx-auto mb-16">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-white text-shadow-lg mb-4">Trusted by Oklahoma Homeowners</h3>
-              <p className="text-gray-200 text-shadow-md">NOAA-verified data • Insurance approved • Licensed professionals</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {images.trustBadge1 && (
-                <div className="glass-card hover-lift float-badge text-center p-6 rounded-xl">
-                  <img src={images.trustBadge1} alt="Trust Badge 1" className="w-24 h-24 mx-auto mb-4 object-contain" />
-                  <p className="text-white text-shadow-md font-semibold">NOAA Verified Data</p>
-                </div>
-              )}
-              {images.trustBadge2 && (
-                <div className="glass-card hover-lift float-badge text-center p-6 rounded-xl" style={{animationDelay: '0.5s'}}>
-                  <img src={images.trustBadge2} alt="Trust Badge 2" className="w-24 h-24 mx-auto mb-4 object-contain" />
-                  <p className="text-white text-shadow-md font-semibold">Insurance Approved</p>
-                </div>
-              )}
-              {images.trustBadge3 && (
-                <div className="glass-card hover-lift float-badge text-center p-6 rounded-xl" style={{animationDelay: '1s'}}>
-                  <img src={images.trustBadge3} alt="Trust Badge 3" className="w-24 h-24 mx-auto mb-4 object-contain" />
-                  <p className="text-white text-shadow-md font-semibold">BBB Rated</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Section Break Image */}
-          {images.sectionBreakImage1 && (
-            <div 
-              className="parallax-bg min-h-80 flex items-center justify-center mb-16"
-              style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${images.sectionBreakImage1})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                minHeight: '320px'
-              }}
-            >
-              <div className="text-center">
-                <h3 className="text-4xl font-bold text-white text-shadow-lg mb-4">Storm Damage Restoration Experts</h3>
-                <p className="text-xl text-gray-200 text-shadow-md">Professional assessment • Insurance claims • Quality repairs</p>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Projects Gallery Section */}
-      <div className="bg-gray-50 relative z-10">
+      <div className="bg-gray-50">
         <div className="container mx-auto px-6 lg:px-12 py-16">
           <Projects />
         </div>
       </div>
 
-      <div className="bg-white relative z-10">
+      <div className="bg-white">
         <div className="container mx-auto px-6 lg:px-12 py-16 lg:py-24">
           <div className="grid lg:grid-cols-5 gap-16">
             <div className="lg:col-span-3 space-y-16">
@@ -796,11 +703,11 @@ export default function HailLandingPage() {
 
             <div className="lg:col-span-2">
               <div className="sticky top-8">
-                <div id="contact-form" className="glass-card hover-lift border-0 shadow-xl rounded-lg">
+                <div id="contact-form" className="border-0 shadow-xl bg-white rounded-lg">
                   <div className="p-8">
                     <div className="text-center mb-8">
-                      <h3 className="text-2xl font-bold text-white text-shadow-lg mb-2">Free Storm Damage Inspection</h3>
-                      <p className="text-gray-200 text-shadow-md">Get your roof assessed by certified professionals</p>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Storm Damage Inspection</h3>
+                      <p className="text-gray-600">Get your roof assessed by certified professionals</p>
                     </div>
 
                     {submitMessage && (

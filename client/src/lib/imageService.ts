@@ -14,12 +14,6 @@ interface WebsiteImages {
   processStep3Image?: string;
   processStep4Image?: string;
   testimonialBackground?: string;
-  hailLandingPageBackground?: string;
-  sectionBreakImage1?: string;
-  sectionBreakImage2?: string;
-  trustBadge1?: string;
-  trustBadge2?: string;
-  trustBadge3?: string;
 }
 
 export async function getWebsiteImages(): Promise<WebsiteImages> {

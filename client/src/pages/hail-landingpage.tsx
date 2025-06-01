@@ -407,6 +407,17 @@ export default function HailLandingPage() {
     }
   };
 
+  // Background image styles for proper scaling
+  const backgroundImageStyles = {
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden'
+  };
+
   if (!hailData.verified) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -425,10 +436,10 @@ export default function HailLandingPage() {
         backgroundImage: images.hailLandingPageBackground 
           ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${images.hailLandingPageBackground})`
           : 'linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
+        ...backgroundImageStyles,
+        minHeight: '100vh',
+        maxWidth: '100vw',
+        position: 'relative'
       }}
     >
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">

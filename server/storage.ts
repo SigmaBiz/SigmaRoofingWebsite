@@ -29,6 +29,33 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.currentContactId = 1;
     this.currentProjectId = 1;
+    
+    // Initialize website images with all required fields
+    this.websiteImages = {
+      id: 1,
+      heroBackground: null,
+      heroFeatureImage: null,
+      residentialRoofingImage: null,
+      roofRepairImage: null,
+      roofInspectionImage: null,
+      gutterServiceImage: null,
+      stormDamageImage: null,
+      paintingServiceImage: null,
+      teamPhoto: null,
+      companyLogo: null,
+      processStep1Image: null,
+      processStep2Image: null,
+      processStep3Image: null,
+      processStep4Image: null,
+      testimonialBackground: null,
+      hailLandingPageBackground: null,
+      sectionBreakImage1: null,
+      sectionBreakImage2: null,
+      trustBadge1: null,
+      trustBadge2: null,
+      trustBadge3: null,
+      updatedAt: new Date(),
+    };
   }
 
   async getUser(id: number): Promise<User | undefined> {

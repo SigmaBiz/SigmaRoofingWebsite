@@ -424,7 +424,11 @@ export default function HailLandingPage() {
       style={{
         backgroundImage: images.hailLandingPageBackground 
           ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)), url(${images.hailLandingPageBackground})`
-          : 'linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%)'
+          : 'linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
       }}
     >
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -625,7 +629,11 @@ export default function HailLandingPage() {
             <div 
               className="parallax-bg min-h-80 flex items-center justify-center mb-16"
               style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${images.sectionBreakImage1})`
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${images.sectionBreakImage1})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                minHeight: '320px'
               }}
             >
               <div className="text-center">

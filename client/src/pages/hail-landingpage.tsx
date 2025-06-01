@@ -484,7 +484,17 @@ export default function HailLandingPage() {
                 </div>
               </div>
             ) : stormContent && (
-              <div className="glass-card hover-lift bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl">
+              <div 
+                className="glass-card hover-lift bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 rounded-2xl p-8 lg:p-12 shadow-xl"
+                style={{
+                  backgroundImage: images.sectionBreakImage2 
+                    ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${images.sectionBreakImage2})`
+                    : undefined,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              >
                 <div className="flex items-start space-x-6">
                   <div className="flex-shrink-0">
                     <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center alert-icon-glow">

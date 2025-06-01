@@ -295,7 +295,11 @@ export default function HailLandingPage() {
 
   useEffect(() => {
     // Load images for visual enhancements
-    getWebsiteImages().then(setImages);
+    getWebsiteImages().then((loadedImages) => {
+      console.log('Loaded images:', loadedImages);
+      console.log('Hail background:', loadedImages?.hailLandingPageBackground);
+      setImages(loadedImages);
+    });
     
     const loadingTimeout = setTimeout(() => {
       setHailData({

@@ -75,7 +75,6 @@ export const websiteImages = pgTable("website_images", {
   stormDamageImage: text("storm_damage_image"),
   paintingServiceImage: text("painting_service_image"),
   teamPhoto: text("team_photo"),
-  companyLogo: text("company_logo"),
   processStep1Image: text("process_step1_image"),
   processStep2Image: text("process_step2_image"),
   processStep3Image: text("process_step3_image"),

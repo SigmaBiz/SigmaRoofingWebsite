@@ -8,7 +8,6 @@ interface WebsiteImages {
   stormDamageImage?: string;
   paintingServiceImage?: string;
   teamPhoto?: string;
-  companyLogo?: string;
   processStep1Image?: string;
   processStep2Image?: string;
   processStep3Image?: string;
@@ -40,7 +39,7 @@ export async function getWebsiteImages(): Promise<WebsiteImages> {
   const imageKeys = [
     'heroBackground', 'heroFeatureImage', 'residentialRoofingImage', 'roofRepairImage',
     'roofInspectionImage', 'gutterServiceImage', 'stormDamageImage',
-    'paintingServiceImage', 'teamPhoto', 'companyLogo',
+    'paintingServiceImage', 'teamPhoto',
     'processStep1Image', 'processStep2Image', 'processStep3Image',
     'processStep4Image', 'testimonialBackground'
   ];

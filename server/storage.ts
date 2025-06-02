@@ -9,6 +9,7 @@ export interface IStorage {
   createProject(project: InsertProject): Promise<Project>;
   getProjects(): Promise<Project[]>;
   deleteProject(id: number): Promise<boolean>;
+  saveProjects(projects: any[]): Promise<boolean>;
   getWebsiteImages(): Promise<WebsiteImages | undefined>;
   updateWebsiteImages(images: InsertWebsiteImages): Promise<WebsiteImages>;
 }
@@ -84,6 +85,32 @@ export class MemStorage implements IStorage {
 
   async deleteProject(id: number): Promise<boolean> {
     return this.projects.delete(id);
+  }
+
+  async saveProjects(projects: any[]): Promise<boolean> {
+    try {
+      // Clear existing projects and add new ones
+      this.projects.clear();
+      this.currentProjectId = 1;
+      
+      for (const project of projects) {
+        const id = this.currentProjectId++;
+        const newProject: Project = {
+          id,
+          title: project.title || 'Untitled Project',
+          description: project.description || '',
+          imageUrl: project.image || project.imageUrl || '',
+          category: project.category || 'General',
+          location: project.location || 'Edmond, OK',
+          createdAt: new Date()
+        };
+        this.projects.set(id, newProject);
+      }
+      return true;
+    } catch (error) {
+      console.error('Error saving projects:', error);
+      return false;
+    }
   }
 
   async getWebsiteImages(): Promise<WebsiteImages | undefined> {

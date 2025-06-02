@@ -1317,6 +1317,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Projects API endpoint for consistent cross-device access
+  app.get("/api/projects", async (req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      res.json({ 
+        success: true, 
+        projects: projects || []
+      });
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.json({ 
+        success: false, 
+        projects: [],
+        message: "Projects not available"
+      });
+    }
+  });
+
+  // Save projects API endpoint
+  app.post("/api/projects", async (req, res) => {
+    try {
+      const projects = req.body.projects;
+      await storage.saveProjects(projects);
+      res.json({ 
+        success: true, 
+        message: "Projects saved successfully"
+      });
+    } catch (error) {
+      console.error("Error saving projects:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to save projects"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

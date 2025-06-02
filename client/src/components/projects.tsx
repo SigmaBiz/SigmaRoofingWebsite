@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, memo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 
 interface BusinessPhoto {
   id: number;
@@ -104,10 +105,22 @@ export default function Projects() {
   const [adminProjects, setAdminProjects] = useState<any[]>([]);
   const [useAdminProjects, setUseAdminProjects] = useState(false);
 
-  // Memoized function to load admin projects
+  // Use API to load projects consistently across all devices
+  const { data: apiProjects } = useQuery({
+    queryKey: ['/api/projects'],
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30 // 30 minutes
+  });
+
+  // Memoized function to load admin projects from multiple sources
   const loadAdminProjects = useMemo(() => {
     try {
-      // First check for bulk admin projects
+      // First check API data
+      if (apiProjects?.success && apiProjects?.projects && Array.isArray(apiProjects.projects) && apiProjects.projects.length > 0) {
+        return { projects: apiProjects.projects, hasProjects: true };
+      }
+
+      // Fallback to localStorage for development
       const savedProjects = localStorage.getItem('adminProjects');
       if (savedProjects) {
         const parsedProjects = JSON.parse(savedProjects);
@@ -141,8 +154,6 @@ export default function Projects() {
       }
 
       if (hasAnyProjects) {
-        // Cache the loaded projects for next time
-        localStorage.setItem('adminProjects', JSON.stringify(customProjects));
         return { projects: customProjects, hasProjects: true };
       }
 
@@ -151,13 +162,15 @@ export default function Projects() {
       console.log('Error loading admin projects:', error);
       return { projects: [], hasProjects: false };
     }
-  }, []); // Empty dependency array since localStorage is stable
+  }, [apiProjects]); // Depend on API data
 
   useEffect(() => {
     const { projects, hasProjects } = loadAdminProjects;
     if (hasProjects) {
       setAdminProjects(projects);
       setUseAdminProjects(true);
+    } else {
+      setUseAdminProjects(false);
     }
   }, [loadAdminProjects]);
 

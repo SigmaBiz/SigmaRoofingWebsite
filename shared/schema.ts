@@ -75,12 +75,14 @@ export const websiteImages = pgTable("website_images", {
   stormDamageImage: text("storm_damage_image"),
   paintingServiceImage: text("painting_service_image"),
   teamPhoto: text("team_photo"),
+  visionImage: text("vision_image"),
   companyLogo: text("company_logo"),
   processStep1Image: text("process_step1_image"),
   processStep2Image: text("process_step2_image"),
   processStep3Image: text("process_step3_image"),
   processStep4Image: text("process_step4_image"),
   testimonialBackground: text("testimonial_background"),
+  stormReportBackground: text("storm_report_background"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

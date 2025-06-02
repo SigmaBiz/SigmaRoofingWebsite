@@ -97,6 +97,27 @@ export default function Admin() {
     staleTime: 1000 * 60 * 5 // 5 minutes
   });
 
+  // Function to sync projects to API
+  const syncProjectsToAPI = async (projects: any[]) => {
+    if (projects.length === 0) return;
+    
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projects }),
+      });
+      
+      if (response.ok) {
+        console.log('Projects synced to API successfully');
+      }
+    } catch (error) {
+      console.log('Failed to sync projects to API:', error);
+    }
+  };
+
   // Load saved images when component mounts
   useEffect(() => {
     // Load from API first
@@ -115,18 +136,35 @@ export default function Admin() {
       });
     }
 
-    // Load all project data
+    // Load all project data and sync to API
+    const loadedProjects: any = {};
     Object.keys(allProjects).forEach(projectKey => {
       const saved = localStorage.getItem(`project_${projectKey}`);
       if (saved) {
         try {
           const projectData = JSON.parse(saved);
+          loadedProjects[projectKey] = projectData;
           setAllProjects(prev => ({ ...prev, [projectKey]: projectData }));
         } catch (error) {
           console.log('Error loading project data:', projectKey);
         }
       }
     });
+
+    // Sync loaded projects to API for cross-device access
+    const projectArray = Object.entries(loadedProjects)
+      .filter(([_, project]: [string, any]) => project.imageUrl !== "")
+      .map(([_, project]: [string, any]) => ({
+        image: project.imageUrl,
+        title: project.title || 'Untitled Project',
+        description: project.description || 'Custom project managed through admin panel',
+        category: project.category || 'Admin Project',
+        location: project.location || 'Edmond, OK'
+      }));
+    
+    if (projectArray.length > 0) {
+      syncProjectsToAPI(projectArray);
+    }
   }, [savedImages]);
 
   // Update form data when current project changes
@@ -180,7 +218,7 @@ export default function Admin() {
     setDuplicateWarnings(prev => ({ ...prev, [currentProject]: isDuplicate }));
   };
 
-  const saveCurrentProject = () => {
+  const saveCurrentProject = async () => {
     // Check for duplicates
     const isDuplicate = duplicateWarnings[currentProject];
     if (isDuplicate) {
@@ -202,15 +240,38 @@ export default function Admin() {
         image: project.imageUrl,
         title: project.title || `Project ${index + 1}`,
         description: project.description || `Custom project managed through admin panel`,
-        category: project.category || "Admin Project"
+        category: project.category || "Admin Project",
+        location: project.location || "Edmond, OK"
       }));
 
+    // Save to localStorage first
     localStorage.setItem('adminProjects', JSON.stringify(projectArray));
     
-    toast({
-      title: "Project Saved!",
-      description: `${currentProject.replace('project', 'Project ')} has been saved and is now live on your website.`,
-    });
+    try {
+      // Also save to backend API for cross-device consistency
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projects: projectArray }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Project Saved!",
+          description: `${currentProject.replace('project', 'Project ')} has been saved and is now live on your website.`,
+        });
+      } else {
+        throw new Error('Failed to save to server');
+      }
+    } catch (error) {
+      // Still show success if localStorage save worked
+      toast({
+        title: "Project Saved Locally!",
+        description: `${currentProject.replace('project', 'Project ')} has been saved. Note: Server sync failed.`,
+      });
+    }
   };
 
   const handleSaveWebsiteImages = async () => {

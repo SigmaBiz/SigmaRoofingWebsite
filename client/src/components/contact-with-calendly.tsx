@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,10 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, MapPin, IdCard, AlertTriangle, Send, Calendar, Clock, ShieldCheck } from "lucide-react";
+import { Phone, Mail, MapPin, IdCard, AlertTriangle, Send, Calendar, ShieldCheck } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+
+// Add script to head for Calendly
+declare global {
+  interface Window {
+    Calendly: any;
+  }
+}
 
 interface ContactForm {
   firstName: string;
@@ -19,10 +25,7 @@ interface ContactForm {
   address: string;
   serviceType: string;
   description: string;
-  preferredDate1: string;
-  preferredTime1: string;
-  preferredDate2: string;
-  preferredTime2: string;
+  schedulingUrl?: string; // Store the Calendly booking URL after scheduling
 }
 
 interface ValidationErrors {
@@ -30,7 +33,6 @@ interface ValidationErrors {
   phone?: string;
   address?: string;
   description?: string;
-  dates?: string;
 }
 
 interface AddressSuggestion {
@@ -38,7 +40,7 @@ interface AddressSuggestion {
   place_id: string;
 }
 
-export default function Contact() {
+export default function ContactWithCalendly() {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ContactForm>({
     firstName: "",
@@ -48,26 +50,85 @@ export default function Contact() {
     address: "",
     serviceType: "",
     description: "",
-    preferredDate1: "",
-    preferredTime1: "",
-    preferredDate2: "",
-    preferredTime2: ""
+    schedulingUrl: ""
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [hasScheduled, setHasScheduled] = useState(false);
 
-  // Get minimum date (today)
-  const today = new Date().toISOString().split('T')[0];
-  
-  // Available time slots for appointments
-  const availableTimeSlots = [
-    "8:00 AM - 12:00 PM",
-    "12:00 PM - 4:00 PM", 
-    "4:00 PM - 7:00 PM"
-  ];
+  // Load Calendly widget script
+  useEffect(() => {
+    // Check if script already exists
+    if (document.querySelector('script[src*="calendly.com"]')) {
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    script.type = 'text/javascript';
+    
+    script.onload = () => {
+      console.log('Calendly script loaded successfully');
+      // Add a small delay to ensure DOM is ready
+      setTimeout(() => {
+        const element = document.querySelector('.calendly-inline-widget');
+        if (window.Calendly && element) {
+          console.log('Initializing Calendly widget');
+          try {
+            window.Calendly.initInlineWidget({
+              url: 'https://calendly.com/aescalante-oksigma/new-meeting?hide_gdpr_banner=1&primary_color=10b981',
+              parentElement: element,
+              prefill: {
+                email: formData.email || '',
+                firstName: formData.firstName || '',
+                lastName: formData.lastName || '',
+              },
+              utm: {}
+            });
+          } catch (error) {
+            console.error('Calendly initialization error:', error);
+          }
+        } else {
+          console.error('Calendly not available or element not found');
+        }
+      }, 100);
+    };
+    
+    script.onerror = (error) => {
+      console.error('Failed to load Calendly script:', error);
+    };
+    
+    document.head.appendChild(script);
+
+    return () => {
+      // Don't remove the script on cleanup to avoid re-loading issues
+    };
+  }, []);
+
+  // Listen for Calendly events
+  useEffect(() => {
+    const handleCalendlyEvent = (e: MessageEvent) => {
+      if (e.data.event && e.data.event.indexOf('calendly') === 0) {
+        if (e.data.event === 'calendly.event_scheduled') {
+          setHasScheduled(true);
+          setFormData(prev => ({ 
+            ...prev, 
+            schedulingUrl: e.data.payload?.event?.uri || 'Appointment scheduled'
+          }));
+          toast({
+            title: "Appointment Scheduled!",
+            description: "Your appointment has been booked. Please complete the form to submit your details.",
+          });
+        }
+      }
+    };
+
+    window.addEventListener('message', handleCalendlyEvent);
+    return () => window.removeEventListener('message', handleCalendlyEvent);
+  }, [toast]);
 
   // Email validation - strict for lead quality
   const validateEmail = (email: string): boolean => {
@@ -136,35 +197,6 @@ export default function Contact() {
       console.log('Address validation temporarily unavailable');
       setShowAddressSuggestions(false);
     }
-  };
-
-  // Check if time slot is available (simulate booking system)
-  const isSlotAvailable = (date: string, time: string): boolean => {
-    const slotKey = `${date}-${time}`;
-    return !bookedSlots.includes(slotKey);
-  };
-
-  // Validate appointment times don't overlap and are available
-  const validateAppointmentTimes = (): string | null => {
-    if (formData.preferredDate1 === formData.preferredDate2 && 
-        formData.preferredTime1 === formData.preferredTime2 &&
-        formData.preferredDate1 && formData.preferredTime1) {
-      return "Please select different time slots for your preferred appointments";
-    }
-    
-    if (formData.preferredDate1 && formData.preferredTime1) {
-      if (!isSlotAvailable(formData.preferredDate1, formData.preferredTime1)) {
-        return "Your first preferred time slot is already booked. Please select another time.";
-      }
-    }
-    
-    if (formData.preferredDate2 && formData.preferredTime2) {
-      if (!isSlotAvailable(formData.preferredDate2, formData.preferredTime2)) {
-        return "Your second preferred time slot is already booked. Please select another time.";
-      }
-    }
-    
-    return null;
   };
 
   // Real-time validation as user types
@@ -249,11 +281,6 @@ export default function Contact() {
       newErrors.description = "Detailed project description required";
     }
     
-    const dateError = validateAppointmentTimes();
-    if (dateError) {
-      newErrors.dates = dateError;
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -266,7 +293,9 @@ export default function Contact() {
     onSuccess: (data) => {
       toast({
         title: "Request Submitted Successfully!",
-        description: "We'll contact you within 24 hours to schedule your estimate.",
+        description: hasScheduled 
+          ? "We'll see you at your scheduled appointment!" 
+          : "We'll contact you within 24 hours to schedule your estimate.",
       });
       // Reset form after successful submission
       setFormData({
@@ -277,12 +306,10 @@ export default function Contact() {
         address: "",
         serviceType: "",
         description: "",
-        preferredDate1: "",
-        preferredTime1: "",
-        preferredDate2: "",
-        preferredTime2: ""
+        schedulingUrl: ""
       });
       setErrors({});
+      setHasScheduled(false);
     },
     onError: (error) => {
       toast({
@@ -317,10 +344,6 @@ export default function Contact() {
            formData.address.trim() &&
            formData.serviceType &&
            filterContent(formData.description) &&
-           formData.preferredDate1 &&
-           formData.preferredTime1 &&
-           formData.preferredDate2 &&
-           formData.preferredTime2 &&
            Object.keys(errors).length === 0;
   };
 
@@ -332,7 +355,7 @@ export default function Contact() {
             Get Your Free Roofing Estimate
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Professional roofing services in Oklahoma. Fill out our secure form for a detailed estimate within 24 hours.
+            Professional roofing services in Oklahoma. Fill out our secure form and schedule your appointment below.
           </p>
           <div className="flex items-center justify-center mt-4 text-emerald-600">
             <ShieldCheck className="w-5 h-5 mr-2" />
@@ -534,81 +557,41 @@ export default function Contact() {
                   )}
                 </div>
 
-                {/* Smart Appointment Scheduling */}
+                {/* Calendly Inline Widget for Scheduling */}
                 <div className="space-y-6">
                   <div className="flex items-center mb-4">
                     <Calendar className="w-5 h-5 text-emerald-600 mr-2" />
-                    <h3 className="text-lg font-semibold">Preferred Appointment Times</h3>
+                    <h3 className="text-lg font-semibold">Schedule Your Free Estimate</h3>
                   </div>
                   
-                  {/* First Appointment Preference */}
-                  <div className="grid md:grid-cols-2 gap-4 p-4 bg-emerald-50 rounded-lg">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">First Choice Date *</Label>
-                      <Input
-                        type="date"
-                        value={formData.preferredDate1}
-                        onChange={(e) => handleInputChange('preferredDate1', e.target.value)}
-                        min={today}
-                        required
-                        className="h-12"
-                      />
+                  {hasScheduled && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                      <p className="text-green-800 flex items-center">
+                        <ShieldCheck className="w-5 h-5 mr-2" />
+                        Great! Your appointment has been scheduled. Please submit the form to complete your request.
+                      </p>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">First Choice Time *</Label>
-                      <Select value={formData.preferredTime1} onValueChange={(value) => handleInputChange('preferredTime1', value)}>
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select time window" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableTimeSlots.map((slot) => (
-                            <SelectItem key={slot} value={slot}>
-                              {slot}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Second Appointment Preference */}
-                  <div className="grid md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Second Choice Date *</Label>
-                      <Input
-                        type="date"
-                        value={formData.preferredDate2}
-                        onChange={(e) => handleInputChange('preferredDate2', e.target.value)}
-                        min={today}
-                        required
-                        className="h-12"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Second Choice Time *</Label>
-                      <Select value={formData.preferredTime2} onValueChange={(value) => handleInputChange('preferredTime2', value)}>
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select different time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableTimeSlots.map((slot) => (
-                            <SelectItem key={slot} value={slot}>
-                              {slot}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {errors.dates && (
-                    <p className="text-red-500 text-sm flex items-center">
-                      <AlertTriangle className="w-4 h-4 mr-1" />
-                      {errors.dates}
-                    </p>
                   )}
+                  
+                  {/* Calendly inline widget */}
+                  <div className="bg-white rounded-lg shadow-inner p-4" style={{ minHeight: '650px' }}>
+                    <div 
+                      className="calendly-inline-widget" 
+                      style={{ minWidth: '320px', height: '650px', position: 'relative' }}
+                    >
+                      {/* Loading message while Calendly loads */}
+                      <div className="flex items-center justify-center h-full text-gray-500">
+                        <div className="text-center">
+                          <Calendar className="w-12 h-12 mx-auto mb-4 text-emerald-600 animate-pulse" />
+                          <p>Loading scheduling calendar...</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 text-center mt-4">
+                    📅 Select a convenient time above for your free roofing estimate
+                  </p>
                 </div>
 
                 {/* Submit Button with Validation Status */}
@@ -630,7 +613,7 @@ export default function Contact() {
                     ) : (
                       <div className="flex items-center">
                         <Send className="w-5 h-5 mr-2" />
-                        Request Free Estimate
+                        Submit Request
                       </div>
                     )}
                   </Button>

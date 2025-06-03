@@ -46,49 +46,115 @@ export async function registerRoutes(app: Express): Promise<Express> {
     }
   });
 
-  // Google Places Autocomplete for Oklahoma addresses
+  // Google Places Autocomplete for Oklahoma addresses - MVP3 Enhanced
   app.get("/api/address-suggestions", async (req, res) => {
     try {
       const query = req.query.q as string;
       const apiKey = process.env.GOOGLE_API_KEY;
       
       if (!apiKey) {
-        return res.status(500).json({ success: false, message: "Google API key not configured" });
+        console.log('Google API key not configured - using fallback suggestions');
+        
+        // Provide enhanced fallback suggestions for Oklahoma immediately
+        const fallbackSuggestions = [
+          { formatted_address: "Oklahoma City, OK, USA", place_id: "fallback_okc", main_text: "Oklahoma City", secondary_text: "OK, USA" },
+          { formatted_address: "Edmond, OK, USA", place_id: "fallback_edmond", main_text: "Edmond", secondary_text: "OK, USA" },
+          { formatted_address: "Norman, OK, USA", place_id: "fallback_norman", main_text: "Norman", secondary_text: "OK, USA" },
+          { formatted_address: "Moore, OK, USA", place_id: "fallback_moore", main_text: "Moore", secondary_text: "OK, USA" },
+          { formatted_address: "Midwest City, OK, USA", place_id: "fallback_mwc", main_text: "Midwest City", secondary_text: "OK, USA" },
+          { formatted_address: "Yukon, OK, USA", place_id: "fallback_yukon", main_text: "Yukon", secondary_text: "OK, USA" },
+          { formatted_address: "Mustang, OK, USA", place_id: "fallback_mustang", main_text: "Mustang", secondary_text: "OK, USA" },
+          { formatted_address: "Deer Creek, OK, USA", place_id: "fallback_deer_creek", main_text: "Deer Creek", secondary_text: "OK, USA" }
+        ].filter(city => 
+          city.main_text.toLowerCase().includes(query.toLowerCase()) ||
+          city.formatted_address.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        console.log(`⚠️ No Google API key - returning ${fallbackSuggestions.length} fallback suggestions for "${query}"`);
+        
+        return res.json({ 
+          success: true, 
+          suggestions: fallbackSuggestions,
+          source: 'fallback',
+          message: 'Using local suggestions - add Google API key for enhanced results'
+        });
       }
 
       if (!query || query.length < 3) {
         return res.json({ success: true, suggestions: [] });
       }
 
-      // Google Places Autocomplete API with Oklahoma restriction
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query + ' Oklahoma')}&types=address&key=${apiKey}`
-      );
+      // Enhanced Google Places Autocomplete API call
+      const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
+      url.searchParams.set('input', `${query} Oklahoma`);
+      url.searchParams.set('types', 'address');
+      url.searchParams.set('components', 'country:us|administrative_area:oklahoma');
+      url.searchParams.set('key', apiKey);
+      
+      console.log(`Fetching addresses for: "${query}"`);
+      
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Google API responded with status: ${response.status}`);
+      }
       
       const data = await response.json();
       
-      console.log(`Address search for "${query}":`, data);
-      
       if (data.status === "OK") {
-        const suggestions = data.predictions?.slice(0, 5).map((pred: any) => ({
+        const suggestions = data.predictions?.slice(0, 8).map((pred: any) => ({
           formatted_address: pred.description,
-          place_id: pred.place_id
+          place_id: pred.place_id,
+          main_text: pred.structured_formatting?.main_text || pred.description,
+          secondary_text: pred.structured_formatting?.secondary_text || ''
         })) || [];
         
-        console.log(`Found ${suggestions.length} suggestions`);
+        console.log(`✅ Found ${suggestions.length} Google Places suggestions`);
         
         res.json({ 
           success: true, 
-          suggestions: suggestions 
+          suggestions: suggestions,
+          source: 'google_places'
         });
+      } else if (data.status === "ZERO_RESULTS") {
+        console.log(`No results found for "${query}"`);
+        res.json({ success: true, suggestions: [], source: 'google_places' });
       } else {
-        console.log('Places API error:', data.status, data.error_message);
-        res.json({ success: true, suggestions: [] });
+        console.error('Google Places API error:', data.status, data.error_message);
+        throw new Error(`Google Places API error: ${data.status}`);
       }
       
     } catch (error) {
       console.error("Error fetching address suggestions:", error);
-      res.json({ success: true, suggestions: [] });
+      
+      // Provide enhanced fallback suggestions for Oklahoma
+      const fallbackSuggestions = [
+        { formatted_address: "Oklahoma City, OK, USA", place_id: "fallback_okc", main_text: "Oklahoma City", secondary_text: "OK, USA" },
+        { formatted_address: "Edmond, OK, USA", place_id: "fallback_edmond", main_text: "Edmond", secondary_text: "OK, USA" },
+        { formatted_address: "Norman, OK, USA", place_id: "fallback_norman", main_text: "Norman", secondary_text: "OK, USA" },
+        { formatted_address: "Moore, OK, USA", place_id: "fallback_moore", main_text: "Moore", secondary_text: "OK, USA" },
+        { formatted_address: "Midwest City, OK, USA", place_id: "fallback_mwc", main_text: "Midwest City", secondary_text: "OK, USA" },
+        { formatted_address: "Yukon, OK, USA", place_id: "fallback_yukon", main_text: "Yukon", secondary_text: "OK, USA" },
+        { formatted_address: "Mustang, OK, USA", place_id: "fallback_mustang", main_text: "Mustang", secondary_text: "OK, USA" },
+        { formatted_address: "Deer Creek, OK, USA", place_id: "fallback_deer_creek", main_text: "Deer Creek", secondary_text: "OK, USA" }
+      ].filter(city => 
+        city.main_text.toLowerCase().includes(query.toLowerCase()) ||
+        city.formatted_address.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      console.log(`⚠️ Using fallback suggestions (${fallbackSuggestions.length} matches)`);
+      
+      res.json({ 
+        success: true, 
+        suggestions: fallbackSuggestions,
+        source: 'fallback',
+        message: 'Using local suggestions - add Google API key for enhanced results'
+      });
     }
   });
 

@@ -32,6 +32,8 @@ interface ValidationErrors {
 interface AddressSuggestion {
   formatted_address: string;
   place_id: string;
+  main_text?: string;
+  secondary_text?: string;
 }
 
 export default function ContactWithCalendly() {
@@ -105,29 +107,23 @@ export default function ContactWithCalendly() {
       
       const data = await response.json();
       
-      if (response.ok && data.success && data.suggestions) {
+      if (data.success && data.suggestions) {
         setAddressSuggestions(data.suggestions);
         setShowAddressSuggestions(data.suggestions.length > 0);
-      } else if (!response.ok || data.message?.includes("Google API key not configured")) {
-          // Provide fallback Oklahoma city suggestions if no API key
-          const fallbackSuggestions = [
-            "Oklahoma City, OK",
-            "Edmond, OK", 
-            "Norman, OK",
-            "Moore, OK",
-            "Midwest City, OK"
-          ].filter(city => 
-            city.toLowerCase().includes(query.toLowerCase())
-          ).map(city => ({
-            formatted_address: city,
-            place_id: `fallback_${city}`
-          }));
-          
-          if (fallbackSuggestions.length > 0) {
-            setAddressSuggestions(fallbackSuggestions);
-            setShowAddressSuggestions(true);
-          }
+        
+        // Log the source for debugging
+        if (data.source === 'google_places') {
+          console.log('✅ Using Google Places API');
+        } else if (data.source === 'fallback') {
+          console.log('⚠️ Using fallback suggestions');
         }
+      } else {
+        // Handle API errors gracefully
+        setShowAddressSuggestions(false);
+        if (data.message) {
+          console.log('Address API:', data.message);
+        }
+      }
     } catch (error) {
       console.log('Address validation temporarily unavailable');
       setShowAddressSuggestions(false);
@@ -332,7 +328,16 @@ export default function ContactWithCalendly() {
                         >
                           <div className="flex items-start">
                             <MapPin className="w-4 h-4 text-emerald-600 mt-0.5 mr-2 flex-shrink-0" />
-                            <span className="text-gray-900">{suggestion.formatted_address}</span>
+                            <div className="flex-1">
+                              {suggestion.main_text && suggestion.secondary_text ? (
+                                <>
+                                  <div className="text-gray-900 font-medium">{suggestion.main_text}</div>
+                                  <div className="text-gray-500 text-xs">{suggestion.secondary_text}</div>
+                                </>
+                              ) : (
+                                <span className="text-gray-900">{suggestion.formatted_address}</span>
+                              )}
+                            </div>
                           </div>
                         </button>
                       ))}

@@ -3,9 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Phone, Mail, MapPin, IdCard, AlertTriangle, Send, Calendar, ShieldCheck } from "lucide-react";
+import { Phone, MapPin, AlertTriangle, Send, Calendar, ShieldCheck } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,25 +18,15 @@ declare global {
 }
 
 interface ContactForm {
-  firstName: string;
-  lastName: string;
-  email: string;
   phone: string;
   address: string;
   serviceType: string;
-  description: string;
-  preferredDate1?: string;
-  preferredTime1?: string;
-  preferredDate2?: string;
-  preferredTime2?: string;
   schedulingUrl?: string; // Store the Calendly booking URL after scheduling
 }
 
 interface ValidationErrors {
-  email?: string;
   phone?: string;
   address?: string;
-  description?: string;
 }
 
 interface AddressSuggestion {
@@ -48,13 +37,9 @@ interface AddressSuggestion {
 export default function ContactWithCalendly() {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ContactForm>({
-    firstName: "",
-    lastName: "",
-    email: "",
     phone: "",
     address: "",
     serviceType: "",
-    description: "",
     schedulingUrl: ""
   });
 
@@ -87,16 +72,6 @@ export default function ContactWithCalendly() {
     return () => window.removeEventListener('message', handleCalendlyEvent);
   }, [toast]);
 
-  // Email validation - strict for lead quality
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com'];
-    const domain = email.split('@')[1]?.toLowerCase();
-    return emailRegex.test(email) && 
-           !email.includes('+') && 
-           email.length <= 50 &&
-           (commonDomains.includes(domain) || domain?.includes('.com') || domain?.includes('.net') || domain?.includes('.org'));
-  };
 
   // Phone validation (US format only)
   const validatePhone = (phone: string): boolean => {
@@ -115,21 +90,6 @@ export default function ContactWithCalendly() {
     return phoneNumber;
   };
 
-  // Content filtering for spam and inappropriate content
-  const filterContent = (text: string): boolean => {
-    const bannedWords = ['spam', 'test123', 'asdf', 'qwerty', 'fake', 'scam', 'viagra', 'casino'];
-    const suspiciousPatterns = [
-      /(.)\1{4,}/g, // Repeated characters like "aaaaaaa"
-      /^[A-Z\s!]{20,}$/g, // All caps long text
-      /\b(click here|free money|act now|limited time|urgent)\b/gi, // Spam phrases
-      /http[s]?:\/\//gi // URLs
-    ];
-    
-    const lowerText = text.toLowerCase();
-    return !bannedWords.some(word => lowerText.includes(word)) && 
-           !suspiciousPatterns.some(pattern => pattern.test(text)) &&
-           text.length >= 10; // Minimum description length
-  };
 
   // Google Places Autocomplete for Oklahoma addresses
   const searchOklahomaAddresses = async (query: string) => {
@@ -179,13 +139,6 @@ export default function ContactWithCalendly() {
     const newErrors = { ...errors };
     
     switch (field) {
-      case 'email':
-        if (value && !validateEmail(value)) {
-          newErrors.email = "Please enter a valid email address from a recognized provider";
-        } else {
-          delete newErrors.email;
-        }
-        break;
       case 'phone':
         if (value && !validatePhone(value)) {
           newErrors.phone = "Please enter a valid 10-digit US phone number";
@@ -198,13 +151,6 @@ export default function ContactWithCalendly() {
           newErrors.address = "We currently only serve properties in Oklahoma";
         } else {
           delete newErrors.address;
-        }
-        break;
-      case 'description':
-        if (value && !filterContent(value)) {
-          newErrors.description = "Please provide a detailed, professional description of your roofing needs";
-        } else {
-          delete newErrors.description;
         }
         break;
     }
@@ -240,20 +186,12 @@ export default function ContactWithCalendly() {
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
     
-    if (!validateEmail(formData.email)) {
-      newErrors.email = "Valid email required";
-    }
-    
     if (!validatePhone(formData.phone)) {
       newErrors.phone = "Valid phone number required";
     }
     
     if (!formData.address.toLowerCase().includes('oklahoma') && !formData.address.toLowerCase().includes('ok')) {
       newErrors.address = "Oklahoma address required";
-    }
-    
-    if (!filterContent(formData.description)) {
-      newErrors.description = "Detailed project description required";
     }
     
     setErrors(newErrors);
@@ -302,13 +240,9 @@ export default function ContactWithCalendly() {
 
   // Check if form is valid for submission
   const isFormValid = () => {
-    return formData.firstName.trim() &&
-           formData.lastName.trim() &&
-           validateEmail(formData.email) &&
-           validatePhone(formData.phone) &&
+    return validatePhone(formData.phone) &&
            formData.address.trim() &&
            formData.serviceType &&
-           filterContent(formData.description) &&
            Object.keys(errors).length === 0;
   };
 
@@ -332,92 +266,30 @@ export default function ContactWithCalendly() {
           <Card className="shadow-2xl border-0">
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Personal Information */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-sm font-medium">
-                      <IdCard className="w-4 h-4 inline mr-2" />
-                      First Name *
-                    </Label>
-                    <Input
-                      id="firstName"
-                      value={formData.firstName}
-                      onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      placeholder="Enter your first name"
-                      required
-                      className="h-12"
-                      autoComplete="given-name"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-sm font-medium">
-                      Last Name *
-                    </Label>
-                    <Input
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      placeholder="Enter your last name"
-                      required
-                      className="h-12"
-                      autoComplete="family-name"
-                    />
-                  </div>
-                </div>
-
-                {/* Contact Information with Real-time Validation */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
-                      <Mail className="w-4 h-4 inline mr-2" />
-                      Email Address *
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="your.email@example.com"
-                      required
-                      className={`h-12 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-green-500' : ''}`}
-                      autoComplete="email"
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-1" />
-                        {errors.email}
-                      </p>
-                    )}
-                    {validateEmail(formData.email) && formData.email && !errors.email && (
-                      <p className="text-green-600 text-sm">✓ Email verified</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium">
-                      <Phone className="w-4 h-4 inline mr-2" />
-                      Phone Number *
-                    </Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="(405) 555-0123"
-                      required
-                      className={`h-12 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-green-500' : ''}`}
-                      autoComplete="tel"
-                    />
-                    {errors.phone && (
-                      <p className="text-red-500 text-sm flex items-center">
-                        <AlertTriangle className="w-4 h-4 mr-1" />
-                        {errors.phone}
-                      </p>
-                    )}
-                    {validatePhone(formData.phone) && formData.phone && !errors.phone && (
-                      <p className="text-green-600 text-sm">✓ Phone verified</p>
-                    )}
-                  </div>
+                {/* Phone Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium">
+                    <Phone className="w-4 h-4 inline mr-2" />
+                    Phone Number *
+                  </Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="(405) 555-0123"
+                    required
+                    className={`h-12 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-green-500' : ''}`}
+                    autoComplete="tel"
+                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-sm flex items-center">
+                      <AlertTriangle className="w-4 h-4 mr-1" />
+                      {errors.phone}
+                    </p>
+                  )}
+                  {validatePhone(formData.phone) && formData.phone && !errors.phone && (
+                    <p className="text-green-600 text-sm">✓ Phone verified</p>
+                  )}
                 </div>
 
                 {/* Smart Address Input with Oklahoma Suggestions */}
@@ -501,30 +373,6 @@ export default function ContactWithCalendly() {
                   </Select>
                 </div>
 
-                {/* Filtered Project Description */}
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium">
-                    Project Description * (Minimum 10 characters)
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Please describe your roofing needs in detail. Include any specific issues, timeline, and budget considerations."
-                    required
-                    rows={4}
-                    className={`${errors.description ? 'border-red-500' : filterContent(formData.description) && formData.description ? 'border-green-500' : ''}`}
-                  />
-                  {errors.description && (
-                    <p className="text-red-500 text-sm flex items-center">
-                      <AlertTriangle className="w-4 h-4 mr-1" />
-                      {errors.description}
-                    </p>
-                  )}
-                  {filterContent(formData.description) && formData.description && !errors.description && (
-                    <p className="text-green-600 text-sm">✓ Description approved</p>
-                  )}
-                </div>
 
                 {/* Calendly Inline Widget for Scheduling */}
                 <div className="space-y-6">
@@ -543,13 +391,13 @@ export default function ContactWithCalendly() {
                   )}
                   
                   {/* Calendly scheduling section */}
-                  <div className="bg-white rounded-lg shadow-inner p-8 text-center">
+                  <div className="bg-emerald-50 rounded-lg shadow-inner p-8 text-center border-2 border-emerald-100">
                     <div className="space-y-4">
                       <Calendar className="w-16 h-16 mx-auto text-emerald-600" />
-                      <h4 className="text-xl font-semibold text-gray-900">Ready to Schedule?</h4>
-                      <p className="text-gray-600">Complete the form above, then click below to select your appointment time</p>
-                      <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
-                        ⚠️ Please fill out all required fields before scheduling
+                      <h4 className="text-xl font-semibold text-gray-900">Next: Hi! What is your name and when can we meet you?</h4>
+                      <p className="text-gray-600">After submitting your contact info above, we'll open our scheduling calendar where you can tell us your name and pick your preferred appointment time.</p>
+                      <div className="text-sm text-emerald-700 bg-emerald-100 p-3 rounded-lg">
+                        ✨ Quick & Easy - Just 3 fields above, then schedule!
                       </div>
                     </div>
                   </div>
@@ -603,18 +451,14 @@ export default function ContactWithCalendly() {
       
       {/* Calendly Popup Modal */}
       <PopupModal
-        url={`https://calendly.com/aescalante-oksigma/new-meeting?name=${formData.firstName}%20${formData.lastName}&email=${formData.email}`}
+        url={`https://calendly.com/aescalante-oksigma/new-meeting`}
         onModalClose={() => {
           setIsCalendlyOpen(false);
           // Reset form after scheduling
           setFormData({
-            firstName: "",
-            lastName: "",
-            email: "",
             phone: "",
             address: "",
             serviceType: "",
-            description: "",
             schedulingUrl: ""
           });
           setErrors({});

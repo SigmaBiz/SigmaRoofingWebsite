@@ -1,12 +1,11 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertContactRequestSchema } from "@shared/schema";
 import { emailService } from "./email-service";
 import { stormDataService } from "./storm-data-service-final";
 
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<Express> {
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
     try {
@@ -1353,6 +1352,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  // Don't create a new server here - just return the app
+  return app;
 }

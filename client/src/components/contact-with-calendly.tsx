@@ -9,6 +9,7 @@ import { Phone, Mail, MapPin, IdCard, AlertTriangle, Send, Calendar, ShieldCheck
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { PopupModal } from "react-calendly";
 
 // Add script to head for Calendly
 declare global {
@@ -25,6 +26,10 @@ interface ContactForm {
   address: string;
   serviceType: string;
   description: string;
+  preferredDate1?: string;
+  preferredTime1?: string;
+  preferredDate2?: string;
+  preferredTime2?: string;
   schedulingUrl?: string; // Store the Calendly booking URL after scheduling
 }
 
@@ -57,56 +62,8 @@ export default function ContactWithCalendly() {
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
   const [hasScheduled, setHasScheduled] = useState(false);
+  const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
 
-  // Load Calendly widget script
-  useEffect(() => {
-    // Check if script already exists
-    if (document.querySelector('script[src*="calendly.com"]')) {
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://assets.calendly.com/assets/external/widget.js';
-    script.async = true;
-    script.type = 'text/javascript';
-    
-    script.onload = () => {
-      console.log('Calendly script loaded successfully');
-      // Add a small delay to ensure DOM is ready
-      setTimeout(() => {
-        const element = document.querySelector('.calendly-inline-widget');
-        if (window.Calendly && element) {
-          console.log('Initializing Calendly widget');
-          try {
-            window.Calendly.initInlineWidget({
-              url: 'https://calendly.com/aescalante-oksigma/new-meeting?hide_gdpr_banner=1&primary_color=10b981',
-              parentElement: element,
-              prefill: {
-                email: formData.email || '',
-                firstName: formData.firstName || '',
-                lastName: formData.lastName || '',
-              },
-              utm: {}
-            });
-          } catch (error) {
-            console.error('Calendly initialization error:', error);
-          }
-        } else {
-          console.error('Calendly not available or element not found');
-        }
-      }, 100);
-    };
-    
-    script.onerror = (error) => {
-      console.error('Failed to load Calendly script:', error);
-    };
-    
-    document.head.appendChild(script);
-
-    return () => {
-      // Don't remove the script on cleanup to avoid re-loading issues
-    };
-  }, []);
 
   // Listen for Calendly events
   useEffect(() => {
@@ -186,13 +143,31 @@ export default function ContactWithCalendly() {
       // Call our backend API to get address suggestions
       const response = await fetch(`/api/address-suggestions?q=${encodeURIComponent(query)}`);
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.suggestions) {
-          setAddressSuggestions(data.suggestions);
-          setShowAddressSuggestions(data.suggestions.length > 0);
+      const data = await response.json();
+      
+      if (response.ok && data.success && data.suggestions) {
+        setAddressSuggestions(data.suggestions);
+        setShowAddressSuggestions(data.suggestions.length > 0);
+      } else if (!response.ok || data.message?.includes("Google API key not configured")) {
+          // Provide fallback Oklahoma city suggestions if no API key
+          const fallbackSuggestions = [
+            "Oklahoma City, OK",
+            "Edmond, OK", 
+            "Norman, OK",
+            "Moore, OK",
+            "Midwest City, OK"
+          ].filter(city => 
+            city.toLowerCase().includes(query.toLowerCase())
+          ).map(city => ({
+            formatted_address: city,
+            place_id: `fallback_${city}`
+          }));
+          
+          if (fallbackSuggestions.length > 0) {
+            setAddressSuggestions(fallbackSuggestions);
+            setShowAddressSuggestions(true);
+          }
         }
-      }
     } catch (error) {
       console.log('Address validation temporarily unavailable');
       setShowAddressSuggestions(false);
@@ -290,28 +265,18 @@ export default function ContactWithCalendly() {
       const response = await apiRequest("POST", "/api/contact", data);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
-        title: "Request Submitted Successfully!",
-        description: hasScheduled 
-          ? "We'll see you at your scheduled appointment!" 
-          : "We'll contact you within 24 hours to schedule your estimate.",
+        title: "Information Saved!",
+        description: "Now let's schedule your appointment...",
       });
-      // Reset form after successful submission
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        address: "",
-        serviceType: "",
-        description: "",
-        schedulingUrl: ""
-      });
-      setErrors({});
-      setHasScheduled(false);
+      
+      // Open Calendly popup after successful form submission
+      setTimeout(() => {
+        setIsCalendlyOpen(true);
+      }, 1000); // Small delay to let the toast show
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Submission Failed",
         description: "Please check your information and try again.",
@@ -381,6 +346,7 @@ export default function ContactWithCalendly() {
                       placeholder="Enter your first name"
                       required
                       className="h-12"
+                      autoComplete="given-name"
                     />
                   </div>
                   
@@ -395,6 +361,7 @@ export default function ContactWithCalendly() {
                       placeholder="Enter your last name"
                       required
                       className="h-12"
+                      autoComplete="family-name"
                     />
                   </div>
                 </div>
@@ -414,6 +381,7 @@ export default function ContactWithCalendly() {
                       placeholder="your.email@example.com"
                       required
                       className={`h-12 ${errors.email ? 'border-red-500' : validateEmail(formData.email) && formData.email ? 'border-green-500' : ''}`}
+                      autoComplete="email"
                     />
                     {errors.email && (
                       <p className="text-red-500 text-sm flex items-center">
@@ -438,6 +406,7 @@ export default function ContactWithCalendly() {
                       placeholder="(405) 555-0123"
                       required
                       className={`h-12 ${errors.phone ? 'border-red-500' : validatePhone(formData.phone) && formData.phone ? 'border-green-500' : ''}`}
+                      autoComplete="tel"
                     />
                     {errors.phone && (
                       <p className="text-red-500 text-sm flex items-center">
@@ -473,7 +442,7 @@ export default function ContactWithCalendly() {
                     placeholder="Start typing your address... (e.g., 123 Main Street)"
                     required
                     className={`h-12 ${errors.address ? 'border-red-500' : formData.address.toLowerCase().includes('ok') ? 'border-green-500' : ''}`}
-                    autoComplete="off"
+                    autoComplete="street-address"
                   />
                   
                   {showAddressSuggestions && addressSuggestions.length > 0 && (
@@ -573,25 +542,17 @@ export default function ContactWithCalendly() {
                     </div>
                   )}
                   
-                  {/* Calendly inline widget */}
-                  <div className="bg-white rounded-lg shadow-inner p-4" style={{ minHeight: '650px' }}>
-                    <div 
-                      className="calendly-inline-widget" 
-                      style={{ minWidth: '320px', height: '650px', position: 'relative' }}
-                    >
-                      {/* Loading message while Calendly loads */}
-                      <div className="flex items-center justify-center h-full text-gray-500">
-                        <div className="text-center">
-                          <Calendar className="w-12 h-12 mx-auto mb-4 text-emerald-600 animate-pulse" />
-                          <p>Loading scheduling calendar...</p>
-                        </div>
+                  {/* Calendly scheduling section */}
+                  <div className="bg-white rounded-lg shadow-inner p-8 text-center">
+                    <div className="space-y-4">
+                      <Calendar className="w-16 h-16 mx-auto text-emerald-600" />
+                      <h4 className="text-xl font-semibold text-gray-900">Ready to Schedule?</h4>
+                      <p className="text-gray-600">Complete the form above, then click below to select your appointment time</p>
+                      <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
+                        ⚠️ Please fill out all required fields before scheduling
                       </div>
                     </div>
                   </div>
-                  
-                  <p className="text-sm text-gray-600 text-center mt-4">
-                    📅 Select a convenient time above for your free roofing estimate
-                  </p>
                 </div>
 
                 {/* Submit Button with Validation Status */}
@@ -613,7 +574,7 @@ export default function ContactWithCalendly() {
                     ) : (
                       <div className="flex items-center">
                         <Send className="w-5 h-5 mr-2" />
-                        Submit Request
+                        Submit & Schedule Appointment
                       </div>
                     )}
                   </Button>
@@ -639,6 +600,32 @@ export default function ContactWithCalendly() {
           </Card>
         </div>
       </div>
+      
+      {/* Calendly Popup Modal */}
+      <PopupModal
+        url={`https://calendly.com/aescalante-oksigma/new-meeting?name=${formData.firstName}%20${formData.lastName}&email=${formData.email}`}
+        onModalClose={() => {
+          setIsCalendlyOpen(false);
+          // Reset form after scheduling
+          setFormData({
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            address: "",
+            serviceType: "",
+            description: "",
+            schedulingUrl: ""
+          });
+          setErrors({});
+          toast({
+            title: "All Set!",
+            description: "We've saved your information and will see you at your scheduled time!",
+          });
+        }}
+        open={isCalendlyOpen}
+        rootElement={document.getElementById("root") as HTMLElement}
+      />
     </section>
   );
 }

@@ -102,7 +102,12 @@ app.get('/', (req, res) => {
       <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; line-height: 1.6; }
         .form-group { margin: 15px 0; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border-color 0.3s; }
+        .validation-invalid { border-color: #ef4444 !important; }
+        .validation-valid { border-color: #10b981 !important; }
+        .validation-message { font-size: 12px; margin-top: 5px; padding: 5px 8px; border-radius: 4px; display: none; }
+        .validation-message.invalid { background: #fee2e2; color: #991b1b; display: block; }
+        .validation-message.valid { background: #d1fae5; color: #065f46; display: block; }
         button { background: #10b981; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; width: 100%; }
         button:hover { background: #059669; }
         .header { background: linear-gradient(135deg, #10b981, #047857); color: white; padding: 30px; border-radius: 8px; text-align: center; margin-bottom: 30px; }
@@ -127,10 +132,12 @@ app.get('/', (req, res) => {
           </div>
         </div>
         <div class="form-group">
-          <input type="email" name="email" placeholder="Email Address*" required>
+          <input type="email" name="email" id="email-input" placeholder="Email Address*" required>
+          <div id="email-validation" class="validation-message"></div>
         </div>
         <div class="form-group">
-          <input type="tel" name="phone" placeholder="Phone Number (e.g., 405-555-0123)*" required>
+          <input type="tel" name="phone" id="phone-input" placeholder="Phone Number (e.g., 405-555-0123)*" required>
+          <div id="phone-validation" class="validation-message"></div>
         </div>
         <div class="form-group" style="position: relative;">
           <input type="text" name="address" id="address-input" placeholder="Property Address (Oklahoma)*" required>
@@ -152,6 +159,101 @@ app.get('/', (req, res) => {
       <div id="message" style="margin-top: 20px; padding: 15px; border-radius: 8px; display: none;"></div>
       
       <script>
+        // Real-time validation system
+        const validationState = {
+          email: false,
+          phone: false
+        };
+
+        function validateEmail(email) {
+          const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/;
+          if (!email) return { valid: false, message: '' };
+          
+          if (!emailRegex.test(email)) {
+            return { valid: false, message: 'Please enter a valid email address' };
+          }
+          
+          // Check for common fake domains
+          const fakeDomains = ['test.com', 'example.com', 'fake.com', 'temp.com', '10minutemail', 'guerrillamail'];
+          const domain = email.split('@')[1]?.toLowerCase();
+          if (fakeDomains.some(fake => domain?.includes(fake))) {
+            return { valid: false, message: 'Please use a real email address' };
+          }
+          
+          return { valid: true, message: '✓ Valid email address' };
+        }
+
+        function validatePhone(phone) {
+          if (!phone) return { valid: false, message: '' };
+          
+          const cleanPhone = phone.replace(/\\D/g, '');
+          
+          if (cleanPhone.length < 10) {
+            return { valid: false, message: 'Phone number must be at least 10 digits' };
+          }
+          
+          if (cleanPhone.length > 11) {
+            return { valid: false, message: 'Phone number too long' };
+          }
+          
+          // Must be exactly 10 digits for US numbers (or 11 with country code)
+          if (cleanPhone.length === 11 && cleanPhone[0] !== '1') {
+            return { valid: false, message: 'Invalid country code' };
+          }
+          
+          const phoneNumber = cleanPhone.length === 11 ? cleanPhone.slice(1) : cleanPhone;
+          
+          // Area code cannot start with 0 or 1
+          if (phoneNumber[0] === '0' || phoneNumber[0] === '1') {
+            return { valid: false, message: 'Invalid area code' };
+          }
+          
+          // Exchange code cannot start with 0 or 1
+          if (phoneNumber[3] === '0' || phoneNumber[3] === '1') {
+            return { valid: false, message: 'Invalid phone number format' };
+          }
+          
+          // Check for fake patterns
+          if (/^(\\d)\\1{9}$/.test(phoneNumber)) {
+            return { valid: false, message: 'Please enter a real phone number' };
+          }
+          
+          if (phoneNumber === '1234567890' || phoneNumber === '0123456789') {
+            return { valid: false, message: 'Please enter a real phone number' };
+          }
+          
+          return { valid: true, message: '✓ Valid phone number' };
+        }
+
+        function formatPhoneNumber(value) {
+          const phone = value.replace(/\\D/g, '');
+          if (phone.length <= 3) return phone;
+          if (phone.length <= 6) return '(' + phone.slice(0, 3) + ') ' + phone.slice(3);
+          return '(' + phone.slice(0, 3) + ') ' + phone.slice(3, 6) + '-' + phone.slice(6, 10);
+        }
+
+        function updateValidationDisplay(fieldId, validation) {
+          const input = document.getElementById(fieldId + '-input');
+          const message = document.getElementById(fieldId + '-validation');
+          
+          input.classList.remove('validation-valid', 'validation-invalid');
+          message.classList.remove('valid', 'invalid');
+          
+          if (validation.message) {
+            if (validation.valid) {
+              input.classList.add('validation-valid');
+              message.classList.add('valid');
+              message.textContent = validation.message;
+            } else {
+              input.classList.add('validation-invalid');
+              message.classList.add('invalid');
+              message.textContent = validation.message;
+            }
+          }
+          
+          validationState[fieldId] = validation.valid;
+        }
+
         // Address autocomplete functionality
         let addressTimeout;
         async function searchAddresses(query) {
@@ -205,6 +307,22 @@ app.get('/', (req, res) => {
           searchAddresses(e.target.value);
         });
 
+        // Real-time validation listeners
+        document.getElementById('email-input').addEventListener('input', function(e) {
+          const validation = validateEmail(e.target.value);
+          updateValidationDisplay('email', validation);
+        });
+
+        document.getElementById('phone-input').addEventListener('input', function(e) {
+          // Format phone number as user types
+          const formatted = formatPhoneNumber(e.target.value);
+          e.target.value = formatted;
+          
+          // Validate phone number
+          const validation = validatePhone(e.target.value);
+          updateValidationDisplay('phone', validation);
+        });
+
         // Hide suggestions when clicking outside
         document.addEventListener('click', function(e) {
           if (!e.target.closest('.form-group')) {
@@ -228,6 +346,19 @@ app.get('/', (req, res) => {
           // Simple validation
           if (!data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.serviceType) {
             alert('Please fill in all required fields.');
+            return;
+          }
+          
+          // Check validation state
+          if (!validationState.email) {
+            alert('Please enter a valid email address.');
+            document.getElementById('email-input').focus();
+            return;
+          }
+          
+          if (!validationState.phone) {
+            alert('Please enter a valid phone number.');
+            document.getElementById('phone-input').focus();
             return;
           }
           

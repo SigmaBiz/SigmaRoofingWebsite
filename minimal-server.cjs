@@ -61,11 +61,13 @@ app.post('/api/contact', async (req, res) => {
       const msg = {
         to: process.env.NOTIFICATION_EMAIL,
         from: 'aescalante@oksigma.com',
-        subject: `🏠 New MVP3 Lead: ${req.body.serviceType} - ${req.body.phone}`,
-        text: `New lead from MVP3 Contact Form:\n\nPhone: ${req.body.phone}\nAddress: ${req.body.address}\nService: ${req.body.serviceType}\n\nCall immediately to schedule consultation!`,
+        subject: `🏠 New MVP3 Lead: ${req.body.firstName} ${req.body.lastName} - ${req.body.serviceType}`,
+        text: `New lead from MVP3 Contact Form:\n\nName: ${req.body.firstName} ${req.body.lastName}\nEmail: ${req.body.email}\nPhone: ${req.body.phone}\nAddress: ${req.body.address}\nService: ${req.body.serviceType}\n\nCall immediately to schedule consultation!`,
         html: `
           <div style="font-family: Arial, sans-serif;">
             <h2>🏠 New MVP3 Lead</h2>
+            <p><strong>Name:</strong> ${req.body.firstName} ${req.body.lastName}</p>
+            <p><strong>Email:</strong> <a href="mailto:${req.body.email}">${req.body.email}</a></p>
             <p><strong>Phone:</strong> <a href="tel:${req.body.phone}">${req.body.phone}</a></p>
             <p><strong>Address:</strong> ${req.body.address}</p>
             <p><strong>Service:</strong> ${req.body.serviceType}</p>
@@ -116,6 +118,17 @@ app.get('/', (req, res) => {
       <p>Fill out our streamlined form and we'll contact you within 24 hours to schedule your consultation.</p>
       
       <form id="contactForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div class="form-group" style="margin: 0;">
+            <input type="text" name="firstName" placeholder="First Name*" required>
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <input type="text" name="lastName" placeholder="Last Name*" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Email Address*" required>
+        </div>
         <div class="form-group">
           <input type="tel" name="phone" placeholder="Phone Number (e.g., 405-555-0123)*" required>
         </div>
@@ -204,13 +217,16 @@ app.get('/', (req, res) => {
           
           const formData = new FormData(e.target);
           const data = {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
             phone: formData.get('phone'),
             address: formData.get('address'),
             serviceType: formData.get('serviceType')
           };
           
           // Simple validation
-          if (!data.phone || !data.address || !data.serviceType) {
+          if (!data.firstName || !data.lastName || !data.email || !data.phone || !data.address || !data.serviceType) {
             alert('Please fill in all required fields.');
             return;
           }
@@ -233,7 +249,10 @@ app.get('/', (req, res) => {
               messageDiv.style.border = '2px solid #10b981';
               messageDiv.innerHTML = '✅ ' + result.message;
               // Store form data for Calendly
-              const formData = {
+              const savedData = {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
                 phone: data.phone,
                 address: data.address,
                 serviceType: data.serviceType
@@ -248,10 +267,10 @@ app.get('/', (req, res) => {
                     url: 'https://calendly.com/aescalante-oksigma/new-meeting',
                     text: 'Schedule your roofing consultation',
                     prefill: {
+                      name: savedData.firstName + ' ' + savedData.lastName,
+                      email: savedData.email,
                       customAnswers: {
-                        a1: formData.phone,
-                        a2: formData.address,
-                        a3: formData.serviceType
+                        a1: 'Phone: ' + savedData.phone + ' | Service: ' + savedData.serviceType + ' | Address: ' + savedData.address
                       }
                     }
                   });

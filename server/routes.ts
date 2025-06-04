@@ -88,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
       const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
       url.searchParams.set('input', `${query} Oklahoma`);
       url.searchParams.set('types', 'address');
-      url.searchParams.set('components', 'country:us|administrative_area:oklahoma');
+      url.searchParams.set('components', 'country:us');
       url.searchParams.set('key', apiKey);
       
       console.log(`Fetching addresses for: "${query}"`);
@@ -133,6 +133,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
       console.error("Error fetching address suggestions:", error);
       
       // Provide enhanced fallback suggestions for Oklahoma
+      const query = req.query.q as string || '';
       const fallbackSuggestions = [
         { formatted_address: "Oklahoma City, OK, USA", place_id: "fallback_okc", main_text: "Oklahoma City", secondary_text: "OK, USA" },
         { formatted_address: "Edmond, OK, USA", place_id: "fallback_edmond", main_text: "Edmond", secondary_text: "OK, USA" },

@@ -47,7 +47,7 @@ export async function getWebsiteImages(): Promise<WebsiteImages> {
       const data = await response.json();
       console.log('[ImageService] API response:', data);
       
-      if (data.success && data.images) {
+      if (data.success && data.images && Object.keys(data.images).length > 0) {
         // Also save to localStorage as backup
         Object.entries(data.images).forEach(([key, value]) => {
           if (value) {
@@ -56,6 +56,9 @@ export async function getWebsiteImages(): Promise<WebsiteImages> {
         });
         console.log('[ImageService] Successfully loaded images from API');
         return data.images;
+      } else if (data.success && Object.keys(data.images || {}).length === 0) {
+        console.log('[ImageService] API returned empty images, checking localStorage');
+        // API is working but returned empty data, fall through to localStorage
       }
     } else {
       console.error('[ImageService] API error:', response.status, response.statusText);
@@ -116,11 +119,14 @@ export async function getProjectsData() {
       const data = await response.json();
       console.log('[ImageService] Projects API response:', data);
       
-      if (data.success && data.projects) {
+      if (data.success && data.projects && data.projects.length > 0) {
         // Save to localStorage as backup
         localStorage.setItem('adminProjects', JSON.stringify(data.projects));
         console.log('[ImageService] Successfully loaded projects from API');
         return data.projects;
+      } else if (data.success && data.projects && data.projects.length === 0) {
+        console.log('[ImageService] API returned empty projects, checking localStorage');
+        // API is working but returned empty data, fall through to localStorage
       }
     } else {
       console.error('[ImageService] Projects API error:', response.status);

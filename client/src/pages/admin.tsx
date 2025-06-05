@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import CloudinaryPhotoManager from "@/components/cloudinary-photo-manager";
+import DataSync from "@/components/data-sync";
 
 interface ProjectForm {
   title: string;
@@ -698,6 +699,11 @@ export default function Admin() {
             <CloudinaryPhotoManager />
           </TabsContent>
         </Tabs>
+        
+        {/* Data Sync Tool */}
+        <div className="mt-8">
+          <DataSync />
+        </div>
       </div>
     </div>
   );

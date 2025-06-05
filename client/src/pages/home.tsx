@@ -8,6 +8,7 @@ import Testimonials from "@/components/testimonials";
 import FAQ from "@/components/faq";
 import MVP3ContactForm from "@/components/mvp3-contact-form";
 import Footer from "@/components/footer";
+import DebugPanel from "@/components/debug-panel";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
       <FAQ />
       <MVP3ContactForm />
       <Footer />
+      <DebugPanel />
     </div>
   );
 }

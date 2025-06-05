@@ -55,15 +55,27 @@ export default function Hero() {
   return (
     <section 
       id="home" 
-      className="relative min-h-screen flex items-center"
-      style={{
-        backgroundImage: images.heroBackground ? `url(${images.heroBackground})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
+      className="relative min-h-screen flex items-center overflow-hidden"
     >
-      {!images.heroBackground && <div className="hero-bg absolute inset-0" />}
+      {/* Background image with better mobile support */}
+      {images.heroBackground ? (
+        <div className="absolute inset-0 w-full h-full">
+          <img 
+            src={images.heroBackground} 
+            alt="Hero Background"
+            className="w-full h-full object-cover"
+            loading="eager"
+            onError={(e) => {
+              console.error('[Hero] Background image failed to load:', images.heroBackground);
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+      ) : (
+        <div className="hero-bg absolute inset-0" />
+      )}
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-white text-center">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">

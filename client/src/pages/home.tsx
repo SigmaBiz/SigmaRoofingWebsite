@@ -6,7 +6,7 @@ import About from "@/components/about";
 import Projects from "@/components/projects";
 import Testimonials from "@/components/testimonials";
 import FAQ from "@/components/faq";
-import Contact from "@/components/contact-with-calendly";
+import MVP3ContactForm from "@/components/mvp3-contact-form";
 import Footer from "@/components/footer";
 
 export default function Home() {
@@ -20,7 +20,7 @@ export default function Home() {
       <Projects />
       <Testimonials />
       <FAQ />
-      <Contact />
+      <MVP3ContactForm />
       <Footer />
     </div>
   );

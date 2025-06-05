@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
         });
       }
 
-      if (!query || query.length < 3) {
+      if (!query || query.length < 1) {
         return res.json({ success: true, suggestions: [] });
       }
 

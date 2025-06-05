@@ -4,6 +4,9 @@ import { z } from "zod";
 
 export const contactRequests = pgTable("contact_requests", {
   id: serial("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
   phone: text("phone").notNull(),
   address: text("address").notNull(),
   serviceType: text("service_type").notNull(),

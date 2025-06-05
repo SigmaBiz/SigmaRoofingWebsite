@@ -126,7 +126,7 @@ export default function FAQ() {
             Have a question not covered here?
           </p>
           <p className="text-sigma-light-gray mb-4">
-            Every policy is different, and every home is unique. We approach each situation with fresh eyes and clear purpose — to help you get the best result possible based on what's real and what's right for your home.
+            Every case is different, and every home is unique. We approach each situation with fresh eyes and clear purpose — to help you get the best result possible based on what's real and what's right for your home.
           </p>
           <a 
             href="#contact" 

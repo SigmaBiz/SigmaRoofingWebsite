@@ -315,21 +315,32 @@ export default function MVP3ContactForm() {
   return (
     <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-white">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            🏠 Sigma Roofing LLC - MVP3
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Professional Roofing Services in Oklahoma
-          </p>
+        <div className="flex flex-col items-center mb-16">
+          <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl shadow-xl border border-emerald-100">
+            <div className="flex items-center justify-center space-x-6">
+              <img 
+                src="/sigma-logo.png" 
+                alt="Sigma Roofing LLC" 
+                className="h-20 w-20 object-contain"
+              />
+              <div className="text-center">
+                <h2 className="text-4xl font-bold text-gray-900 tracking-tight">
+                  SIGMA ROOFING LLC
+                </h2>
+                <p className="text-lg text-emerald-600 font-semibold mt-2">
+                  Professional Roofing Services in Oklahoma
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-xl">
             <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold mb-2">Get Your Free Estimate</h3>
-              <p className="text-gray-600 mb-6">
-                Fill out our streamlined form and we'll contact you within 24 hours to schedule your consultation.
+              <h3 className="text-3xl font-bold text-center mb-4 text-gray-800">Help is on the way!</h3>
+              <p className="text-lg text-gray-600 text-center mb-8 leading-relaxed">
+                Our streamlined appointment form gets help your way when you need it.
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-6">

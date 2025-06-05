@@ -64,7 +64,7 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on port 3000
   // this serves both the API and the client.
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
-  server.listen(port, '127.0.0.1', () => {
+  server.listen(port, '0.0.0.0', () => {
     log(`serving on port ${port}`);
     console.log(`Server accessible at http://localhost:${port}`);
     console.log(`Also try: http://127.0.0.1:${port}`);

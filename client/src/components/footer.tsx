@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Home, Facebook, Linkedin } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
 import { Link } from "wouter";
+import TrademarkDisclaimer from "@/components/trademark-disclaimer";
 
 export default function Footer() {
   const scrollToSection = (sectionId: string) => {
@@ -105,6 +106,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      <TrademarkDisclaimer />
     </footer>
   );
 }

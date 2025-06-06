@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, memo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { applyTrademarks } from "@/lib/trademark-utils";
 
 interface BusinessPhoto {
   id: number;
@@ -83,8 +84,8 @@ const ProjectCard = memo(({ project }: { project: any }) => {
         fallbackSrc={fallbackImage}
       />
       <CardContent className="p-6">
-        <h3 className="font-bold text-xl mb-2 text-sigma-charcoal">{project.title}</h3>
-        <p className="text-sigma-light-gray mb-4">{project.description}</p>
+        <h3 className="font-bold text-xl mb-2 text-sigma-charcoal">{applyTrademarks(project.title)}</h3>
+        <p className="text-sigma-light-gray mb-4">{applyTrademarks(project.description)}</p>
         <div className="flex justify-between items-center">
           <span className="text-sm text-sigma-emerald font-semibold bg-sigma-emerald/10 px-3 py-1 rounded-full">{project.category}</span>
           <Button variant="link" className="text-sigma-emerald p-0 h-auto hover:text-emerald-600">

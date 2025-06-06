@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import CloudinaryPhotoManager from "@/components/cloudinary-photo-manager";
 import DataSync from "@/components/data-sync";
+import TrademarkUpdater from "@/components/trademark-updater";
 
 interface ProjectForm {
   title: string;
@@ -703,6 +704,11 @@ export default function Admin() {
         {/* Data Sync Tool */}
         <div className="mt-8">
           <DataSync />
+        </div>
+        
+        {/* Trademark Compliance Tool */}
+        <div className="mt-4">
+          <TrademarkUpdater />
         </div>
       </div>
     </div>

@@ -14,40 +14,46 @@ interface BusinessPhoto {
 
 const staticProjects = [
   {
-    image: "https://images.unsplash.com/photo-1604709177225-055f99402ea3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Asphalt Shingle Replacement",
-    description: "Complete asphalt shingle roof replacement for a 2,200 sq ft home in Edmond. High-quality materials with comprehensive warranty.",
-    category: "Residential Project"
+    image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372972/sigma-roofing/projects/gkfyybvob6ew3fqavaaz.jpg",
+    title: "GAF® Pewter Gray Laminate Roof w/ High Profile Z Ridge",
+    description: "This beautiful new roof features rich charcoal gray shingles that perfectly complement the home's stone and wood exterior details. The clean installation and classic color choice create a timeless look that enhances the overall curb appeal of this home.",
+    category: "Residential",
+    location: "NW Oklahoma City"
   },
   {
-    image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Exterior House Painting",
-    description: "Complete exterior painting for a beautiful Edmond home. Premium paint with weather protection and curb appeal enhancement.",
-    category: "Painting Project"
+    image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372969/sigma-roofing/projects/nxwhjnvbnbmp1wfx1s1v.jpg",
+    title: "GAF® Charcoal Laminate Roof w/ High Profile Z Ridge",
+    description: "This new charcoal roof installation delivers a bold, sophisticated appearance with precise shingle alignment and expert flashing work. The deep gray tones create a striking contrast against the lighter elements, giving this home a fresh, classic look.",
+    category: "Storm Damage",
+    location: "South Oklahoma City"
   },
   {
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Storm Damage Repair",
-    description: "Complete asphalt shingle restoration after hail damage. Insurance claim assistance and emergency repairs provided.",
-    category: "Insurance Claim"
+    image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372967/sigma-roofing/projects/vzmkyoilfhychhxwluin.jpg",
+    title: "CertainTeed® Colonial Slate w/ Ridge Vent",
+    description: "This Colonial Slate shingle roof replacement features beautiful multi-toned gray shingles that create an elegant weathered slate appearance. The varied gray tones and textured pattern give this home a distinguished, upscale look while providing long-lasting protection.",
+    category: "Residential",
+    location: "South Oklahoma City"
   },
   {
-    image: "https://images.unsplash.com/photo-1609220136736-443140cffec6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Asphalt Shingle Installation",
-    description: "New asphalt shingle roof installation for family home. Durable materials with enhanced ventilation system.",
-    category: "New Installation"
+    image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748371608/sigma-roofing/projects/c9ip8kujkvrzpkfry2ah.jpg",
+    title: "GAF® Charcoal Laminate Roof w/ Redeck",
+    description: "This stunning brick home received a complete roof replacement including new decking and classic charcoal shingles that beautifully complement the red brick exterior. The timeless charcoal color creates a perfect contrast against the warm brick tones, transforming the home's entire aesthetic.",
+    category: "Storm Damage",
+    location: "SW Oklahoma City"
   },
   {
-    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Shingle Roof Repair",
-    description: "Professional asphalt shingle repair and maintenance service to extend roof life and prevent leaks.",
-    category: "Repair Project"
+    image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748371606/sigma-roofing/projects/md8oh6pqosm188ihtcqx.jpg",
+    title: "GAF ArmorShield™ II WeatheredWood Impact Resistant System",
+    description: "This home features a new hail impact resistant roofing system with beautiful Weatherwood shingles that provide both superior storm protection and classic appeal. The natural weathered wood tones create a timeless look that blends seamlessly with any neighborhood while offering peace of mind against severe weather damage.",
+    category: "Storm Damage",
+    location: "Edmond"
   },
   {
-    image: "https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-    title: "Gutter Installation",
-    description: "New seamless gutter system installation with leaf guards to protect foundation and landscaping.",
-    category: "Gutter Project"
+    image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748371609/sigma-roofing/projects/jwx9k6khrtfg0zjgemxv.jpg",
+    title: "GAF® Charcoal Laminate Roof w/ High Profile Ridge",
+    description: "This charcoal roof installation showcases professional craftsmanship with sleek valley metal and high-profile ridge cap detailing that adds both function and visual appeal. The classic charcoal shingles paired with the premium finishing touches create a sophisticated look that stands out in the neighborhood.",
+    category: "Residential",
+    location: "The Village"
   }
 ];
 
@@ -74,7 +80,7 @@ ProjectImage.displayName = 'ProjectImage';
 
 // Memoized individual project card
 const ProjectCard = memo(({ project }: { project: any }) => {
-  const fallbackImage = "https://images.unsplash.com/photo-1604709177225-055f99402ea3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+  const fallbackImage = "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372972/sigma-roofing/projects/gkfyybvob6ew3fqavaaz.jpg";
   
   return (
     <Card className="bg-white overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border-t-4 border-t-sigma-emerald">
@@ -107,7 +113,7 @@ export default function Projects() {
   const [useAdminProjects, setUseAdminProjects] = useState(false);
 
   // Use API to load projects consistently across all devices
-  const { data: apiProjects } = useQuery({
+  const { data: apiProjects } = useQuery<{success: boolean; projects: any[]}>({
     queryKey: ['/api/projects'],
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30 // 30 minutes
@@ -189,7 +195,7 @@ export default function Projects() {
   // Memoized description text to avoid recalculation
   const descriptionText = useMemo(() => {
     return showingAdminProjects 
-      ? "Custom project gallery showcasing our latest roofing work managed through your admin panel."
+      ? "Custom project gallery showcasing our latest work."
       : "Take a look at some of our recent roofing projects in the Edmond area. Each project showcases our commitment to quality and attention to detail.";
   }, [showingAdminProjects]);
 

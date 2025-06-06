@@ -457,38 +457,6 @@ export class StormDataService {
    */
   private matchPhrasesToEvents(phrases: string[], events: CSVStormEvent[]): CSVStormEvent[] {
     const matchedEvents: Array<{event: CSVStormEvent, score: number}> = [];
-
-    events.forEach(event => {
-      let score = 0;
-      const eventText = `${event.EVENT_TYPE} ${event.CZ_NAME} ${event.BEGIN_LOCATION} ${event.EVENT_NARRATIVE}`.toLowerCase();
-      
-      phrases.forEach(phrase => {
-        const phraseWords = phrase.toLowerCase().split(' ');
-        phraseWords.forEach(word => {
-          if (eventText.includes(word)) {
-            score += 1;
-          }
-        });
-      });
-      
-      if (score > 0) {
-        matchedEvents.push({event, score});
-      }
-    });
-
-    return matchedEvents
-      .sort((a, b) => b.score - a.score)
-      .map(item => item.event);
-  }
-
-
-}
-
-  /**
-   * Match trending phrases with verified storm events
-   */
-  private matchPhrasesToEvents(phrases: string[], events: CSVStormEvent[]): CSVStormEvent[] {
-    const matchedEvents: Array<{event: CSVStormEvent, score: number}> = [];
     
     for (const event of events) {
       let score = 0;

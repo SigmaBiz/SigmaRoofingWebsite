@@ -179,28 +179,28 @@ export default function DynamicLanding() {
   useEffect(() => {
     const staticProjects = [
       {
-        image: "https://images.unsplash.com/photo-1604709177225-055f99402ea3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-        title: "Asphalt Shingle Replacement",
-        description: "Complete asphalt shingle roof replacement for a 2,200 sq ft home in Edmond. High-quality materials with comprehensive warranty.",
-        category: "Residential Project"
+        image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372972/sigma-roofing/projects/gkfyybvob6ew3fqavaaz.jpg",
+        title: "GAF® Pewter Gray Laminate Roof w/ High Profile Z Ridge",
+        description: "This beautiful new roof features rich charcoal gray shingles that perfectly complement the home's stone and wood exterior details. The clean installation and classic color choice create a timeless look that enhances the overall curb appeal of this home.",
+        category: "Residential"
       },
       {
-        image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-        title: "Exterior House Painting",
-        description: "Complete exterior painting for a beautiful Edmond home. Premium paint with weather protection and curb appeal enhancement.",
-        category: "Painting Project"
+        image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372969/sigma-roofing/projects/nxwhjnvbnbmp1wfx1s1v.jpg",
+        title: "GAF® Charcoal Laminate Roof w/ High Profile Z Ridge",
+        description: "This new charcoal roof installation delivers a bold, sophisticated appearance with precise shingle alignment and expert flashing work. The deep gray tones create a striking contrast against the lighter elements, giving this home a fresh, classic look.",
+        category: "Storm Damage"
       },
       {
-        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-        title: "Storm Damage Repair",
-        description: "Complete asphalt shingle restoration after hail damage. Insurance claim assistance and emergency repairs provided.",
-        category: "Insurance Claim"
+        image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372967/sigma-roofing/projects/vzmkyoilfhychhxwluin.jpg",
+        title: "CertainTeed® Colonial Slate w/ Ridge Vent",
+        description: "This Colonial Slate shingle roof replacement features beautiful multi-toned gray shingles that create an elegant weathered slate appearance. The varied gray tones and textured pattern give this home a distinguished, upscale look while providing long-lasting protection.",
+        category: "Residential"
       },
       {
-        image: "https://images.unsplash.com/photo-1609220136736-443140cffec6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-        title: "Asphalt Shingle Installation",
-        description: "New asphalt shingle roof installation for family home. Durable materials with enhanced ventilation system.",
-        category: "New Installation"
+        image: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748371608/sigma-roofing/projects/c9ip8kujkvrzpkfry2ah.jpg",
+        title: "GAF® Charcoal Laminate Roof w/ Redeck",
+        description: "This stunning brick home received a complete roof replacement including new decking and classic charcoal shingles that beautifully complement the red brick exterior. The timeless charcoal color creates a perfect contrast against the warm brick tones, transforming the home's entire aesthetic.",
+        category: "Storm Damage"
       }
     ];
 
@@ -934,7 +934,7 @@ export default function DynamicLanding() {
                         loading="lazy"
                         onError={(e) => {
                           // Fallback to placeholder if image fails to load
-                          e.currentTarget.src = "https://images.unsplash.com/photo-1604709177225-055f99402ea3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+                          e.currentTarget.src = "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372972/sigma-roofing/projects/gkfyybvob6ew3fqavaaz.jpg";
                         }}
                       />
                       <div className="absolute top-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-semibold">

@@ -11,6 +11,7 @@ const services = [
     description: "Complete residential roofing services including new installations, repairs, and maintenance for all roof types.",
     features: ["Asphalt Shingles", "Metal Roofing", "Wood Shingles", "Storm Damage Repair"],
     imageKey: "residentialRoofingImage",
+    fallbackImage: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748379460/sigma-roofing/projects/afuczeaaeow6y7iwexzx.jpg",
     iconColor: "bg-blue-500"
   },
   {
@@ -19,6 +20,7 @@ const services = [
     description: "Professional exterior painting services to protect and beautify your home with quality materials and expert craftsmanship.",
     features: ["House Painting", "Trim & Siding", "Deck Staining", "Power Washing"],
     imageKey: "paintingServiceImage",
+    fallbackImage: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748388890/sigma-roofing/projects/fqmpnsw0yuib7p44vzjt.jpg",
     iconColor: "bg-orange-500"
   },
   {
@@ -27,6 +29,7 @@ const services = [
     description: "Emergency and scheduled roof repairs to protect your property from water damage and structural issues.",
     features: ["Leak Detection & Repair", "Shingle Replacement", "Flashing Repair", "Emergency Services"],
     imageKey: "roofRepairImage",
+    fallbackImage: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748388891/sigma-roofing/projects/uryhdz9sdu9tahumtjgx.jpg",
     iconColor: "bg-red-500"
   },
   {
@@ -35,6 +38,7 @@ const services = [
     description: "Comprehensive roof inspections to identify potential issues before they become costly problems.",
     features: ["Annual Inspections", "Storm Damage Assessment", "Insurance Claims Support", "Detailed Reports"],
     imageKey: "roofInspectionImage",
+    fallbackImage: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748379453/sigma-roofing/projects/fhxuxcy7qc5falugqjxu.jpg",
     iconColor: "bg-purple-500"
   },
   {
@@ -43,6 +47,7 @@ const services = [
     description: "Complete gutter installation, repair, and maintenance services to protect your roof and foundation.",
     features: ["Gutter Installation", "Gutter Cleaning", "Downspout Repair", "Gutter Guards"],
     imageKey: "gutterServiceImage",
+    fallbackImage: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748388893/sigma-roofing/projects/nwdrsyjnsxmyml4vteof.jpg",
     iconColor: "bg-cyan-500"
   },
   {
@@ -51,6 +56,7 @@ const services = [
     description: "Rapid response storm damage repair services with insurance claim assistance and emergency protection.",
     features: ["Emergency Tarping", "Insurance Claims", "Hail Damage Repair", "Wind Damage Restoration"],
     imageKey: "stormDamageImage",
+    fallbackImage: "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748379454/sigma-roofing/projects/tjthdiocyevopn6lpl6i.jpg",
     iconColor: "bg-yellow-500"
   }
 ];
@@ -173,7 +179,7 @@ export default function Services() {
       <ServiceCard 
         key={service.imageKey || index}
         service={service}
-        imageUrl={serviceImages[service.imageKey]}
+        imageUrl={serviceImages[service.imageKey] || service.fallbackImage}
       />
     ));
   }, [serviceImages]);

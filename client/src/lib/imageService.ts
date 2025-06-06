@@ -47,21 +47,29 @@ export async function getWebsiteImages(): Promise<WebsiteImages> {
       const data = await response.json();
       console.log('[ImageService] API response:', data);
       
-      if (data.success && data.images && Object.keys(data.images).length > 0) {
-        // Also save to localStorage as backup
-        Object.entries(data.images).forEach(([key, value]) => {
-          if (value) {
-            localStorage.setItem(key, value as string);
-          }
-        });
-        console.log('[ImageService] Successfully loaded images from API');
-        return data.images;
-      } else if (data.success && Object.keys(data.images || {}).length === 0) {
-        console.log('[ImageService] API returned empty images, checking localStorage');
-        // API is working but returned empty data, fall through to localStorage
+      if (data.success && data.images) {
+        // Check if API has any non-null images
+        const hasValidImages = Object.values(data.images).some(value => value !== null && value !== undefined && value !== '');
+        
+        if (hasValidImages) {
+          // Also save to localStorage as backup
+          Object.entries(data.images).forEach(([key, value]) => {
+            if (value) {
+              localStorage.setItem(key, value as string);
+            }
+          });
+          console.log('[ImageService] Successfully loaded images from API');
+          return data.images;
+        } else {
+          console.log('[ImageService] API returned null/empty images, falling back to localStorage');
+        }
       }
     } else {
       console.error('[ImageService] API error:', response.status, response.statusText);
+      // For 404 errors, don't retry, just use localStorage
+      if (response.status === 404) {
+        console.log('[ImageService] API endpoint not found, using localStorage only');
+      }
     }
   } catch (error) {
     console.error('[ImageService] Fetch error:', error);

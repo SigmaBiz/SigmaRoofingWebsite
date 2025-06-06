@@ -86,9 +86,9 @@ export default function About() {
     };
   }, [websiteImages]);
 
-  // Fallback image URLs
-  const fallbackTeamPhoto = "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
-  const fallbackVisionImage = "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+  // Fallback image URLs - using actual Sigma Roofing images
+  const fallbackTeamPhoto = "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748389526/sigma-roofing/projects/rfwxm4ysfg1nsi9yumde.jpg";
+  const fallbackVisionImage = "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748379461/sigma-roofing/projects/cc9tl1zez7eibeog2uvt.png";
   return (
     <section id="about" className="py-20 bg-sigma-emerald">
       <div className="container mx-auto px-4">

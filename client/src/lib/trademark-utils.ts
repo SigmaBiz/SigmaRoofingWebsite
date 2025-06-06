@@ -28,9 +28,16 @@ export function applyTrademarks(text: string): string {
   const sortedTerms = Object.keys(trademarkMap).sort((a, b) => b.length - a.length);
   
   sortedTerms.forEach(term => {
+    // Skip if the replacement would create double symbols
+    const replacement = trademarkMap[term];
+    if (text.includes(replacement)) {
+      return; // Skip this replacement if it already exists
+    }
+    
     // Use word boundaries to avoid replacing parts of words
-    const regex = new RegExp(`\\b${term}\\b`, 'gi');
-    result = result.replace(regex, trademarkMap[term]);
+    // Also check that the term doesn't already have a trademark symbol
+    const regex = new RegExp(`\\b${term}\\b(?!®|™)`, 'gi');
+    result = result.replace(regex, replacement);
   });
   
   return result;

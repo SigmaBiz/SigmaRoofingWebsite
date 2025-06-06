@@ -143,6 +143,28 @@ export default function Hero() {
           </div>
         </div>
       </div>
+      
+      {/* Photo credit - discreet positioning in bottom left */}
+      <div className="absolute bottom-2 left-2 text-xs text-white/60 z-20">
+        Photo by{' '}
+        <a 
+          href="https://unsplash.com/@tornadogreg?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-white/80 transition-colors"
+        >
+          Greg Johnson
+        </a>
+        {' '}on{' '}
+        <a 
+          href="https://unsplash.com/photos/a-large-tornado-is-seen-in-the-sky-over-a-green-field-2ww84LX_um4?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-white/80 transition-colors"
+        >
+          Unsplash
+        </a>
+      </div>
     </section>
   );
 }

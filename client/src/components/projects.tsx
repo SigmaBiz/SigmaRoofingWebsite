@@ -83,7 +83,7 @@ const ProjectCard = memo(({ project }: { project: any }) => {
   const fallbackImage = "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372972/sigma-roofing/projects/gkfyybvob6ew3fqavaaz.jpg";
   
   return (
-    <Card className="bg-white overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border-t-4 border-t-sigma-emerald">
+    <Card className="bg-gray-50 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border-t-4 border-t-sigma-emerald">
       <ProjectImage 
         src={project.image || project.imageUrl} 
         alt={project.title}
@@ -196,7 +196,7 @@ export default function Projects() {
   const descriptionText = useMemo(() => {
     return showingAdminProjects 
       ? "Custom project gallery showcasing our latest work."
-      : "Take a look at some of our recent roofing projects in the Edmond area. Each project showcases our commitment to quality and attention to detail.";
+      : "Take a look at some of our recent work!";
   }, [showingAdminProjects]);
 
   // Memoized project list to prevent unnecessary re-renders

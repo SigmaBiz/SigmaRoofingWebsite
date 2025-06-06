@@ -60,7 +60,7 @@ const insuranceProcess = [
 
 export default function Process() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="font-bold text-4xl text-sigma-charcoal mb-4">Our Process</h2>
@@ -82,7 +82,7 @@ export default function Process() {
                 {retailProcess.map((step, index) => (
                   <div key={index} className="flex flex-col items-center relative">
                     {/* Process Card */}
-                    <Card className="bg-white border-2 border-sigma-emerald/20 hover:border-sigma-emerald transition-all duration-300 hover:shadow-lg max-w-xs">
+                    <Card className="bg-gray-50 border-2 border-sigma-emerald/20 hover:border-sigma-emerald transition-all duration-300 hover:shadow-lg max-w-xs">
                       <CardContent className="p-6 text-center">
                         <div className="w-16 h-16 bg-sigma-emerald rounded-full flex items-center justify-center mx-auto mb-4">
                           <step.icon className="text-white" size={24} />
@@ -118,7 +118,7 @@ export default function Process() {
                 {insuranceProcess.map((step, index) => (
                   <div key={index} className="flex flex-col items-center relative">
                     {/* Process Card */}
-                    <Card className="bg-white border-2 border-sigma-emerald/20 hover:border-sigma-emerald transition-all duration-300 hover:shadow-lg max-w-xs">
+                    <Card className="bg-gray-50 border-2 border-sigma-emerald/20 hover:border-sigma-emerald transition-all duration-300 hover:shadow-lg max-w-xs">
                       <CardContent className="p-6 text-center">
                         <div className="w-16 h-16 bg-sigma-emerald rounded-full flex items-center justify-center mx-auto mb-4">
                           <step.icon className="text-white" size={24} />

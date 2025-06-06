@@ -325,7 +325,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-white">
+    <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-gray-50">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -454,7 +454,7 @@ export default function Contact() {
                   />
                   
                   {showAddressSuggestions && addressSuggestions.length > 0 && (
-                    <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-xl max-h-64 overflow-y-auto mt-1">
+                    <div className="absolute z-50 w-full bg-gray-50 border border-gray-300 rounded-md shadow-xl max-h-64 overflow-y-auto mt-1">
                       <div className="px-3 py-2 text-xs text-gray-500 bg-gray-50 border-b">
                         <MapPin className="w-3 h-3 inline mr-1" />
                         Verified Oklahoma addresses

@@ -1,0 +1,10 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+Initializing SendGrid email service...
+SendGrid initialized successfully
+Storm Data Service initialized with NOAA CSV data and trending phrase integration
+12:29:16 AM [express] serving on port 3000
+Server accessible at http://localhost:3000
+Also try: http://0.0.0.0:3000

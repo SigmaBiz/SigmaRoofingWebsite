@@ -313,10 +313,10 @@ export default function MVP3ContactForm() {
   };
 
   return (
-    <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-white">
+    <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-gray-50">
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center mb-16">
-          <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl shadow-xl border border-emerald-100">
+          <div className="bg-gradient-to-br from-emerald-50 to-gray-50 p-8 rounded-2xl shadow-xl border border-emerald-100">
             <div className="flex items-center justify-center space-x-6">
               <img 
                 src="/sigma-logo.png" 
@@ -415,7 +415,7 @@ export default function MVP3ContactForm() {
                     autoComplete="off"
                   />
                   {showSuggestions && addressSuggestions.length > 0 && (
-                    <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                    <div className="absolute z-50 w-full bg-gray-50 border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
                       {addressSuggestions.map((suggestion, index) => (
                         <button
                           key={index}
@@ -449,7 +449,7 @@ export default function MVP3ContactForm() {
                   disabled={isSubmitting}
                   className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Free Estimate Request'}
+                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
                 </Button>
               </form>
 
@@ -468,7 +468,7 @@ export default function MVP3ContactForm() {
                 <Button
                   type="button"
                   onClick={() => window.location.href='tel:+14059021826'}
-                  className="bg-white text-red-600 hover:bg-gray-100 font-bold px-8 py-3"
+                  className="bg-gray-50 text-red-600 hover:bg-gray-100 font-bold px-8 py-3"
                 >
                   📞 (405) 902-1826
                 </Button>

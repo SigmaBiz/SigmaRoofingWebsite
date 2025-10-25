@@ -5,6 +5,55 @@
 Initializing SendGrid email service...
 SendGrid initialized successfully
 Storm Data Service initialized with NOAA CSV data and trending phrase integration
-12:29:16 AM [express] serving on port 3000
+11:35:24 AM [express] serving on port 3000
 Server accessible at http://localhost:3000
 Also try: http://0.0.0.0:3000
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+11:35:52 AM [express] GET /api/website-images 200 in 2ms :: {"success":true,"images":{"id":1,"heroBac…
+11:35:52 AM [express] GET /api/website-images 304 in 0ms :: {"success":true,"images":{"id":1,"heroBac…
+11:35:52 AM [express] GET /api/website-images 304 in 0ms :: {"success":true,"images":{"id":1,"heroBac…
+11:35:52 AM [express] GET /api/projects 200 in 0ms :: {"success":true,"projects":[]}
+11:35:52 AM [express] GET /api/website-images 304 in 0ms :: {"success":true,"images":{"id":1,"heroBac…
+API Key present: true
+Searching for: BBAV ROOFING LLC 16612 N Western Avenue Edmond OK
+11:35:52 AM [express] GET /api/projects 304 in 0ms :: {"success":true,"projects":[]}
+Search response: {
+  candidates: [],
+  error_message: 'The provided API key is expired.',
+  status: 'REQUEST_DENIED'
+}
+Broader search response: {
+  error_message: 'The provided API key is expired.',
+  html_attributions: [],
+  results: [],
+  status: 'REQUEST_DENIED'
+}
+Error fetching Google reviews: Error: Business not found in Google Places. Status: REQUEST_DENIED
+    at <anonymous> (/Users/antoniomartinez/Desktop/SigmaRoofingWebsite/server/routes.ts:529:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+11:35:52 AM [express] GET /api/reviews 500 in 452ms :: {"success":false,"message":"Unable to fetch re…
+11:41:15 AM [express] GET /api/website-images 200 in 0ms :: {"success":true,"images":{"id":1,"heroBac…
+11:41:15 AM [express] GET /api/website-images 200 in 1ms :: {"success":true,"images":{"id":1,"heroBac…
+11:41:15 AM [express] GET /api/website-images 200 in 0ms :: {"success":true,"images":{"id":1,"heroBac…
+11:41:15 AM [express] GET /api/projects 200 in 0ms :: {"success":true,"projects":[]}
+API Key present: true
+Searching for: BBAV ROOFING LLC 16612 N Western Avenue Edmond OK
+11:41:15 AM [express] GET /api/website-images 200 in 0ms :: {"success":true,"images":{"id":1,"heroBac…
+11:41:15 AM [express] GET /api/projects 200 in 1ms :: {"success":true,"projects":[]}
+Search response: {
+  candidates: [],
+  error_message: 'The provided API key is expired.',
+  status: 'REQUEST_DENIED'
+}
+Broader search response: {
+  error_message: 'The provided API key is expired.',
+  html_attributions: [],
+  results: [],
+  status: 'REQUEST_DENIED'
+}
+Error fetching Google reviews: Error: Business not found in Google Places. Status: REQUEST_DENIED
+    at <anonymous> (/Users/antoniomartinez/Desktop/SigmaRoofingWebsite/server/routes.ts:529:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+11:41:15 AM [express] GET /api/reviews 500 in 336ms :: {"success":false,"message":"Unable to fetch re…

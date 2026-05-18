@@ -467,10 +467,10 @@ export default function MVP3ContactForm() {
                 <p className="mb-4">Call us now for immediate help:</p>
                 <Button
                   type="button"
-                  onClick={() => window.location.href='tel:+14059021826'}
+                  onClick={() => window.location.href='tel:+14059025266'}
                   className="bg-gray-50 text-red-600 hover:bg-gray-100 font-bold px-8 py-3"
                 >
-                  📞 (405) 902-1826
+                  📞 (405) 902-5266
                 </Button>
               </div>
             </CardContent>

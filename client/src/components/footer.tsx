@@ -77,7 +77,7 @@ export default function Footer() {
             <div className="space-y-4 text-gray-300">
               <div className="flex items-start space-x-3">
                 <div>
-                  <p className="font-semibold">(405) 902-1826</p>
+                  <p className="font-semibold">(405) 902-5266</p>
                   <p className="text-sm">24/7 Emergency Service</p>
                 </div>
               </div>

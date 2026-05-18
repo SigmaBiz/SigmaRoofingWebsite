@@ -293,7 +293,7 @@ export default function DynamicLanding() {
     onError: (error) => {
       toast({
         title: "Error sending message",
-        description: "Please try again or call us directly at (405) 902-1826",
+        description: "Please try again or call us directly at (405) 902-5266",
         variant: "destructive",
       });
     },
@@ -520,7 +520,7 @@ export default function DynamicLanding() {
           <div className="flex items-center space-x-4">
             <a href="tel:(405)902-1826" className="flex items-center text-sigma-emerald font-semibold">
               <Phone className="h-4 w-4 mr-2" />
-              (405) 902-1826
+              (405) 902-5266
             </a>
           </div>
         </div>
@@ -973,7 +973,7 @@ export default function DynamicLanding() {
               onClick={() => window.open("tel:(405)902-1826")}
             >
               <Phone className="mr-2 h-5 w-5" />
-              Emergency: (405) 902-1826
+              Emergency: (405) 902-5266
             </Button>
           </div>
 

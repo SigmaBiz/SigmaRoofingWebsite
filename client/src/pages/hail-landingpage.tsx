@@ -487,7 +487,7 @@ export default function HailLandingPage() {
       console.log('Form submission failed:', error);
       setSubmitMessage({
         type: 'error',
-        text: 'Submission failed. Please try again or call us directly at (405) 902-1826'
+        text: 'Submission failed. Please try again or call us directly at (405) 902-5266'
       });
     } finally {
       setIsSubmitting(false);
@@ -566,10 +566,10 @@ export default function HailLandingPage() {
             </div>
             <div className="text-right">
               <a 
-                href="tel:4059021826" 
+                href="tel:4059025266" 
                 className="text-lg font-bold text-emerald-600 hover:text-emerald-700 transition-all duration-200 hover:scale-105 inline-block"
               >
-                (405) 902-1826
+                (405) 902-5266
               </a>
               <p className="text-sm text-gray-600 font-medium">24/7 Emergency Service</p>
             </div>
@@ -1102,8 +1102,8 @@ export default function HailLandingPage() {
 
                       <div className="text-center">
                         <p className="text-sm text-gray-500 mb-2">Or call us directly:</p>
-                        <a href="tel:4059021826" className="text-lg font-semibold text-emerald-600 hover:text-emerald-700">
-                          (405) 902-1826
+                        <a href="tel:4059025266" className="text-lg font-semibold text-emerald-600 hover:text-emerald-700">
+                          (405) 902-5266
                         </a>
                       </div>
                     </form>

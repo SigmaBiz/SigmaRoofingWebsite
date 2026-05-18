@@ -59,7 +59,7 @@ export default function Sitemap() {
             <div className="space-y-2">
               <p><strong>Sigma Roofing LLC</strong></p>
               <p>16612 N Western Avenue, Edmond, OK 73012</p>
-              <p>Phone: (405) 902-1826</p>
+              <p>Phone: (405) 902-5266</p>
               <p>Email: ok.sigmaroofs@gmail.com</p>
               <p>License: LIC#80006734</p>
               <p>Available 24/7 for Emergency Services</p>

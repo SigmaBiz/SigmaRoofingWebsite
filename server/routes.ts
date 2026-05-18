@@ -970,7 +970,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
           <div class="emergency">
             <h2>Emergency Storm Damage?</h2>
             <p>Call us now for immediate help:</p>
-            <button onclick="window.location.href='tel:+14059021826'">📞 (405) 902-1826</button>
+            <button onclick="window.location.href='tel:+14059025266'">📞 (405) 902-5266</button>
           </div>
 
           <div class="footer">
@@ -1235,7 +1235,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
                 throw new Error('Submission failed');
               }
             } catch (error) {
-              alert('Please check your information and try again, or call us directly at (405) 902-1826');
+              alert('Please check your information and try again, or call us directly at (405) 902-5266');
             }
           });
 
@@ -1311,7 +1311,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
         <div class="emergency-section">
           <h2>Emergency Storm Damage?</h2>
           <p>If you have immediate safety concerns or active leaks, call us now for emergency services.</p>
-          <button onclick="window.location.href='tel:+14059021826'">Emergency: (405) 902-1826</button>
+          <button onclick="window.location.href='tel:+14059025266'">Emergency: (405) 902-5266</button>
         </div>
         
         <div class="data-source">
@@ -1328,7 +1328,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
       const event = await stormDataService.getDailyHailContentWithTrends();
       
       if (!event) {
-        return res.send(`<h1>No qualifying hail events found</h1><p>Call us directly: (405) 902-1826</p>`);
+        return res.send(`<h1>No qualifying hail events found</h1><p>Call us directly: (405) 902-5266</p>`);
       }
 
       // Enhanced trending phrase matching logic
@@ -1357,7 +1357,7 @@ export async function registerRoutes(app: Express): Promise<Express> {
       
     } catch (err) {
       console.error(err);
-      res.status(500).send(`<h1>Service Unavailable</h1><p>Please call us: (405) 902-1826</p>`);
+      res.status(500).send(`<h1>Service Unavailable</h1><p>Please call us: (405) 902-5266</p>`);
     }
   });
 

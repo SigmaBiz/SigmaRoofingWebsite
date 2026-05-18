@@ -60,7 +60,7 @@ export default function PrivacyPolicy() {
             <div className="mt-2">
               <p>Sigma Roofing LLC</p>
               <p>16612 N Western Avenue, Edmond, OK 73012</p>
-              <p>Phone: (405) 902-1826</p>
+              <p>Phone: (405) 902-5266</p>
               <p>Email: ok.sigmaroofs@gmail.com</p>
             </div>
           </section>

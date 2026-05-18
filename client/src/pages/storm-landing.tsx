@@ -182,7 +182,7 @@ export default function StormLanding() {
     onError: (error) => {
       toast({
         title: "Error sending message",
-        description: "Please try again or call us directly at (405) 902-1826",
+        description: "Please try again or call us directly at (405) 902-5266",
         variant: "destructive",
       });
     },
@@ -417,7 +417,7 @@ export default function StormLanding() {
             </div>
             <div className="flex items-center space-x-4">
               <Phone className="h-5 w-5 text-emerald-600" />
-              <span className="text-lg font-semibold text-gray-900">(405) 902-1826</span>
+              <span className="text-lg font-semibold text-gray-900">(405) 902-5266</span>
             </div>
           </div>
         </div>
@@ -833,7 +833,7 @@ export default function StormLanding() {
             onClick={() => window.open("tel:(405)902-1826")}
           >
             <Phone className="mr-2 h-5 w-5" />
-            Emergency: (405) 902-1826
+            Emergency: (405) 902-5266
           </Button>
         </div>
 

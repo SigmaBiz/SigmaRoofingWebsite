@@ -92,7 +92,7 @@ export default function TornadoDamage() {
     onError: () => {
       toast({
         title: "Submission Failed",
-        description: "Please try again or call us directly at (405) 902-1826",
+        description: "Please try again or call us directly at (405) 902-5266",
         variant: "destructive",
       });
     }
@@ -123,7 +123,7 @@ export default function TornadoDamage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-lg font-semibold text-emerald-600">(405) 902-1826</p>
+              <p className="text-lg font-semibold text-emerald-600">(405) 902-5266</p>
               <p className="text-sm text-gray-600">24/7 Emergency Service</p>
             </div>
           </div>
@@ -411,7 +411,7 @@ export default function TornadoDamage() {
                     onClick={() => window.open("tel:(405)902-1826")}
                   >
                     <Phone className="mr-2 h-5 w-5" />
-                    Emergency: (405) 902-1826
+                    Emergency: (405) 902-5266
                   </Button>
                 </div>
               </CardContent>

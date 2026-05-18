@@ -189,7 +189,7 @@ export default function HailDamage() {
       console.log('API call failed:', error);
       setSubmitMessage({
         type: 'error',
-        text: 'Submission failed. Please try again or call us directly at (405) 902-1826'
+        text: 'Submission failed. Please try again or call us directly at (405) 902-5266'
       });
     } finally {
       setIsSubmitting(false);
@@ -237,7 +237,7 @@ export default function HailDamage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-lg font-semibold text-emerald-600">(405) 902-1826</p>
+              <p className="text-lg font-semibold text-emerald-600">(405) 902-5266</p>
               <p className="text-sm text-gray-600">24/7 Emergency Service</p>
             </div>
           </div>
@@ -521,8 +521,8 @@ export default function HailDamage() {
 
                       <div className="text-center">
                         <p className="text-sm text-gray-500 mb-2">Or call us directly:</p>
-                        <a href="tel:4059021826" className="text-lg font-semibold text-emerald-600 hover:text-emerald-700">
-                          (405) 902-1826
+                        <a href="tel:4059025266" className="text-lg font-semibold text-emerald-600 hover:text-emerald-700">
+                          (405) 902-5266
                         </a>
                       </div>
                     </form>

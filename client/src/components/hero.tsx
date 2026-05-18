@@ -98,7 +98,7 @@ export default function Hero() {
               onClick={() => window.open("tel:(405)902-1826")}
             >
               <Phone className="mr-2 h-5 w-5" />
-              Call (405) 902-1826
+              Call (405) 902-5266
             </Button>
             <Button
               size="lg"

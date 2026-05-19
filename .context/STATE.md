@@ -99,5 +99,38 @@ Last updated: 2026-05-18
 - Priority 1, Step 1 (Calendly): COMPLETE — was a reconnection issue, now fixed
 - Priority 1, Step 2 (Google Places autocomplete): COMPLETE — new API key deployed, confirmed working 2026-05-18
 - Priority 1, Step 3 (SendGrid): DEFERRED — trial expired, Nodemailer swap (~30 min) is the preferred fix when ready. Calendly covers core use case in the meantime.
-- Priority 2 (Google Reviews): Not started — `/api/reviews` endpoint already built but searches wrong business name ("BBAV ROOFING LLC"). Needs business name fix + frontend display component.
-- Priority 3 (SocHub): New feature, does not exist yet — needs its own planning session before work begins
+- Priority 2 (Google Reviews): Backend fixed (business name updated to "SIGMA ROOFING LLC"). Frontend already wired in testimonials.tsx. Live review display not yet verified on production.
+- Priority 3 (SocHub): COMPLETE — deployed 2026-05-19. See SocHub section below.
+
+---
+
+## SocHub — COMPLETE (deployed 2026-05-19)
+
+### What was built
+- **Backend**: `social_videos` table in schema.ts, MemStorage methods, 3 API routes (GET/POST /api/social-videos, DELETE /api/social-videos/:id)
+- **Admin**: "SocHub Videos" tab in /admin — paste a URL + title, platform auto-detected, delete button per video
+- **Frontend**: /social page — full video grid with YouTube iFrame embeds, TikTok blockquote embeds, direct HTML5 video, Instagram link cards. Social profile buttons at top. CTA to booking form.
+- **Homepage**: SocHubTeaser section between Projects and Testimonials — shows up to 4 videos, links to /social. Hidden automatically when no videos have been added yet.
+- **Footer**: Real social links — TikTok (@sigmaroofing405), Instagram (@sigmaroofing405), Facebook (Sigma Roofing LLC search)
+
+### How Antonio adds videos
+1. Go to oksigma.com/admin → SocHub Videos tab
+2. Paste a TikTok, YouTube, Instagram, or direct video URL + a title → click Add
+3. Video appears on /social immediately and in the homepage teaser (up to 4 most recent)
+
+### Platform detection logic
+- URL contains `tiktok.com` → TikTok embed (blockquote)
+- URL contains `youtube.com` or `youtu.be` → YouTube iFrame
+- URL contains `instagram.com` → Instagram link card
+- Everything else (Cloudinary, .mp4, etc.) → HTML5 video
+
+### What's NOT done yet
+- YouTube channel doesn't exist yet — Antonio needs to create it
+- TikTok embed requires TikTok's embed script to be loaded — this may need a script tag added to index.html if TikTok videos don't render. Simple fix when Antonio has TikTok videos to test.
+- MemStorage resets on server restart — videos added via admin will disappear on Railway redeploy. This is the same limitation as project gallery. If persistence is needed, a Postgres connection or localStorage sync is the fix (separate task).
+
+### Social handles confirmed
+- TikTok: @sigmaroofing405
+- Instagram: @sigmaroofing405
+- Facebook: Sigma Roofing LLC (page)
+- YouTube: not created yet

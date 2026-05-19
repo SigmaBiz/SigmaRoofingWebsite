@@ -1456,6 +1456,20 @@ export async function registerRoutes(app: Express): Promise<Express> {
     }
   });
 
+  // TikTok oEmbed thumbnail proxy — avoids CORS issues fetching from the browser
+  app.get("/api/tiktok-thumbnail", async (req, res) => {
+    const url = req.query.url as string;
+    if (!url) return res.status(400).json({ thumbnail_url: null });
+    try {
+      const response = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
+      const data = await response.json() as { thumbnail_url?: string };
+      res.json({ thumbnail_url: data.thumbnail_url || null });
+    } catch (error) {
+      console.error("TikTok oEmbed error:", error);
+      res.json({ thumbnail_url: null });
+    }
+  });
+
   // Don't create a new server here - just return the app
   return app;
 }

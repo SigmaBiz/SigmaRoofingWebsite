@@ -36,6 +36,16 @@ function VideoCard({ video }: { video: SocialVideo }) {
   const style = PLATFORM_STYLES[video.platform] ?? PLATFORM_STYLES.direct;
   const ytThumb = video.platform === "youtube" ? getYouTubeThumbnail(video.url) : null;
 
+  const { data: ttData } = useQuery<{ thumbnail_url: string | null }>({
+    queryKey: ["/api/tiktok-thumbnail", video.url],
+    queryFn: () =>
+      fetch(`/api/tiktok-thumbnail?url=${encodeURIComponent(video.url)}`).then(r => r.json()),
+    enabled: video.platform === "tiktok",
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+
+  const thumbnail = ytThumb || (video.platform === "tiktok" ? (ttData?.thumbnail_url ?? null) : null);
+
   return (
     <a
       href={video.url}
@@ -44,9 +54,9 @@ function VideoCard({ video }: { video: SocialVideo }) {
       className="group block rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
     >
       {/* Thumbnail / Placeholder */}
-      <div className={`relative aspect-video flex items-center justify-center ${ytThumb ? "" : style.bg}`}>
-        {ytThumb ? (
-          <img src={ytThumb} alt={video.title} className="w-full h-full object-cover" />
+      <div className={`relative aspect-video flex items-center justify-center ${thumbnail ? "" : style.bg}`}>
+        {thumbnail ? (
+          <img src={thumbnail} alt={video.title} className="w-full h-full object-cover" />
         ) : (
           <div className="flex flex-col items-center gap-2 text-white opacity-70">
             <Play className="w-12 h-12" />

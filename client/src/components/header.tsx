@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, Phone } from "lucide-react";
+import { Link } from "wouter";
 import sigmaLogo from "@assets/Untitled design.png";
 
 export default function Header() {
@@ -57,6 +58,13 @@ export default function Header() {
             >
               Projects
             </button>
+            <Link
+              href="/social"
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors flex items-center gap-1"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-sigma-emerald animate-pulse" />
+              Watch
+            </Link>
             <button
               onClick={() => scrollToSection("faq")}
               className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
@@ -122,6 +130,14 @@ export default function Header() {
               >
                 Projects
               </button>
+              <Link
+                href="/social"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors flex items-center gap-1"
+              >
+                <span className="inline-block w-2 h-2 rounded-full bg-sigma-emerald animate-pulse" />
+                Watch
+              </Link>
               <button
                 onClick={() => scrollToSection("faq")}
                 className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors text-left"

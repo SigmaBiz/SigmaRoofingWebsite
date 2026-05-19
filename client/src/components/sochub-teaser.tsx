@@ -29,6 +29,7 @@ const PLATFORM_STYLES: Record<string, { bg: string; label: string; badge: string
   tiktok:    { bg: "bg-black",       label: "TikTok",    badge: "bg-white text-black" },
   youtube:   { bg: "bg-red-700",     label: "YouTube",   badge: "bg-white text-red-700" },
   instagram: { bg: "bg-purple-700",  label: "Instagram", badge: "bg-white text-purple-700" },
+  facebook:  { bg: "bg-blue-700",    label: "Facebook",  badge: "bg-white text-blue-700" },
   direct:    { bg: "bg-sigma-charcoal", label: "Video",  badge: "bg-white text-gray-800" },
 };
 

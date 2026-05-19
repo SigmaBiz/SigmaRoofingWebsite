@@ -21,6 +21,7 @@ function detectPlatform(url: string): string {
   if (url.includes("tiktok.com")) return "tiktok";
   if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube";
   if (url.includes("instagram.com")) return "instagram";
+  if (url.includes("facebook.com") || url.includes("fb.watch")) return "facebook";
   if (url.includes("cloudinary.com") || url.match(/\.(mp4|mov|webm)$/i)) return "direct";
   return "direct";
 }
@@ -29,6 +30,7 @@ const PLATFORM_LABELS: Record<string, string> = {
   tiktok: "TikTok",
   youtube: "YouTube",
   instagram: "Instagram",
+  facebook: "Facebook",
   direct: "Direct Video",
 };
 
@@ -36,6 +38,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   tiktok: "bg-black text-white",
   youtube: "bg-red-600 text-white",
   instagram: "bg-purple-600 text-white",
+  facebook: "bg-blue-700 text-white",
   direct: "bg-blue-600 text-white",
 };
 

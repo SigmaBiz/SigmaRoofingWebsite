@@ -495,31 +495,31 @@ export async function registerRoutes(app: Express): Promise<Express> {
     }
   });
 
-  // Google Business Profile reviews for BBAV Roofing LLC
+  // Google Business Profile reviews for Sigma Roofing LLC
   app.get("/api/reviews", async (req, res) => {
     try {
       const apiKey = process.env.GOOGLE_API_KEY;
       console.log("API Key present:", !!apiKey);
-      
+
       if (!apiKey) {
         return res.status(500).json({ success: false, message: "Google Business API key not configured" });
       }
 
-      // Try direct search for BBAV Roofing LLC in Edmond, OK
-      const searchQuery = "BBAV ROOFING LLC 16612 N Western Avenue Edmond OK";
+      // Try direct search for Sigma Roofing LLC in Edmond, OK
+      const searchQuery = "SIGMA ROOFING LLC Edmond OK";
       console.log("Searching for:", searchQuery);
-      
+
       const searchResponse = await fetch(
         `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name&key=${apiKey}`
       );
-      
+
       const searchData = await searchResponse.json();
       console.log("Search response:", searchData);
-      
+
       if (searchData.status !== "OK" || !searchData.candidates.length) {
         // If specific business not found, let's try a broader search
         const broaderSearch = await fetch(
-          `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent("BBAV ROOFING LLC Edmond Oklahoma")}&key=${apiKey}`
+          `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent("SIGMA ROOFING LLC Edmond Oklahoma")}&key=${apiKey}`
         );
         
         const broaderData = await broaderSearch.json();

@@ -15,6 +15,7 @@ import StormLanding from "@/pages/storm-landing";
 import HailDamage from "@/pages/hail-damage";
 import HailLandingPage from "@/pages/hail-landingpage";
 import TornadoDamage from "@/pages/tornado-damage";
+import SocHub from "@/pages/sochub";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/sitemap" component={Sitemap} />
       <Route path="/admin" component={Admin} />
+      <Route path="/social" component={SocHub} />
       <Route path="/google-photos-test" component={GooglePhotosTest} />
       <Route component={NotFound} />
     </Switch>

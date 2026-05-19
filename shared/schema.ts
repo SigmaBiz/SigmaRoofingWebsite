@@ -89,3 +89,22 @@ export const insertWebsiteImagesSchema = createInsertSchema(websiteImages).omit(
 
 export type InsertWebsiteImages = z.infer<typeof insertWebsiteImagesSchema>;
 export type WebsiteImages = typeof websiteImages.$inferSelect;
+
+// Social videos schema (SocHub)
+export const socialVideos = pgTable("social_videos", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  platform: text("platform").notNull(), // "tiktok", "youtube", "instagram", "direct"
+  isActive: text("is_active").default("true").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertSocialVideoSchema = createInsertSchema(socialVideos).pick({
+  title: true,
+  url: true,
+  platform: true,
+});
+
+export type InsertSocialVideo = z.infer<typeof insertSocialVideoSchema>;
+export type SocialVideo = typeof socialVideos.$inferSelect;

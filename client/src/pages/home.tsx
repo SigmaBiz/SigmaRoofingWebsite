@@ -4,6 +4,7 @@ import Services from "@/components/services";
 import Process from "@/components/process";
 import About from "@/components/about";
 import Projects from "@/components/projects";
+import SocHubTeaser from "@/components/sochub-teaser";
 import Testimonials from "@/components/testimonials";
 import FAQ from "@/components/faq";
 import MVP3ContactForm from "@/components/mvp3-contact-form";
@@ -19,6 +20,7 @@ export default function Home() {
       <Process />
       <About />
       <Projects />
+      <SocHubTeaser />
       <Testimonials />
       <FAQ />
       <MVP3ContactForm />

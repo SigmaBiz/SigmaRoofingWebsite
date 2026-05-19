@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Home, Facebook, Linkedin } from "lucide-react";
-import { FaGoogle } from "react-icons/fa";
+import { Home } from "lucide-react";
+import { FaTiktok, FaInstagram, FaFacebook } from "react-icons/fa";
 import { Link } from "wouter";
 import TrademarkDisclaimer from "@/components/trademark-disclaimer";
 
@@ -33,15 +33,21 @@ export default function Footer() {
               Professional roofing and painting services in Edmond, Oklahoma. Licensed, insured, and committed to quality workmanship.
             </p>
             <div className="flex space-x-4">
-              <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
-                <Facebook className="text-white" size={16} />
-              </Button>
-              <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
-                <FaGoogle className="text-white" size={16} />
-              </Button>
-              <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
-                <Linkedin className="text-white" size={16} />
-              </Button>
+              <a href="https://www.tiktok.com/@sigmaroofing405" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
+                  <FaTiktok className="text-white" size={16} />
+                </Button>
+              </a>
+              <a href="https://www.instagram.com/sigmaroofing405" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
+                  <FaInstagram className="text-white" size={16} />
+                </Button>
+              </a>
+              <a href="https://www.facebook.com/search/top?q=Sigma%20Roofing%20LLC" target="_blank" rel="noopener noreferrer">
+                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
+                  <FaFacebook className="text-white" size={16} />
+                </Button>
+              </a>
             </div>
           </div>
 

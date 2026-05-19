@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { storage } from "./storage";
-import { insertContactRequestSchema } from "@shared/schema";
+import { insertContactRequestSchema, insertSocialVideoSchema } from "@shared/schema";
 import { emailService } from "./email-service";
 import { stormDataService } from "./storm-data-service-final";
 
@@ -1416,6 +1416,43 @@ export async function registerRoutes(app: Express): Promise<Express> {
         success: false, 
         message: "Failed to save projects"
       });
+    }
+  });
+
+  // Social videos API (SocHub)
+  app.get("/api/social-videos", async (req, res) => {
+    try {
+      const videos = await storage.getSocialVideos();
+      res.json({ success: true, videos });
+    } catch (error) {
+      console.error("Error fetching social videos:", error);
+      res.status(500).json({ success: false, videos: [], message: "Failed to fetch videos" });
+    }
+  });
+
+  app.post("/api/social-videos", async (req, res) => {
+    try {
+      const validated = insertSocialVideoSchema.parse(req.body);
+      const video = await storage.createSocialVideo(validated);
+      res.json({ success: true, video });
+    } catch (error) {
+      console.error("Error creating social video:", error);
+      res.status(400).json({ success: false, message: "Invalid video data" });
+    }
+  });
+
+  app.delete("/api/social-videos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteSocialVideo(id);
+      if (deleted) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ success: false, message: "Video not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting social video:", error);
+      res.status(500).json({ success: false, message: "Failed to delete video" });
     }
   });
 

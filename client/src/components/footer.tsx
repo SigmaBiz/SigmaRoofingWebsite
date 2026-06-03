@@ -34,17 +34,17 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <a href="https://www.tiktok.com/@sigmaroofing405" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
+                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-sigma-gold/90 p-0">
                   <FaTiktok className="text-white" size={16} />
                 </Button>
               </a>
               <a href="https://www.instagram.com/sigmaroofing405" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
+                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-sigma-gold/90 p-0">
                   <FaInstagram className="text-white" size={16} />
                 </Button>
               </a>
               <a href="https://www.facebook.com/search/top?q=Sigma%20Roofing%20LLC" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-yellow-600 p-0">
+                <Button size="sm" className="w-10 h-10 bg-sigma-gold hover:bg-sigma-gold/90 p-0">
                   <FaFacebook className="text-white" size={16} />
                 </Button>
               </a>

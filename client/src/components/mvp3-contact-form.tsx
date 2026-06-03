@@ -316,7 +316,7 @@ export default function MVP3ContactForm() {
     <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-gray-50">
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center mb-16">
-          <div className="bg-gradient-to-br from-emerald-50 to-gray-50 p-8 rounded-2xl shadow-xl border border-emerald-100">
+          <div className="bg-gradient-to-br from-primary/5 to-gray-50 p-8 rounded-2xl shadow-xl border border-primary/15">
             <div className="flex items-center justify-center space-x-6">
               <img 
                 src="/sigma-logo.png" 
@@ -327,7 +327,7 @@ export default function MVP3ContactForm() {
                 <h2 className="text-4xl font-bold text-gray-900 tracking-tight">
                   SIGMA ROOFING LLC
                 </h2>
-                <p className="text-lg text-emerald-600 font-semibold mt-2">
+                <p className="text-lg text-primary font-semibold mt-2">
                   Professional Roofing Services in Oklahoma
                 </p>
               </div>
@@ -447,7 +447,7 @@ export default function MVP3ContactForm() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                  className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Request'}
                 </Button>

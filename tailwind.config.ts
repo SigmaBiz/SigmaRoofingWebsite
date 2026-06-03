@@ -5,6 +5,12 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        // Phase 0: load the fonts the CSS already intended (Inter / Open Sans).
+        // Phase 1 swaps these two stacks (+ the <link> in index.html) to the storm-authority pairing.
+        sans: ["Open Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -44,6 +50,18 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        // Brand color scale. These names were used all over the components
+        // (text-sigma-emerald, bg-sigma-charcoal, hover:text-sigma-gold, text-sigma-dark, ...)
+        // but were never defined as colors — so they silently failed. Now they are token-backed,
+        // so every usage both renders correctly AND follows the Phase 1 palette swap.
+        sigma: {
+          emerald: "hsl(var(--primary))",
+          charcoal: "hsl(var(--foreground))",
+          "light-gray": "hsl(var(--muted-foreground))",
+          white: "hsl(var(--card))",
+          gold: "hsl(var(--gold))",
+          dark: "hsl(var(--foreground))",
+        },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",

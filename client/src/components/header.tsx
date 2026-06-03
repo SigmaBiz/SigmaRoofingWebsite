@@ -85,9 +85,9 @@ export default function Header() {
               <p className="font-semibold text-sigma-charcoal">(405) 902-5266</p>
               <p className="text-sm text-sigma-light-gray">Free Estimates</p>
             </div>
-            <Button 
+            <Button
               onClick={() => scrollToSection("contact")}
-              className="bg-sigma-emerald text-white hover:bg-emerald-600"
+              className="bg-sigma-emerald text-white hover:bg-primary/90"
             >
               Get Quote
             </Button>
@@ -154,7 +154,7 @@ export default function Header() {
                 <p className="font-semibold text-sigma-dark">(405) 902-5266</p>
                 <Button 
                   onClick={() => scrollToSection("contact")}
-                  className="bg-sigma-gold text-white mt-2 w-full hover:bg-yellow-600"
+                  className="bg-sigma-emerald text-white mt-2 w-full hover:bg-primary/90"
                 >
                   Get Quote
                 </Button>

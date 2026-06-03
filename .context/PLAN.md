@@ -23,28 +23,30 @@
 
 ---
 
-## Priority 4: SocHub Phase 2 — IN PLANNING
+## Priority 4: SocHub Phase 2 — COMPLETE (shipped in commit 532b0a1)
 
 ### Feature 1: Facebook inline embed support
-- [ ] Detect `facebook.com` URLs in platform auto-detection (currently falls through to "direct")
-- [ ] Embed Facebook videos inline via `<iframe src="https://www.facebook.com/plugins/video.php?href=URL">` (no API key needed)
-- [ ] Add Facebook-branded placeholder card when thumbnail not available
-- [ ] Add Facebook to `/api/tiktok-thumbnail` proxy OR create separate proxy — FB oEmbed needs app credentials, so placeholder is fine for now
+- [x] Detect `facebook.com` URLs in platform auto-detection
+- [x] Embed Facebook videos inline via Facebook video plugin iframe
+- [x] Facebook-branded placeholder card when thumbnail not available
 
 ### Feature 2: SocHub reviews + follows section
-- [ ] Add "Help Us Grow" section on /social page below video grid
-- [ ] Google review CTA button — links to Sigma Roofing Google review page (need Antonio's Google Business Place ID or review URL)
-- [ ] Social follow buttons (TikTok, Instagram, Facebook) with follower-focused copy ("Follow for more job walkthroughs")
-- [ ] Consider adding this section to the homepage teaser as well
+- [x] "Help Us Grow" section on /social page below video grid
+- [x] Google review CTA button — VERIFY it points to Antonio's real Google review URL
+- [x] Social follow buttons (TikTok, Instagram, Facebook) with follower-focused copy
 
 ### Feature 3: SocHub nav link in header
-- [ ] Add "Watch" or "SocHub" link to the main site navigation (header.tsx)
-- [ ] Should be visible on homepage so visitors can find the video page without scrolling
-- [ ] Decide placement: nav bar item, or a banner/badge on the hero section
+- [x] "Watch" link added to the main site navigation (header.tsx)
 
-### Blocked on
-- [ ] Antonio's Google Business review URL (for the review CTA button)
+### Still outstanding (carried)
+- [ ] Confirm Antonio's Google Business review URL is wired to the review CTA
 - [ ] Antonio to create YouTube channel (YouTube content not available yet)
+
+---
+
+## Priority 5: Persuasion-grounded design reskin — ACTIVE
+See `.context/PLAN-design-reskin.md`, `.context/BASIS-persuasion.md`, and the approved plan at
+`~/.claude/plans/resilient-exploring-raccoon.md`. On branch `design-reskin`.
 
 ## Priority Order
 Phase 2 items are independent — can do in any order. Facebook embed is ~30 min. Reviews/follows section is ~1 hr. Nav link is ~15 min.

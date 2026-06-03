@@ -1,6 +1,6 @@
 # STATE.md — Sigma Roofing Website
 
-Last updated: 2026-05-19
+Last updated: 2026-06-03
 
 ---
 
@@ -14,7 +14,8 @@ Last updated: 2026-05-19
 | Google Reviews backend | COMPLETE (business name fixed) |
 | Google Reviews live verification | NOT YET VERIFIED on production |
 | SocHub Phase 1 | COMPLETE — deployed 2026-05-19 |
-| SocHub Phase 2 | IN PLANNING — see PLAN.md |
+| SocHub Phase 2 | COMPLETE — shipped in commit 532b0a1 (Facebook embeds, reviews/follows section, nav link) |
+| Design reskin (persuasion-grounded) | ACTIVE — see PLAN-design-reskin.md + BASIS-persuasion.md; on branch `design-reskin` |
 
 ---
 
@@ -55,6 +56,13 @@ Last updated: 2026-05-19
 - `.env` is gitignored — all production secrets set in Railway Variables tab
 - MemStorage is in-memory — data resets on every redeploy (same for projects and social videos)
 
+### Local working copy (2026-06-03)
+- **Canonical local path: `~/dev/SigmaRoofingWebsite`** — moved off `~/Desktop` (iCloud-synced) because the iCloud FileProvider raced npm's atomic renames and corrupted installs with `ENOTEMPTY`. `~/dev` is outside the CloudDocs container, so installs/builds are no longer coupled to sync.
+- Moved via `rsync -a` (NOT `mv` — `mv` out of iCloud hangs on FileProvider). `.env` was carried by rsync (it's gitignored, so it does NOT travel via git — re-copy manually if ever re-cloning).
+- Verified in new location: `npm install` clean (646 pkgs, no ENOTEMPTY), `npm run build` OK, source byte-identical to old copy, git tree clean.
+- **`npm run check` (tsc) has PRE-EXISTING type errors that do NOT block deploy** — production ships via esbuild `npm run build`, which does not type-check. These errors predate the move (proved by byte-identical source + clean git tree).
+- Old `~/Desktop/SigmaRoofingWebsite` copy **deleted 2026-06-03** after the new copy was verified (clean install, build OK, dev server booted + served HTTP 200). `~/dev/SigmaRoofingWebsite` is now the only working copy. Do all local work here — never recreate the project under `~/Desktop` (iCloud).
+
 ---
 
 ## SocHub — Phase 1 COMPLETE (2026-05-19)
@@ -86,12 +94,28 @@ Last updated: 2026-05-19
 
 ---
 
-## SocHub Phase 2 — Next Session
+## SocHub Phase 2 — COMPLETE (shipped in commit 532b0a1)
 
-Three features planned (see PLAN.md for full detail):
+All three features shipped: Facebook inline embeds, reviews/follows section on /social, and the
+SocHub nav link in the header. (The state docs previously lagged behind the commits — reconciled
+2026-06-03.) One item that may still be outstanding: the Google Business **review URL** for the
+reviews/follows CTA — verify it's wired to Antonio's real review link.
 
-1. **Facebook inline embed** — detect facebook.com URLs, embed via Facebook video plugin iframe (no API key needed). ~30 min.
+---
 
-2. **Reviews + follows section on /social** — "Help Us Grow" section below video grid: Google review CTA button + social follow buttons with follower-focused copy. **Blocked on**: Antonio's Google Business review URL (the direct link customers use to leave a review — find it in Google Business Profile dashboard).
+## ACTIVE WORK (2026-06-03): Persuasion-grounded design reskin
 
-3. **SocHub nav link in header** — add a "Watch" or "SocHub" link to the main site header so visitors can find the page without scrolling. ~15 min.
+On branch `design-reskin` (NOT the auto-deploying `staging-mobile-fix`). Localhost-only,
+push only on explicit OK.
+
+- **Directional basis is locked** — see `.context/BASIS-persuasion.md` (the WORKFLOW_3
+  persuasion engine instantiated on the homeowner) and the operational skill
+  `.claude/skills/sigma-design/SKILL.md`.
+- **Plan:** `.context/PLAN-design-reskin.md` + the approved plan at
+  `~/.claude/plans/resilient-exploring-raccoon.md`.
+- **Brand nomination:** storm-authority (navy/slate + warm gold) — verify by render.
+- **Key discovery:** the token layer is half-broken — fonts never load (Inter/Open Sans named
+  but never imported), conversion CTAs hardcode emerald (bypass `bg-primary`), ghost classes
+  `sigma-gold`/`sigma-dark` undefined, ~718 hardcoded palette utilities. Phase 0 repairs this
+  before any reskin.
+- **Next step:** finish Phase 0 (token-layer repair), then render brand variants for a pick.

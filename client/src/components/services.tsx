@@ -76,7 +76,7 @@ const ServiceCard = memo(({ service, imageUrl }: { service: any; imageUrl?: stri
   }, []);
   
   return (
-    <Card className="bg-gray-50 hover:shadow-xl transition-all duration-300 hover:scale-105 border-l-4 border-l-sigma-emerald">
+    <Card className="bg-gray-50 hover:shadow-xl transition-all duration-300 hover:scale-105">
       <CardContent className="p-0">
         {/* Optimized Image Header with Loading State */}
         {imageUrl && !imgError && (
@@ -122,7 +122,7 @@ const ServiceCard = memo(({ service, imageUrl }: { service: any; imageUrl?: stri
                 contactSection.scrollIntoView({ behavior: 'smooth' });
               }
             }}
-            className="bg-sigma-emerald hover:bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-300"
+            className="bg-sigma-emerald hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-300"
           >
             Get Help
           </Button>
@@ -200,7 +200,7 @@ export default function Services() {
           ) : (
             // Loading skeleton for services
             Array.from({ length: 6 }, (_, index) => (
-              <Card key={index} className="bg-gray-50 border-l-4 border-l-sigma-emerald">
+              <Card key={index} className="bg-gray-50">
                 <CardContent className="p-0">
                   <div className="h-48 bg-gray-200 animate-pulse rounded-t-lg" />
                   <div className="p-8">

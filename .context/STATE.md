@@ -129,5 +129,10 @@ push only on explicit OK.
   (a) headline copy approval [legally-safe physical-damage framing; the claim-window/institutional-THREAT
   version is gated on OK legal grounding], (b) real ground-view + close-up hail-damage photos,
   (c) hero CTA→gold contrast fix + the address-aim decision.
-- **BLOCKED — community-skill mining:** needs Antonio to install/point to UI/UX PRO MAX / TASTE / IMPECCABLE,
-  then read → extract value-aligned snippets → fold into `.claude/skills/sigma-design`.
+- **Community skills installed (subordinate to sigma-design), 2026-06-03:** `impeccable`,
+  `design-taste-frontend` (taste), `ui-ux-pro-max`. Reinstall:
+  `npx skills add pbakaus/impeccable` · `npx skills add Leonxlnx/taste-skill --skill design-taste-frontend` ·
+  `npx skills add nextlevelbuilder/ui-ux-pro-max-skill` (the last bundles 6 extra `ckm-*` skills — PRUNE them).
+  They live in `.agents/skills/` (gitignored, NOT committed). sigma-design + the basis remain the law
+  (most-specific-wins). Aligned craft rules already folded into sigma-design. Use these to widen options on
+  NEW pages; on funnel pages, sigma-design rules.

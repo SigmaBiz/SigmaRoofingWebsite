@@ -3,17 +3,18 @@
 @tailwind utilities;
 
 :root {
-  /* ── STORM-AUTHORITY (Variant A) — navy primary + warm gold + warm off-white base ── */
-  --background: 40 25% 97%; /* Warm off-white — inviting "cradle" base */
+  /* ── STORM-AUTHORITY (Variant A2) — navy primary + warm gold accent + CLEAN off-white base ──
+     Warmth now comes from the gold accent + real photos, NOT the body bg (avoids the AI-cream tell). */
+  --background: 214 24% 98%; /* Clean navy-tinted off-white */
   --foreground: 215 45% 15%; /* Deep navy ink */
-  --muted: 40 20% 93%;
+  --muted: 214 20% 94%;
   --muted-foreground: 215 18% 40%; /* Muted slate */
   --popover: 0 0% 100%;
   --popover-foreground: 215 45% 15%;
   --card: 0 0% 100%;
   --card-foreground: 215 45% 15%;
-  --border: 40 18% 87%;
-  --input: 40 18% 87%;
+  --border: 214 18% 89%;
+  --input: 214 18% 89%;
   --primary: 214 65% 27%; /* Deep navy — CTAs + brand (carries THREAT/STATUS gravity) */
   --primary-foreground: 0 0% 100%;
   --secondary: 214 32% 91%; /* Light navy tint */

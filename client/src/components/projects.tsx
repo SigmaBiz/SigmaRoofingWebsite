@@ -83,7 +83,7 @@ const ProjectCard = memo(({ project }: { project: any }) => {
   const fallbackImage = "https://res.cloudinary.com/dkcmw0iji/image/upload/v1748372972/sigma-roofing/projects/gkfyybvob6ew3fqavaaz.jpg";
   
   return (
-    <Card className="bg-gray-50 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border-t-4 border-t-sigma-emerald">
+    <Card className="bg-gray-50 overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
       <ProjectImage 
         src={project.image || project.imageUrl} 
         alt={project.title}

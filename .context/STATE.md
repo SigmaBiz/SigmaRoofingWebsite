@@ -113,9 +113,21 @@ push only on explicit OK.
   `.claude/skills/sigma-design/SKILL.md`.
 - **Plan:** `.context/PLAN-design-reskin.md` + the approved plan at
   `~/.claude/plans/resilient-exploring-raccoon.md`.
-- **Brand nomination:** storm-authority (navy/slate + warm gold) — verify by render.
-- **Key discovery:** the token layer is half-broken — fonts never load (Inter/Open Sans named
-  but never imported), conversion CTAs hardcode emerald (bypass `bg-primary`), ghost classes
-  `sigma-gold`/`sigma-dark` undefined, ~718 hardcoded palette utilities. Phase 0 repairs this
-  before any reskin.
-- **Next step:** finish Phase 0 (token-layer repair), then render brand variants for a pick.
+- **Brand CHOSEN (live-approved 2026-06-03):** storm-authority Variant A — navy `--primary: 214 65% 27%`,
+  warm gold `--gold: 38 82% 50%`, warm off-white `--background: 40 25% 97%`, navy ink
+  `--foreground: 215 45% 15%`, `--radius: 0.5rem`. Fonts: Inter (display) + Open Sans (body) — to
+  revisit toward a sturdier display later if desired.
+- **DONE — Phases 0–3** (committed locally, NOT pushed; commits `c39d4a4` docs/skill, `a24b239` code):
+  - Phase 0: token-layer repair — fonts now load; `sigma-*` made token-backed colors in the Tailwind
+    config so every brand class follows the swap; CTAs migrated to `bg-primary`; `--gold`/`--chart-*`/
+    `--sidebar-*` defined; `<title>`/meta added. (Also fixed previously-broken styles: hero's emerald
+    word, footer hovers, header license text.)
+  - Phase 1–2: storm-authority palette at the token layer; hero accent word → gold.
+  - Phase 3: primitives tuned — bolder buttons + lift, radius 0.75→0.5rem, tighter heading tracking.
+  - Dark mode confirmed **unreachable** (no theme toggle wired) — only the light `:root` matters.
+- **DEFERRED — Phase 4 (hero rebuild around the basis):** skipped 2026-06-03 by Antonio. Needs
+  (a) headline copy approval [legally-safe physical-damage framing; the claim-window/institutional-THREAT
+  version is gated on OK legal grounding], (b) real ground-view + close-up hail-damage photos,
+  (c) hero CTA→gold contrast fix + the address-aim decision.
+- **BLOCKED — community-skill mining:** needs Antonio to install/point to UI/UX PRO MAX / TASTE / IMPECCABLE,
+  then read → extract value-aligned snippets → fold into `.claude/skills/sigma-design`.

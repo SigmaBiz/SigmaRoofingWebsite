@@ -83,3 +83,53 @@ what I intended any good"). Give it the money-protecting orders above as its che
 This skill governs the **skin** (the open grab + supplying direction + the guardrails). The
 richer copy work (the IRONY/CONTRADICTION teaching, the lien, hail-calibration imagery) is a
 separate, legally-gated content plan — see `.context/BASIS-persuasion.md` "Scope".
+
+## Craft execution rules (mined from community skills, 2026-06-03)
+
+Vetted against our value gradient and folded in from `impeccable` (pbakaus) and `taste`
+(Leonxlnx). These govern *execution quality* under the basis above. (`ui-ux-pro-max` is a
+separate CSV/CLI reference database — query it for options when you want a parts catalog; it has
+nothing to inline.)
+
+**Calibration dials — set for Sigma (trust/clarity, not experimental):** Variance LOW–MED ·
+Motion LOW · Density MED (breathing room for older eyes on phones).
+
+**Color & contrast (load-bearing for trust):**
+- Body text ≥ 4.5:1 contrast; large/bold ≥ 3:1; placeholders too. The #1 failure is muted-gray
+  text on a tinted near-white — if close, push the body color toward ink. VERIFY on our
+  navy-slate-on-warm-white.
+- ⚠ The warm cream/sand/beige body bg (OKLCH L .84–.97, C<.06, hue 40–100) is *the* saturated AI
+  default of 2026. Carry warmth via the GOLD accent + type + real photos, NOT the body bg. Prefer
+  a near-true off-white (chroma ~0) or a navy-tinted neutral over generic cream.
+- Tint neutrals slightly toward the brand hue (navy), never "toward warm because it feels warm."
+
+**Typography:** ≤3 families (we run 2); pair on a contrast axis; hierarchy via scale (≥1.25 step)
++ weight, not more fonts. Body line length 65–75ch. No all-caps body (uppercase only for ≤4-word
+labels). Display letter-spacing floor ≥ -0.04em. `text-wrap: balance` on h1–h3, `pretty` on prose.
+
+**Layout:** vary spacing for rhythm; cards are the lazy answer (never nested); flex for 1D, grid
+for 2D; `repeat(auto-fit, minmax(280px,1fr))` for breakpoint-free grids; semantic z-index scale
+(never 999/9999).
+
+**Motion (and the screenshot-loop trap):** intentional only; ease-out exponential (no
+bounce/elastic); `prefers-reduced-motion` alternative required. Reveal animations must ENHANCE an
+already-visible default — never gate content visibility on a class-triggered transition (it never
+fires on headless renderers / hidden tabs → section ships blank; this is also why we screenshot
+with motion OFF). Avoid the uniform section-fade reflex.
+
+**Copy (the hero grab + all marketing text):** every word earns its place; open with the reader's
+wrong belief, the strongest claim, or the example — no throat-clearing; take a position; name
+names, use numbers. Button labels = verb + object ("Book my free inspection", not "Submit").
+Links carry standalone meaning. BANNED: em dashes (pick real punctuation); buzzwords
+(seamless/empower/elevate/robust/world-class/transform…); "delve"; the "not just X, it's Y"
+negation-pivot as a default; triadic-everything; uniform sentence length.
+
+**Absolute bans (refuse-and-rewrite):** side-stripe borders (border-left/right >1px as a colored
+accent — *currently present in services/projects; remove*); gradient text; default glassmorphism;
+the hero-metric template; identical icon+heading+text card grids; tiny uppercase tracked eyebrow
+above every section; numbered 01/02/03 section markers as scaffolding; headlines that overflow at
+any breakpoint.
+
+**AI-slop test:** if someone could name the palette/aesthetic from the category alone, rework it.
+Second-order: navy-and-gold is a recognizable combo — make ours specifically Sigma (real photos,
+a specific navy/gold, real copy), not a generic template.

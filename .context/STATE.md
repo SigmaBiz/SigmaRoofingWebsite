@@ -103,7 +103,34 @@ reviews/follows CTA — verify it's wired to Antonio's real review link.
 
 ---
 
-## ACTIVE WORK (2026-06-03): Persuasion-grounded design reskin
+## ACTIVE WORK (2026-06-03, LATEST): PIVOT → Plan v2 (Venus Blush, luxury-editorial) — scoped to rrMVP/new pages
+
+Design direction pivoted to **Plan v2** — verbatim at `.context/PLAN-website-v2.md` (source:
+`~/Downloads/SIGMA_WEBSITE_PLAN_v2-2.md`). **Persuasion basis (THREAT/STATUS) UNCHANGED.**
+
+- **New brand system (v2 §2):** Venus Blush — warm-black `#2C2A28` + warm-white `#F5F0EA`,
+  dusty-rose `#C4897A` (CTA), sage `#7D9E82` (secondary). Type: Cormorant Garamond (display 300/700)
+  + Bricolage Grotesque (body) + JetBrains Mono (data). Register: luxury/editorial/refined
+  (Aman / Cereal / Monocle), restraint, one bold gesture per view. NEVER navy-on-white.
+- **SCOPE (for now):** v2 is a sandbox on **rrMVP / new pages** to evaluate the plugin workflow —
+  NOT a full-site reskin. The **existing site stays storm-authority** (committed). A premature
+  *global* Venus Blush token swap was **reverted** (`git checkout` of index.css / tailwind.config.ts /
+  index.html) so the live site isn't broken.
+- **Tooling:** installing **Superpowers** (`/superpowers:brainstorm`) + **frontend-design** plugins —
+  needs a **session restart** (Superpowers' session-start hook). GSAP installed; Framer Motion +
+  React Three Fiber already present. Community skills (impeccable / taste / ui-ux-pro-max) still active.
+- **rrMVP so far:** `/cascade` — 3D held-harmless triangle (THE-DOOR B.1), currently navy/gold +
+  spinning bloom; to be re-done in Venus Blush + dialed-down motion via the workflow.
+- **NEXT (after plugin install + restart):** run `/superpowers:brainstorm` on an rrMVP page; feed it
+  v2 + a topology wireframe + the §1 direction; let its Visual Companion run; then
+  `/frontend-design:frontend-design` builds it; multi-variant branch loop (v2 §4). Play with results.
+- **RESUME NOTE:** if the session restarts for the plugin install, this file +
+  `.context/PLAN-website-v2.md` + `BASIS-persuasion.md` hold everything. Just say
+  "resume the v2 rrMVP work."
+
+---
+
+## ACTIVE WORK (2026-06-03, earlier): Persuasion-grounded design reskin
 
 On branch `design-reskin` (NOT the auto-deploying `staging-mobile-fix`). Localhost-only,
 push only on explicit OK.

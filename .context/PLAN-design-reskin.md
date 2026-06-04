@@ -1,5 +1,9 @@
 # PLAN — Front-End Design Reskin (brand + tokens)
 
+> **SUPERSEDED for new pages (2026-06-03) by Plan v2** — `.context/PLAN-website-v2.md`
+> (Venus Blush / luxury-editorial). This storm-authority direction now applies ONLY to the
+> EXISTING site skin (committed on branch `design-reskin`). The persuasion basis is unchanged.
+
 Created: 2026-06-03 · Recovered from session `db0c07a5` (the logout cost it from the chat,
 not from disk). Full verbatim discussion: `.context/recovered-frontend-thread-2026-06-03.md`.
 

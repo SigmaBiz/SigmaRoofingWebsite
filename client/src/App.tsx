@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -18,6 +19,18 @@ import TornadoDamage from "@/pages/tornado-damage";
 import SocHub from "@/pages/sochub";
 import NotFound from "@/pages/not-found";
 
+// 3D experience page — lazy-loaded so Three.js stays out of the main/funnel bundle.
+const Cascade = lazy(() => import("@/pages/cascade"));
+const Cube = lazy(() => import("@/pages/cube"));
+const Scrub = lazy(() => import("@/pages/scrub"));
+const Showcase = lazy(() => import("@/pages/showcase"));
+const Scroller = lazy(() => import("@/pages/scroller"));
+const Grid = lazy(() => import("@/pages/grid"));
+const Transitions = lazy(() => import("@/pages/transitions"));
+const CityGrid = lazy(() => import("@/pages/citygrid"));
+const Roof = lazy(() => import("@/pages/roof"));
+const PullBack = lazy(() => import("@/pages/pullback"));
+
 function Router() {
   return (
     <Switch>
@@ -31,6 +44,56 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/social" component={SocHub} />
       <Route path="/google-photos-test" component={GooglePhotosTest} />
+      <Route path="/cascade">
+        <Suspense fallback={<div className="min-h-screen bg-[#0b1b30]" />}>
+          <Cascade />
+        </Suspense>
+      </Route>
+      <Route path="/cube">
+        <Suspense fallback={<div className="min-h-screen bg-[#F5F0EA]" />}>
+          <Cube />
+        </Suspense>
+      </Route>
+      <Route path="/scrub">
+        <Suspense fallback={<div className="min-h-screen bg-[#F5F0EA]" />}>
+          <Scrub />
+        </Suspense>
+      </Route>
+      <Route path="/showcase">
+        <Suspense fallback={<div className="min-h-screen bg-[#F5F0EA]" />}>
+          <Showcase />
+        </Suspense>
+      </Route>
+      <Route path="/scroller">
+        <Suspense fallback={<div className="min-h-screen bg-[#211F1D]" />}>
+          <Scroller />
+        </Suspense>
+      </Route>
+      <Route path="/grid">
+        <Suspense fallback={<div className="min-h-screen bg-[#0E1116]" />}>
+          <Grid />
+        </Suspense>
+      </Route>
+      <Route path="/transitions">
+        <Suspense fallback={<div className="min-h-screen bg-[#F5F0EA]" />}>
+          <Transitions />
+        </Suspense>
+      </Route>
+      <Route path="/citygrid">
+        <Suspense fallback={<div className="min-h-screen bg-[#F5F0EA]" />}>
+          <CityGrid />
+        </Suspense>
+      </Route>
+      <Route path="/roof">
+        <Suspense fallback={<div className="min-h-screen bg-[#E8D8C4]" />}>
+          <Roof />
+        </Suspense>
+      </Route>
+      <Route path="/pullback">
+        <Suspense fallback={<div className="min-h-screen bg-[#F5F0EA]" />}>
+          <PullBack />
+        </Suspense>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

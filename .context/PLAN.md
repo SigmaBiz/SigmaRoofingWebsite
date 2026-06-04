@@ -44,9 +44,26 @@
 
 ---
 
-## Priority 5: Persuasion-grounded design reskin — ACTIVE
-See `.context/PLAN-design-reskin.md`, `.context/BASIS-persuasion.md`, and the approved plan at
-`~/.claude/plans/resilient-exploring-raccoon.md`. On branch `design-reskin`.
+## Priority 5: Design — PIVOTED to Plan v2 (Venus Blush, luxury-editorial)
+
+**Canonical design plan:** `.context/PLAN-website-v2.md` (Venus Blush + Cormorant/Bricolage,
+luxury/editorial). Persuasion basis (THREAT/STATUS) unchanged — `.context/BASIS-persuasion.md`.
+
+- **Now:** v2 is a sandbox on **rrMVP / new pages** (trialing the Superpowers + frontend-design
+  plugin workflow). The **existing site stays storm-authority** (earlier reskin, committed on
+  branch `design-reskin`; its plan `.context/PLAN-design-reskin.md` is now historical/scoped to
+  the existing site).
+- **Build workflow (v2 §3-4):** topology wireframe → `/superpowers:brainstorm` (visual companion)
+  → `/frontend-design` → multi-variant branch loop. Needs the two plugins installed + a session
+  restart.
+- **Done so far:** persuasion basis + `sigma-design` skill; token-layer repair; storm-authority
+  skin (existing site, committed); community skills installed (impeccable/taste/ui-ux-pro-max);
+  GSAP installed; `/cascade` 3D rrMVP (navy/gold — to be redone in Venus Blush).
+- **Next:** install plugins → restart → brainstorm + build an rrMVP page in Venus Blush.
+- **Deferred:** Phase 4 hero rebuild (needs copy + photos + OK legal grounding); full-site v2 redo
+  (later). Photography is the ceiling (v2 §6) — real drone + detail job photos = highest leverage.
+
+**Resume session after restart:** `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`
 
 ## Priority Order
 Phase 2 items are independent — can do in any order. Facebook embed is ~30 min. Reviews/follows section is ~1 hr. Nav link is ~15 min.

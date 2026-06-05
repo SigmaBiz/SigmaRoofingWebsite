@@ -132,9 +132,10 @@ pre-flight checklist is `.context/ROOF-WORKING-MEMORY.md` — **read both before
 ### 🔖 CHECKPOINT (model handoff Opus → Sonnet, 2026-06-05)
 - **Conversation/session to revert to:** `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`
   (`~/.claude/projects/-Users-antoniomartinez-dev-SigmaRoofingWebsite/<id>.jsonl`).
-- **Code checkpoint commit:** see `git log` on branch `design-reskin` — the commit tagged
-  "CHECKPOINT (Opus→Sonnet)" captures solver2.ts + skins.tsx + all roof docs at this exact good state.
-  To restore: `git checkout <that-hash> -- client/src/lib/tr3 client/src/pages/skins.tsx .context`.
+- **Code checkpoint commit:** `b53b117` (full `b53b1179164b75a5d086c0d974bee7c24864671b`) on branch
+  `design-reskin`, tagged "CHECKPOINT (Opus→Sonnet)". Captures solver2.ts + skins.tsx + all roof docs
+  at this exact good state. To restore the roof state:
+  `git checkout b53b117 -- client/src/lib/tr3 client/src/pages/skins.tsx .context`.
 - Everything that produced KEPT results is in `ROOF-GEOMETRY-RULES.md`; the strays are quarantined in
   `ROOF-STRAYS.md`. If Sonnet's output regresses, revert to the commit + resume the session above.
 

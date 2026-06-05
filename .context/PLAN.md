@@ -90,8 +90,8 @@ Recreate a real EagleView roof from PRIMITIVES. Engine: `client/src/lib/tr3/solv
 - [ ] Data pipeline: pull real geometry via EagleView DXF/XML or Hover JSON (the `.ESX` is encrypted)
 
 ### 🔖 Checkpoint (Opus → Sonnet handoff, 2026-06-05)
-Session to revert to: `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`. Code checkpoint = the git commit on
-`design-reskin` tagged "CHECKPOINT (Opus→Sonnet)". See STATE.md → 🔖 CHECKPOINT for restore steps.
+Session to revert to: `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`. Code checkpoint = commit `b53b117` on
+`design-reskin` ("CHECKPOINT (Opus→Sonnet)"). See STATE.md → 🔖 CHECKPOINT for restore steps.
 
 ## Priority Order
 Phase 2 items are independent — can do in any order. Facebook embed is ~30 min. Reviews/follows section is ~1 hr. Nav link is ~15 min.

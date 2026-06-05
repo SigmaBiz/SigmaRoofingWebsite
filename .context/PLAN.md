@@ -65,5 +65,33 @@ luxury/editorial). Persuasion basis (THREAT/STATUS) unchanged — `.context/BASI
 
 **Resume session after restart:** `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`
 
+---
+
+## Priority 6: tr3 — 3D roof-generation engine (prim modeler) — ACTIVE
+
+Recreate a real EagleView roof from PRIMITIVES. Engine: `client/src/lib/tr3/solver2.ts`. Demo `/skins`.
+**Spec = `.context/ROOF-GEOMETRY-RULES.md` (canonical kept rules) + `ROOF-STRAYS.md` (what NOT to do) +
+`ROOF-WORKING-MEMORY.md` (pre-flight). Read all three before any roof work.**
+
+### Done + Antonio-approved (2026-06-05)
+- [x] Prim model = **max-of-tents** (host undisturbed; ext deleted where host taller)
+- [x] Hip + gable prims, ewidth, caps, inward **melt** (valley falls out of the max)
+- [x] **Coplanar / facet-K shared** (parallel spawn, hip host, no valley on that side)
+- [x] **Diminished slope** by rafter-fraction (8% example) — modest, melt stays generous
+- [x] **Walls eat roofs** — separate-region meshing + vertical **step-walls** (no bridge)
+- [x] **Crisp facets** — split triangles at exact plane-equality crease + analytic per-facet normals
+- [x] Reference build `buildDimHipGableExt` renders clean (hips/valleys/ridges sharp, gable wall, wall-eat)
+
+### Next (handed to Sonnet — one Z₁ case at a time, verify by screenshot)
+- [ ] #14 **Parallel-spawn / overhang** — ewidth endpoint past the host eave; overhang is a full prim
+- [ ] #15 **Dormer** — ext on a sub-prim, interface base above the host eave
+- [ ] #16 **Wing = ext-on-ext** — host is a sub-prim (recursion)
+- [ ] Faithful **Crestridge** recreation (EagleView 68324055: 4354 sqft, 12 facets, 8/12)
+- [ ] Data pipeline: pull real geometry via EagleView DXF/XML or Hover JSON (the `.ESX` is encrypted)
+
+### 🔖 Checkpoint (Opus → Sonnet handoff, 2026-06-05)
+Session to revert to: `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`. Code checkpoint = the git commit on
+`design-reskin` tagged "CHECKPOINT (Opus→Sonnet)". See STATE.md → 🔖 CHECKPOINT for restore steps.
+
 ## Priority Order
 Phase 2 items are independent — can do in any order. Facebook embed is ~30 min. Reviews/follows section is ~1 hr. Nav link is ~15 min.

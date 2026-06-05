@@ -1,6 +1,6 @@
 # STATE.md — Sigma Roofing Website
 
-Last updated: 2026-06-03
+Last updated: 2026-06-05
 
 ---
 
@@ -16,6 +16,7 @@ Last updated: 2026-06-03
 | SocHub Phase 1 | COMPLETE — deployed 2026-05-19 |
 | SocHub Phase 2 | COMPLETE — shipped in commit 532b0a1 (Facebook embeds, reviews/follows section, nav link) |
 | Design reskin (persuasion-grounded) | ACTIVE — see PLAN-design-reskin.md + BASIS-persuasion.md; on branch `design-reskin` |
+| tr3 roof engine (3D prim modeler) | ACTIVE (latest) — see below + `.context/ROOF-GEOMETRY-RULES.md`; on branch `design-reskin`, demo `/skins` |
 
 ---
 
@@ -103,7 +104,47 @@ reviews/follows CTA — verify it's wired to Antonio's real review link.
 
 ---
 
-## ACTIVE WORK (2026-06-03, LATEST): PIVOT → Plan v2 (Venus Blush, luxury-editorial) — scoped to rrMVP/new pages
+## ACTIVE WORK (2026-06-05, LATEST): tr3 — 3D roof-generation engine (prim modeler)
+
+Building a React-Three-Fiber roof generator from PRIMITIVES ("prims") to recreate a real EagleView
+roof. Training is iterative; the **authoritative spec is `.context/ROOF-GEOMETRY-RULES.md`** and the
+pre-flight checklist is `.context/ROOF-WORKING-MEMORY.md` — **read both before any roof prompt.**
+
+- **Engine:** `client/src/lib/tr3/solver2.ts`. Model = **MAX-OF-TENTS** (each prim a full, undisturbed
+  tent; roof = upper envelope; ext deleted where the host is taller). Demo: `/skins` (localhost:3000),
+  scroll drives a 4-stop camera; click switches the 6 skins.
+- **Current build:** `buildDimHipGableExt` — a **diminished central hip** + a **gable ext** at the +X
+  corner: facet K coplanar-shared with the hip end, facet A melting into the diminished facet I.
+  Geometry approved by Antonio ("got it right pretty much").
+- **Done + approved (2026-06-05):** (1) **walls-eat-roofs** — prims meshed as separate regions +
+  vertical **step-walls** so a raised/diminished eave stays a clean wall and the ext roof behind it is
+  deleted (fixed the "weave/bridge" at the facet-A interface). (2) **Diminish by rafter-fraction**:
+  `f_a` rafter ≈ **8% shorter** than `f_b` (was an over-aggressive raw eave-raise). Everything else held
+  constant (L14 W8 wallH2.6 pitch8/12 extA2 extLen5). Antonio: "got it right pretty much."
+- **Done + approved (2026-06-05):** **crisp creases** — replaced the averaged-normal heightfield with
+  **explicit flat facets** (each point = one active eave/slope plane; triangles split at the exact
+  plane-equality crossing = the crease; analytic per-facet normals). Hips, valleys, ridges are now
+  clean straight lines. Antonio approved.
+- **NEXT (handed to Sonnet):** #13 parallel-spawn / overhang → #14 dormer → #15 wing → faithful
+  Crestridge recreation. Read `ROOF-GEOMETRY-RULES.md` (canonical kept rules) + `ROOF-STRAYS.md`
+  (what NOT to do) + `ROOF-WORKING-MEMORY.md` (pre-flight) before touching `client/src/lib/tr3/`.
+
+### 🔖 CHECKPOINT (model handoff Opus → Sonnet, 2026-06-05)
+- **Conversation/session to revert to:** `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`
+  (`~/.claude/projects/-Users-antoniomartinez-dev-SigmaRoofingWebsite/<id>.jsonl`).
+- **Code checkpoint commit:** see `git log` on branch `design-reskin` — the commit tagged
+  "CHECKPOINT (Opus→Sonnet)" captures solver2.ts + skins.tsx + all roof docs at this exact good state.
+  To restore: `git checkout <that-hash> -- client/src/lib/tr3 client/src/pages/skins.tsx .context`.
+- Everything that produced KEPT results is in `ROOF-GEOMETRY-RULES.md`; the strays are quarantined in
+  `ROOF-STRAYS.md`. If Sonnet's output regresses, revert to the commit + resume the session above.
+
+- **Dead-ends** now live in `ROOF-STRAYS.md` (the quarantined "strayed" batch), separate from the clean rules.
+- **Data pipeline:** EagleView report 68324055 (4354 sqft, 12 facets, 8/12, Crestridge Dr). Xactimate
+  `.ESX` is **encrypted** — use EagleView DXF/XML or Hover JSON, NOT the ESX. Keep claim PII local.
+
+---
+
+## ACTIVE WORK (2026-06-03): PIVOT → Plan v2 (Venus Blush, luxury-editorial) — scoped to rrMVP/new pages
 
 Design direction pivoted to **Plan v2** — verbatim at `.context/PLAN-website-v2.md` (source:
 `~/Downloads/SIGMA_WEBSITE_PLAN_v2-2.md`). **Persuasion basis (THREAT/STATUS) UNCHANGED.**

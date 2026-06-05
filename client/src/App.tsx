@@ -30,6 +30,9 @@ const Transitions = lazy(() => import("@/pages/transitions"));
 const CityGrid = lazy(() => import("@/pages/citygrid"));
 const Roof = lazy(() => import("@/pages/roof"));
 const PullBack = lazy(() => import("@/pages/pullback"));
+const Scene3D = lazy(() => import("@/pages/scene3d"));
+const Zelda = lazy(() => import("@/pages/zelda"));
+const Skins = lazy(() => import("@/pages/skins"));
 
 function Router() {
   return (
@@ -92,6 +95,21 @@ function Router() {
       <Route path="/pullback">
         <Suspense fallback={<div className="min-h-screen bg-[#F5F0EA]" />}>
           <PullBack />
+        </Suspense>
+      </Route>
+      <Route path="/scene3d">
+        <Suspense fallback={<div className="min-h-screen bg-[#EAE2D2]" />}>
+          <Scene3D />
+        </Suspense>
+      </Route>
+      <Route path="/zelda">
+        <Suspense fallback={<div className="min-h-screen bg-[#97CDEC]" />}>
+          <Zelda />
+        </Suspense>
+      </Route>
+      <Route path="/skins">
+        <Suspense fallback={<div className="min-h-screen bg-[#15171c]" />}>
+          <Skins />
         </Suspense>
       </Route>
       <Route component={NotFound} />

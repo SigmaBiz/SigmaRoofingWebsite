@@ -537,6 +537,125 @@ function facetLabels(sample: Tent, idName: Record<number, string>, x0: number, x
   return out;
 }
 
+// ---- ANALYTIC FACET-MAP (pristine, resolution-independent) ------------------------------------
+// Each tent = {planeIds, support RECT}. A facet (plane P in tent T) is the EXACT polygon:
+//   base = T.rect ∩ ⋂_{Q∈T}{P ≤ Q}   (P's lower-envelope cell — convex, via half-plane clipping)
+//   minus, for every OTHER tent U, the region where U strictly wins: U.rect ∩ ⋂_{q∈U}{P < U_q}.
+// Facet P (clipped by {P≤Q}) and facet Q (by {Q≤P}) share the EXACT crease line; valleys are shared at
+// ties; triple points are exact half-plane intersections ⇒ NO gaps/slivers/seams at ANY zoom.
+interface TentSpec {
+  ids: number[];
+  rect: Rect;
+}
+function meshFromTentsExact(tents: TentSpec[], planes: Plane[], boundary: Pt[], wallH: number, tile = 2.2): PrimRoof {
+  const EPS = 1e-7;
+  // clip convex polygon to { val(p) ≤ 0 } (val linear). Returns the clipped (still convex) polygon.
+  const clipHalf = (poly: Pt[], val: (p: Pt) => number): Pt[] => {
+    const out: Pt[] = [],
+      n = poly.length;
+    for (let i = 0; i < n; i++) {
+      const A = poly[i],
+        B = poly[(i + 1) % n],
+        va = val(A),
+        vb = val(B);
+      if (va <= EPS) out.push(A);
+      if ((va < -EPS && vb > EPS) || (va > EPS && vb < -EPS)) {
+        const t = va / (va - vb);
+        out.push([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t]);
+      }
+    }
+    return out;
+  };
+  const rectPoly = (r: Rect): Pt[] => [[r.x0, r.z0], [r.x1, r.z0], [r.x1, r.z1], [r.x0, r.z1]];
+  const hP = (id: number, p: Pt) => planes[id].h(p[0], p[1]);
+
+  const rpos: number[] = [],
+    rnrm: number[] = [],
+    ruv: number[] = [];
+  let apex = wallH;
+  const emitFacet = (id: number, poly: Pt[]) => {
+    if (poly.length < 3) return;
+    const P = planes[id],
+      u = rot90(P.up);
+    for (let i = 1; i + 1 < poly.length; i++) {
+      for (const p of [poly[0], poly[i], poly[i + 1]]) {
+        const y = P.h(p[0], p[1]);
+        apex = Math.max(apex, y);
+        rpos.push(p[0], y, p[1]);
+        rnrm.push(P.nrm[0], P.nrm[1], P.nrm[2]);
+        ruv.push(dot(p, u) / tile, dot(p, P.up) / tile);
+      }
+    }
+  };
+
+  for (const T of tents) {
+    for (const P of T.ids) {
+      let base = rectPoly(T.rect);
+      for (const Q of T.ids) if (Q !== P) base = clipHalf(base, (p) => hP(P, p) - hP(Q, p));
+      if (base.length < 3) continue;
+      let pieces: Pt[][] = [base];
+      for (const U of tents) {
+        if (U === T) continue;
+        // B = the convex region where U strictly wins over P: U.rect ∩ ⋂_q {P < U_q}
+        const cons: ((p: Pt) => number)[] = [
+          (p) => U.rect.x0 - p[0],
+          (p) => p[0] - U.rect.x1,
+          (p) => U.rect.z0 - p[1],
+          (p) => p[1] - U.rect.z1,
+          ...U.ids.map((q) => (p: Pt) => hP(P, p) - hP(q, p)),
+        ];
+        const next: Pt[][] = [];
+        for (const piece of pieces) {
+          // piece \ B = ⋃_k ( piece ∩ {cons_k ≥ 0} ∩ ⋂_{j<k} {cons_j < 0} )
+          let remaining = piece;
+          for (const ck of cons) {
+            const outside = clipHalf(remaining, (p) => -ck(p)); // where cons_k ≥ 0 ⇒ outside B
+            if (outside.length >= 3) next.push(outside);
+            remaining = clipHalf(remaining, ck); // keep the part still inside cons_k
+            if (remaining.length < 3) break;
+          }
+          // `remaining` (inside ALL cons ⇒ inside B, i.e. U wins) is discarded
+        }
+        pieces = next;
+        if (!pieces.length) break;
+      }
+      for (const piece of pieces) emitFacet(P, piece);
+    }
+  }
+
+  // heightfield sampler (for the walls) = the same max-of-(min-over-tent) the facets came from
+  const sampleH = (x: number, z: number) => {
+    let best = -Infinity;
+    for (const T of tents) {
+      if (x < T.rect.x0 - 1e-6 || x > T.rect.x1 + 1e-6 || z < T.rect.z0 - 1e-6 || z > T.rect.z1 + 1e-6) continue;
+      let mn = Infinity;
+      for (const id of T.ids) mn = Math.min(mn, planes[id].h(x, z));
+      best = Math.max(best, mn);
+    }
+    return isFinite(best) ? best : wallH;
+  };
+  const wpos: number[] = [],
+    wuv: number[] = [];
+  const Sg = 24;
+  for (let i = 0; i < boundary.length; i++) {
+    const a = boundary[i],
+      b = boundary[(i + 1) % boundary.length];
+    for (let s = 0; s < Sg; s++) {
+      const pa: Pt = [a[0] + ((b[0] - a[0]) * s) / Sg, a[1] + ((b[1] - a[1]) * s) / Sg];
+      const pb: Pt = [a[0] + ((b[0] - a[0]) * (s + 1)) / Sg, a[1] + ((b[1] - a[1]) * (s + 1)) / Sg];
+      const ya = sampleH(pa[0], pa[1]),
+        yb = sampleH(pb[0], pb[1]);
+      wpos.push(pa[0], 0, pa[1], pb[0], 0, pb[1], pb[0], yb, pb[1], pa[0], 0, pa[1], pb[0], yb, pb[1], pa[0], ya, pa[1]);
+      wuv.push(0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1);
+    }
+  }
+  const roof = new THREE.BufferGeometry();
+  roof.setAttribute("position", new THREE.Float32BufferAttribute(rpos, 3));
+  roof.setAttribute("normal", new THREE.Float32BufferAttribute(rnrm, 3));
+  roof.setAttribute("uv", new THREE.Float32BufferAttribute(ruv, 2));
+  return { roof, walls: geomOf(wpos, wuv), apex };
+}
+
 // CRESTRIDGE reconstruction (19428 Crestridge Dr, EagleView 68324055). Built prim-by-prim from
 // Antonio's decomposition (p1 central hip + p2 north half-hip + p4/p3 SE + p5/p6 SW). One shared plane
 // table, composed by MAX-OF-TENTS. Proportional dims first (validate topology), then refine to feet.
@@ -599,7 +718,7 @@ export function buildCrestridge(): LabeledRoof {
   const p3 = minTent([6, 7, 8], planes, inP3); // SE EXT half-hip: G(west, coplanar p4) + E(east overhang) + D(hip-end)
   const p5 = minTent([0, 10, 11], planes, inP5); // SW SUB: K(west, coplanar p1) + B(east) + C(south hip-end)
   const p6 = minTent([0, 9], planes, inP6); // SW EXT gable: K(west, coplanar p1) + A(east, melds into I)
-  const sample = maxTents([p1, p2, p4, p5, p3, p6]); // hierarchy order: main → subs → exts
+  const sample = maxTents([p1, p2, p4, p5, p3, p6]); // hierarchy order: main → subs → exts (for the labels)
   const boundary = unionRects([
     { x0: -Wx, x1: Wx, z0: -Wz, z1: Wz }, // p1
     { x0: p2W, x1: Wx, z0: Wz, z1: p2N }, // p2 (north)
@@ -607,12 +726,18 @@ export function buildCrestridge(): LabeledRoof {
     { x0: Wx, x1: seE, z0: -Wz, z1: zDEave }, // SE overhang
     { x0: swW, x1: swE, z0: zSwS, z1: -Wz }, // SW south band
   ]);
-  // mesh the WHOLE union footprint as ONE region — the crease-splitter handles every internal facet
-  // boundary, so there are NO inter-region T-junction seams (Crestridge has no vertical step-walls).
-  const regions: Pt[][] = [boundary];
+  // ANALYTIC FACET-MAP: each tent = {planeIds, support RECT}. Rects MUST match the in* support bounds.
+  const tents: TentSpec[] = [
+    { ids: [0, 1, 2, 3], rect: { x0: -Wx, x1: Wx, z0: -Wz, z1: Wz } }, // p1
+    { ids: [1, 4, 5], rect: { x0: p2W, x1: Wx, z0: 0, z1: p2N } }, // p2
+    { ids: [1, 6], rect: { x0: seW, x1: Wx, z0: zSeS, z1: -8 } }, // p4 (SE sub)
+    { ids: [6, 7, 8], rect: { x0: seW, x1: seE, z0: zSeS, z1: zDEave } }, // p3 (SE half-hip)
+    { ids: [0, 10, 11], rect: { x0: swW, x1: swE, z0: zSwS, z1: -16 } }, // p5 (SW sub)
+    { ids: [0, 9], rect: { x0: swW, x1: -16, z0: zSwS, z1: -16 } }, // p6 (SW gable)
+  ];
   const idName: Record<number, string> = { 0: "K", 1: "L", 2: "F", 3: "I", 4: "H", 5: "J", 6: "G", 7: "E", 8: "D", 9: "A", 10: "B", 11: "C" };
   const labels = facetLabels(sample, idName, -Wx, seE, zSeS, p2N);
-  return { ...meshFromTents(regions, boundary, [], sample, planes, wallH), labels };
+  return { ...meshFromTentsExact(tents, planes, boundary, wallH), labels };
 }
 
 // ---- prim driver -------------------------------------------------------------------------------

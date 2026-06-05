@@ -219,7 +219,21 @@ pre-flight checklist is `.context/ROOF-WORKING-MEMORY.md` — **read both before
   - 🔖 **GIT CHECKPOINT (2026-06-05, before the analytic rewrite):** the clean grid-mesh Crestridge
     reconstruction is committed on `design-reskin` (commit msg "CHECKPOINT: Crestridge full reconstruction
     …"). If the analytic facet-map bugs out, revert to it. See `git log`.
-  - [ ] **STAGE 7 (IN PROGRESS): replace the grid mesher with an ANALYTIC FACET-MAP.** Plan: each tent =
+  - [x] **STAGE 7 DONE — ANALYTIC FACET-MAP is PRISTINE.** `meshFromTentsExact(tents, planes, boundary,
+    wallH)`: each facet = `tent.rect ∩ ⋂{P≤Q}` minus where other tents win (convex half-plane clipping +
+    subtraction), fan-triangulated. **ALL wing-junction slivers + the central-convergence notch are GONE**
+    (verified by tight crops); facets meet at exact points; razor-sharp at high zoom (resolution-
+    INDEPENDENT — exact polygons, not grid-sampled). `buildCrestridge` now calls it (grid `meshFromTents`
+    kept for `buildDimHipGableExt`/`buildHalfHipOverhang`). Walls reuse the boundary+sampleH path.
+    **The Crestridge roof is now production-pristine** — ready for the build-phase layering (laps/components).
+  - [ ] **STAGE 8 (IN PROGRESS): cinematic SHOT SEQUENCE on the PLAN view** (Antonio). Scroll-driven:
+    (1) **DRONE OVERHEAD** (high bird's-eye, roof small) → (2) **DROP DOWN** (camera descends, roof grows to
+    fill the frame) → (3) **HERO ROTATE** (house/camera rotates to a ¾ aerial angle — see the whole roof in
+    3-D glory, like the Google-Earth drone reference shots) → (4) settle **BACK TO OVERHEAD** (the working
+    north-up view for designing skins). Refer to the **shot-list file** for camera+object action specs
+    (EWS/MS/MCU etc.). Needs the PLAN camera to become scroll-driven (interpolate position + up-vector +
+    target; up=(0,0,1) for top-down ↔ (0,1,0) for the ¾ tilt). Then resume skin design at the overhead.
+  - **(STAGE 7 plan, for reference):** replace the grid mesher with an ANALYTIC FACET-MAP. Plan: each tent =
     {planeIds, supportRect}; for each (facet P, tent T) → base = footprint ∩ supportRect ∩ ⋂_{Q∈T}{P≤Q}
     (convex, via half-plane clip); then SUBTRACT each other tent U's winning region {∀q: P<U_q} (convex
     bite) → P's exact polygon pieces; triangulate (fan). Coplanar-shared P (e.g. L in p1/p2/p4) = union of

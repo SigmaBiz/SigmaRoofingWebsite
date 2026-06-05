@@ -125,9 +125,124 @@ pre-flight checklist is `.context/ROOF-WORKING-MEMORY.md` — **read both before
   **explicit flat facets** (each point = one active eave/slope plane; triangles split at the exact
   plane-equality crossing = the crease; analytic per-facet normals). Hips, valleys, ridges are now
   clean straight lines. Antonio approved.
-- **NEXT (handed to Sonnet):** #13 parallel-spawn / overhang → #14 dormer → #15 wing → faithful
-  Crestridge recreation. Read `ROOF-GEOMETRY-RULES.md` (canonical kept rules) + `ROOF-STRAYS.md`
-  (what NOT to do) + `ROOF-WORKING-MEMORY.md` (pre-flight) before touching `client/src/lib/tr3/`.
+- **Sonnet handoff REVERTED (2026-06-05):** tried Sonnet for the overhang; it produced a broken
+  detached-ext render. Reverted code to checkpoint `b53b117` (docs kept — they had the hash pins).
+  Back on **Opus 4.8**. Sonnet's `buildOverhangExt` discarded (it set the ext support/regions so the
+  overhang floated detached instead of melding into the host hip-end). Logged as a dead-end.
+
+- **DONE + approved (2026-06-05): the SE "wing" — HALF-HIP + OVERHANG off a gable** (`buildHalfHipOverhang`).
+  Antonio: "excellent job." Verified in render: G coplanar (one continuous slope), E overhangs (wall
+  step), hip-end D, hha ridge > sub ridge, and the **ridge↔hip continuity holds** (sub ridge flows into
+  the D–G hip — confirmed analytically at (0,−S) and visually). Small triple-point notch at the junction
+  (cosmetic, can clean). Built in isolation WITHOUT the central (sub's +Z end is a gable-wall stub).
+  Structure of the SE wing it models:
+  - **Central main hip** = facets **I / L / F / K**.
+  - **Sub prim** (a connector GABLE) = facets **G / L**; **L shared/coplanar with central** (the
+    sub↔central meld is the SAME as the done `buildDimHipGableExt` pattern — already solved).
+  - **Ext' of the sub = a HALF-HIP ("hha")** = facets **G / E / D**; **G shared/coplanar with the sub**.
+    NEW work = meld hha to the sub.
+  - **HALF-HIP def:** a whole hip cut perpendicular to its ridge → either side is a half-hip. It has a
+    **direction vector** (tail at the cut, head pointing toward the hip-end). "hha points at the sub" ⇒
+    its hip-end (D) faces the sub.
+  - **OVERHANG (general, off a gable host):** the ext's two ewidth "sloped lines" (valley lines) — **one
+    starts INSIDE the host gable's SPAN** (= gable-end base) **and one OUTSIDE**; they connect into a
+    prim. The outside part overhangs. **This special case:** one sloped line (facet **G**) is **coplanar**
+    with the sub (no valley there); the other (facet **E**) overhangs past the sub's span. hha's ridge is
+    HIGHER than the sub's (hha is wider). **Level eaves** with everything hha touches (simplifies it).
+  - **Conjecture to verify:** when a gable + hip share a coplanar facet, the gable RIDGE and the hip's
+    hip-line (off the coplanar slope, i.e. the D–G hip) **connect continuously** (one unbroken pencil
+    line) — a ridge↔hip transition. Check it holds in the render.
+  - **Parked simplification:** the lower-left ext (A) actually melds onto an intermediate sub (B/C/K),
+    not directly into facet I — ignore for now; same principles.
+- **NOW (in progress): RECONSTRUCT the Crestridge roof from the prim decomposition Antonio gave.**
+  **Measurements are on disk** — `~/Downloads/68324055.PDF` (EagleView). Per-facet areas (A→L,
+  smallest→largest): A45 B59 C101 D123 E301 F326 G349 H365 I429 J478 K742 L1036 sqft. **All pitch 8/12.**
+  Skeleton (length diagram p.4): Ridges 58 Hips 191 Valleys 87 Rakes 58 Eaves 252 ft, all segments
+  dimensioned. Render diagrams: `pdftoppm -f 5 -l 8 -r 160 -png <pdf> /tmp/ev` (file pp.5-8 = report
+  Length/Pitch/Area/Notes; +1 page offset).
+
+  **DEGENERATION (Antonio's new lexicon):** a facet is *degenerated* when an ext has **spawned** from it
+  OR it's been **diminished** — i.e. its NATURAL prim shape is altered. Natural hip = 2 isosceles
+  trapezoids at a ridge + 2 opposing end-triangles (symmetric); natural gable = 2 rectangles at a ridge.
+  Hierarchy: **mains override subs override exts** (a sub outranks an ext; a sub is named ext-of-the-sub,
+  not host-of-the-deeper-ext).
+
+  **THE DECOMPOSITION (p1–p6, all 12 facets):**
+  - **p1** = central **HIP**, facets **I/L/F/K**. I is **diminished**. **CONFIRMED (Antonio) orientation:
+    ridge N-S** (p1 is the dominant 2533-sqft mass; K=W side, L=E side are the long trapezoids; F=N end,
+    I=S end the triangles, **I diminished/south**). **L is the big coplanar EAST face** (1036 sqft) shared
+    & extended down the whole east side by p2 (N) and p4 (SE). Built: `buildCrestridge()` STAGE 1, looks good.
+  - **p2** = **half-hip** `H/J/L` (J=hip-end). Shares L coplanar with p1. North. Spawns from p1.
+  - **p4** = **gable SUB** `G/L` (L shared w/ p1). Spawns from p1.
+  - **p3** = **half-hip** `G/E/D` (G shared w/ p4). Spawns from **p4** (the SE wing = our
+    `buildHalfHipOverhang` pattern). 
+  - **p5** = **sub** `C/B/K` (K coplanar w/ p1, extends from I). Spawns from p1.
+  - **p6** = gable `A/K` (K coplanar w/ p1). Extends from sub **p5**; host p1.
+  - **Recursion present:** p3←p4←p1 and p6←p5←p1 (ext-on-ext / sub-as-host).
+
+  **PLAN / STAGES** (`buildCrestridge()`, one shared plane table + max-of-tents, verify each by screenshot):
+  - **VERIFICATION TOOL (done):** `/skins` **PLAN mode** (default on; toggle "PLAN" button) — flat
+    labeled facets (A–L at centroids via `buildCrestridge().labels`) + a compass matching EagleView
+    (N up-right ~30°) + a NORTH-UP top-down (camera up=+Z; plan group scaled x=−1 to un-mirror so
+    east=right/west=left). Screenshots now overlay-compare directly to the EagleView notes diagram.
+  - [x] **STAGE 1: p1** central hip, I diminished. **RIDGE CORRECTED N-S → E-W** during STAGE 5: the
+    grounded footprint is ~52 E-W × ~46 N-S (long axis E-W) ⇒ ridge E-W, length 52−46 = **6 = the "+6"**.
+    My earlier "area logic" (K/L biggest ⇒ N-S sides) was wrong — L/K are big because they're the
+    coplanar faces EXTENDED by the wings (degeneration), not because p1 is long N-S. Proportions caught it.
+  - [x] **STAGE 5 (p1+p2 portion): proportions grounded in feet.** Wx=26 Wz=23 (52×46, ridge=+6),
+    p2 west eave −14 (the 12-ft step from K@−26), J north eave +37 (40 wide). PLAN view now overlays the
+    EagleView central+north correctly (J/H/F/K/L/I placed right). Proportions no longer a verification scapegoat.
+  - [ ] **STAGE 2: +p2** north half-hip (J hip-end, ridge N-S ⟂… actually ‖ p1's, shares L coplanar east).
+  - [x] **STAGE 3: +p4/p3** SE wing DONE. p4 (gable sub, min(G,L) — L coplanar p1, G coplanar p3) built
+    in hierarchy order BEFORE p3 (half-hip G/E/D); the recursion p3←p4←p1 renders clean. **Lessons:**
+    (a) build main→sub→ext, never skip a level — an ext is defined relative to its host; junction artifacts
+    = an undefined connection, not an engine bug. (b) a prim's visible footprint can be **non-rectangular**
+    (spawn+overhang ⇒ L-shape) — **mesh the FULL footprint**; truncation = an unmeshed sub-region (STRAYS
+    S10). The 3 defined degenerations: **melt/spawn, diminish, half-hip** (truncation is NOT one). SE facet
+    `D/E/G` render full. Build order in code: `maxTents([p1, p2, p4, p3])`; regions include the SE overhang.
+  - [x] **STAGE 4: +p5/p6** SW DONE + **Antonio "spot on"**. p5 (sub, min(K,B,C)) built before p6 (gable,
+    min(K,A)); both coplanar w/ p1 at K (west), meld into diminished I. **ALL 12 FACETS A–L now render**
+    in the right places — first complete reconstruction (6 prims, hierarchy order maxTents([p1,p2,p4,p5,p3,p6])).
+  - [x] **STAGE 5: PROPORTIONS tuned to eps=1ft.** Measured dims now Δ0: p1 52×46 (ridge +6), "12" step,
+    "40" J eave, p2 wing 15, SE gable 34, SE east eave 25, "+9" overhang 9. Left (per eps rule, don't tune
+    if it risks structure): SW exact feet (approved "spot on"), SE west-eave asymmetry (23 vs 25, Δ2).
+  - [x] **STAGE 6: ARTIFACTS chased** — major ones GONE (center "+6" convergence clean). Fixes (mesh-quality,
+    not model): **triple-point tiling** (exact 3-plane point → 3 wedges) + **single-region mesh**
+    (`regions=[boundary]`, killed T-junction seam cracks) + **R=40**.
+  - **RESIDUAL DIAGNOSIS (important):** 2 sub-mm slivers at the SE/SW wing **reflex footprint corners**
+    (where an overhang juts out concavely and a thin host-facet sliver pinches into the corner). **Verified
+    via a facet-map debug print: the active-id SURFACE is mathematically CLEAN (perfect L/D/E bands, no
+    degenerate islands) — the slivers are PURELY a grid-mesh limitation** (per-triangle crease-split drops
+    sub-grid slivers at reflex corners). Tried & REVERTED: adaptive hidden-facet refinement (R=20+recursion)
+    — made it WORSE (more reflex-corner slivers + T-junctions). **The per-triangle grid mesher has hit its
+    ceiling.**
+  - 🔖 **GIT CHECKPOINT (2026-06-05, before the analytic rewrite):** the clean grid-mesh Crestridge
+    reconstruction is committed on `design-reskin` (commit msg "CHECKPOINT: Crestridge full reconstruction
+    …"). If the analytic facet-map bugs out, revert to it. See `git log`.
+  - [ ] **STAGE 7 (IN PROGRESS): replace the grid mesher with an ANALYTIC FACET-MAP.** Plan: each tent =
+    {planeIds, supportRect}; for each (facet P, tent T) → base = footprint ∩ supportRect ∩ ⋂_{Q∈T}{P≤Q}
+    (convex, via half-plane clip); then SUBTRACT each other tent U's winning region {∀q: P<U_q} (convex
+    bite) → P's exact polygon pieces; triangulate (fan). Coplanar-shared P (e.g. L in p1/p2/p4) = union of
+    its per-tent pieces (they tile, share edges exactly). Gap-free/seam-free/resolution-independent because
+    facet P (clipped by {P≤Q}) and facet Q (clipped by {Q≤P}) share the EXACT crease line; triple points =
+    exact half-plane intersections. Keep the WALLS from the existing `meshFromTents` path; replace only the
+    roof half. **Revert to the checkpoint if it misbehaves.**
+  - **(historical STAGE 5 note): TUNE PROPORTIONS to within eps = 1 ft.** **SCALE: model units ARE feet**
+    (Wx=26⇒52ft, "12" step=12u, "+9"=9u) ⇒ eps = 1 unit. **eps RULE (Antonio):** structure is correct &
+    proportions aren't causing structural problems, so tune each dim to within 1 ft of the EagleView length
+    diagram — BUT only if it doesn't cause/risk structural issues. (If a feature causes structural issues →
+    attack it; if tuning a safe feature stays safe → do it to within eps.) Length-diagram feet: top 40, W 48,
+    E 55, NW step 12 (+ "15"), hips 31/31/36/22/13/21, valleys 31/18/18/15/7, ridges 15/+6/+9/7/11, SE
+    23/25/17+17/+9, SW 12/12, center 10. Then verify PLAN overlay + no new artifacts.
+  - [ ] **STAGE 5 (DO NEXT, reordered per Antonio): GROUND THE PROPORTIONS in EagleView feet** for the
+    p1+p2 scaffold *before* adding wings. **Why:** proportions are NOT a trivial final scaling — if they're
+    off, a wing mismatch can't be attributed (concept failure vs. scaling artifact). Get them "close
+    enough" that proportions can't be blamed for a verification failure, so each stage is signal not noise.
+    Extract the footprint polygon + node coords from the length diagram (`/tmp/ev-05.png`; lengths: top
+    eave 40, W eave 48, E eave 55, the 15+12 NW step, hips 31/31/36, ridges 15/+6/+9, SW rakes 12/12, SE
+    rakes 17/17, eaves 23/10/25). Verify p1+p2 in PLAN mode overlays the plan's central+north to scale.
+  - **THEN** STAGE 3 (SE wing p4/p3, the recursion) → STAGE 4 (SW p5/p6). No TRUE model gap spotted yet.
+  Main risks: dense central convergence (+6 node) + the recursion. Read RULES + STRAYS + WORKING-MEMORY.
 
 ### 🔖 CHECKPOINT (model handoff Opus → Sonnet, 2026-06-05)
 - **Conversation/session to revert to:** `db0c07a5-4417-4b49-b4ee-c25ebc7eb5d5`
@@ -142,6 +257,18 @@ pre-flight checklist is `.context/ROOF-WORKING-MEMORY.md` — **read both before
 - **Dead-ends** now live in `ROOF-STRAYS.md` (the quarantined "strayed" batch), separate from the clean rules.
 - **Data pipeline:** EagleView report 68324055 (4354 sqft, 12 facets, 8/12, Crestridge Dr). Xactimate
   `.ESX` is **encrypted** — use EagleView DXF/XML or Hover JSON, NOT the ESX. Keep claim PII local.
+
+### tr3 PRODUCT VISION (Antonio, 2026-06-05) — why pristine matters
+The roof is the centerpiece of a **scroll-driven experience seen by millions**; as you scroll, the roof
+**graduates in phase with the real ROOF-CLAIM PROCESS** (the current skin-switcher becomes phase-switcher):
+1. **INSPECT** — roof shown with **test squares** (chalk marks marking hail damage / damaged components).
+2. **ADJUSTMENT** — "the approved insurance SCOPE includes the roof diagram" (≈ this faithful PLAN/3-D view).
+3. **BUILD** → **tear-off** → **underlayment** → **finished roof** (each phase = its own roof-layout visual +
+   action + camera move). Underlayment phase shows **synthetic underlayment laps**, branded: **GAF WeatherWatch
+   ice barrier on the eaves (signature blue look)** + **GAF synthetic underlayment on the field**, plus generic
+   components — **pipes w/ pipe jacks, gas vents, a generic chimney**.
+→ **Implication: the geometry must be SPECKLESS & PRISTINE, resolution-independent** (laps/components will be
+   layered on it; "small enough" is not enough). Tackle artifacts to **ZERO**, not "sub-mm."
 
 ---
 

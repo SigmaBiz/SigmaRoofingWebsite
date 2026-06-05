@@ -63,6 +63,39 @@ said, not what was meant) · **belief** (rested on a false assumption about the 
   *(Lesson: when facet letters conflict, restate the geometry — which slope is coplanar, which forms the
   valley — and confirm before building.)*
 
+## S8 — Sonnet's detached overhang ext  *(model error)* — reverted
+- **What happened:** on the Opus→Sonnet handoff, Sonnet attempted `buildOverhangExt` (hip host + ext
+  whose ewidth straddles the +X corner). The ext rendered as a **disconnected floating object**, not
+  melding into the host's perpendicular hip-end. Even after extending the support inward to the apex
+  depth it stayed detached (top-down showed a separate island).
+- **Why it's wrong:** the ext tent's support/region setup didn't let the max blend it into the host —
+  the overhang strip was meshed/sampled as its own thing instead of the host winning where it's taller.
+- **Resolution:** reverted to checkpoint `b53b117`, back on Opus. Overhang to be re-derived carefully
+  in isolation (half-hip primitive first, then the coplanar/overhang interface), verifying each step.
+
+## S9 — Ridge orientation from facet AREA  *(belief error)* — caught by grounding proportions
+- **What I did:** inferred p1's ridge runs N-S because its biggest facets (K=742, L=1036) "must be the
+  long sides." Built p1 long-N-S; Antonio said "looks good" (loosely) and I almost built all wings on it.
+- **Why it's wrong / the disagreement:** when I grounded the footprint in EagleView feet, p1's core is
+  ~52 E-W × ~46 N-S ⇒ **long axis is E-W ⇒ ridge E-W**, length 52−46 = **6 = the "+6" ridge** in the
+  diagram. K/L are big NOT because p1 is long N-S, but because they're the **coplanar faces EXTENDED by
+  the wings (degeneration)** — L is the whole east face (p1+p2+p4), K the whole west face (p1+p5/p6).
+- **Correction (now canon):** **infer ridge orientation from the FOOTPRINT rectangle (long axis) and the
+  ridge segments in the length diagram — NOT from facet areas**, which degeneration inflates. And: ground
+  proportions in real measurements *before* composing dependent prims (STRAYS meta-lesson + WORKING-MEMORY).
+
+## S10 — Truncated half-hip (facets D & E missing a chunk)  *(model/intent error)* — the L-footprint
+- **What I did:** meshed the SE wing's footprint as a simple rectangle (the south band, z ≤ −23) plus the
+  p1 region (x ≤ 26). The wing **overhangs p1 east AND spawns from sub p4**, so its *visible footprint is
+  L-shaped* — the south band **+ an overhang corner** poking east past p1 (x 26–35, z −23 to −12).
+- **Why it's wrong:** that overhang corner was in **no mesh region** → an unmeshed hole → facet **D**'s
+  eave and the top of **E** were **truncated** (clipped at the region edge, hip-line cut short). Antonio:
+  "facet D doesn't extend down to its eave… truncation is not a defined degeneration."
+- **Correction (now canon):** a prim's **visible footprint can be non-rectangular** (spawn + overhang ⇒
+  L-shape). **Mesh the FULL footprint of every prim** (all regions of the union), never assume a rect.
+  Truncation/clipping of a facet = an **unmeshed sub-region**, not a defined degeneration. (Defined
+  degenerations: melt/spawn, diminish, half-hip. Truncation is NOT one.)
+
 ---
 
 ### Meta-lesson (why these happened)

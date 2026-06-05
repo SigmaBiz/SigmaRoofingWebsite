@@ -26,6 +26,14 @@
    victory — ask Antonio to confirm.
 
 ## Standing reminders / dead-ends (don't repeat)
+- **BUILD ORDER = HIERARCHY (main → sub → ext); never skip a level (Antonio).** An ext is defined
+  relative to its host, so the host must exist first (p3 spawns from sub p4, not from main p1). **Junction
+  artifacts = an UNDEFINED connection (missing host / ungeneralized connection type), NOT an engine bug**
+  — you're using the model outside its limits. Add the missing host or define the connection.
+- **Proportions are NOT a trivial final scaling (Antonio).** When reconstructing a real roof, ground the
+  dimensions in the actual measurements EARLY — before adding more prims. If proportions are off, a
+  mismatch can't be diagnosed (real concept error vs. scaling artifact). Get them "close enough" that
+  proportions can't be blamed for a verification failure → each stage reads as signal, not noise.
 - **Do NOT resurrect the global lower-envelope-of-eaves** — it CUTS the host (model error, rejected).
   A single prim's own min-of-4-eaves IS its tent (fine); MAX across prims (never min across prims).
 - **Don't over-diminish** `f_a` — a big eave-raise kills the melt interface (turns it into a wall).

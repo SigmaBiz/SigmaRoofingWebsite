@@ -302,15 +302,47 @@ function meshFromTents(regions: Pt[][], boundary: Pt[], steps: StepWall[], sampl
     t = Math.max(0, Math.min(1, t));
     return [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
   };
+  // exact TRIPLE POINT — (x,z) where planes a == b == c meet (3 linear planes, 2×2 solve). null if degenerate.
+  const triple = (a: number, b: number, c: number): Pt | null => {
+    const co = (id: number) => {
+      const h0 = planes[id].h(0, 0);
+      return [planes[id].h(1, 0) - h0, planes[id].h(0, 1) - h0]; // [∂h/∂x, ∂h/∂z]; const term = h0
+    };
+    const A = co(a),
+      B = co(b),
+      C = co(c);
+    const a0 = planes[a].h(0, 0),
+      b0 = planes[b].h(0, 0),
+      c0 = planes[c].h(0, 0);
+    const m11 = A[0] - B[0],
+      m12 = A[1] - B[1],
+      r1 = b0 - a0;
+    const m21 = B[0] - C[0],
+      m22 = B[1] - C[1],
+      r2 = c0 - b0;
+    const det = m11 * m22 - m12 * m21;
+    if (Math.abs(det) < 1e-9) return null;
+    return [(r1 * m22 - r2 * m12) / det, (m11 * r2 - m21 * r1) / det];
+  };
+  const inTri = (p: Pt, a: Pt, b: Pt, c: Pt): boolean => {
+    const s = (u: Pt, v: Pt, w: Pt) => (u[0] - w[0]) * (v[1] - w[1]) - (v[0] - w[0]) * (u[1] - w[1]);
+    const d1 = s(p, a, b),
+      d2 = s(p, b, c),
+      d3 = s(p, c, a);
+    return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
+  };
   // split a fine triangle by its vertices' active plane id → crisp facets
   const tri = (p0: Pt, p1: Pt, p2: Pt) => {
+    const i0 = idAt(p0[0], p0[1]),
+      i1 = idAt(p1[0], p1[1]),
+      i2 = idAt(p2[0], p2[1]);
+    if (i0 < 0 || i1 < 0 || i2 < 0) return;
     const V = [
-      { p: p0, id: idAt(p0[0], p0[1]) },
-      { p: p1, id: idAt(p1[0], p1[1]) },
-      { p: p2, id: idAt(p2[0], p2[1]) },
+      { p: p0, id: i0 },
+      { p: p1, id: i1 },
+      { p: p2, id: i2 },
     ];
-    if (V.some((v) => v.id < 0)) return;
-    const ids = V.map((v) => v.id);
+    const ids = [i0, i1, i2];
     if (ids[0] === ids[1] && ids[1] === ids[2]) {
       face(ids[0], p0, p1, p2);
       return;
@@ -327,11 +359,25 @@ function meshFromTents(regions: Pt[][], boundary: Pt[], steps: StepWall[], sampl
       face(B, c1, rest[0].p, rest[1].p); // the shared plane's quad (two tris)
       face(B, c1, rest[1].p, c2);
     } else {
-      // rare triple point (only where 3 facets meet, e.g. a hip into the ridge): one tiny transitional tri
-      faceVtx(V);
+      // 3 distinct facets meet — tile the cell into 3 flat wedges meeting at the exact triple point T,
+      // so the facets close with NO gap (the old single-tri fallback left slivers at hip-apex convergences)
+      const T = triple(ids[0], ids[1], ids[2]);
+      if (T && inTri(T, p0, p1, p2)) {
+        const c01 = cross(ids[0], ids[1], p0, p1),
+          c12 = cross(ids[1], ids[2], p1, p2),
+          c20 = cross(ids[2], ids[0], p2, p0);
+        face(ids[0], p0, c01, T);
+        face(ids[0], p0, T, c20);
+        face(ids[1], p1, c12, T);
+        face(ids[1], p1, T, c01);
+        face(ids[2], p2, c20, T);
+        face(ids[2], p2, T, c12);
+      } else {
+        faceVtx(V);
+      }
     }
   };
-  const R = 26;
+  const R = 40; // subdivision (uniform); crease-split + triple-point tiling keep facets crisp
   for (const poly of regions) {
     const tris = THREE.ShapeUtils.triangulateShape(poly.map((p) => new THREE.Vector2(p[0], p[1])), []);
     for (const [ti, tj, tl] of tris) {
@@ -422,6 +468,151 @@ export function buildDimHipGableExt(L: number, W: number, wallH: number, pitch: 
   // the central/wing seam at z=hWm, x∈[extA,hLm]: low side is the wing (+z), so the raised f_a eave eats it
   const steps: StepWall[] = [{ a: [extA, hWm], b: [hLm, hWm], n: [0, 1] }];
   return meshFromTents(regions, boundary, steps, sample, planes, wallH);
+}
+
+// HALF-HIP OVERHANG off a gable. A sub GABLE (ridge along Z at x=0, span 2S, slopes G[−X] and L[+X])
+// + a HALF-HIP ext "hha" off the sub's gable end (z=0), extending into z<0. hha shares slope G
+// COPLANAR with the sub (same −X plane, no valley — facet shared) and OVERHANGS on the +X side by
+// `ov` (its E slope eave sits at x=S+ov, past the sub's span) so hha is wider ⇒ its ridge is HIGHER
+// than the sub's. hha's hip-end D faces +Z (toward the sub). Level eaves throughout. Built by
+// MAX-OF-TENTS: the sub tent extends inward under hha; its ridge runs until it meets hha's D facet at
+// (0,−S) — which lies on the D–G hip line — so the sub RIDGE flows continuously into the D–G HIP
+// (the conjecture). The overhang and continuity both fall out of the max; no special-casing.
+export function buildHalfHipOverhang(wallH: number, pitch: number, S: number, ov: number, subLen: number, hhaLen: number): PrimRoof {
+  const Hsub = wallH + pitch * S; // sub ridge height
+  // plane table: 0 G (sub −X slope, SHARED w/ hha), 1 L (sub +X slope), 2 E (hha +X slope, overhang),
+  // 3 D (hha hip-end facing +Z)
+  const planes: Plane[] = [
+    mkPlane([1, 0], [-S, 0], wallH, pitch), // 0 G: eave x=−S, up-slope +X (shared coplanar)
+    mkPlane([-1, 0], [S, 0], wallH, pitch), // 1 L: eave x=+S, up-slope −X
+    mkPlane([-1, 0], [S + ov, 0], wallH, pitch), // 2 E: eave x=S+ov, up-slope −X (overhang side)
+    mkPlane([0, -1], [0, 0], wallH, pitch), // 3 D: hip-end, eave z=0, up-slope −Z (toward hha body)
+  ];
+  // sub tent = min(G,L); support extends inward (z<0, under hha) so the ridge reaches the D–G hip
+  const inSub = (x: number, z: number) => x >= -S - 1e-6 && x <= S + 1e-6 && z >= -S - 1 - 1e-6 && z <= subLen + 1e-6;
+  // hha tent = min(G,E,D); spans the gable end (z=0) down to the cut (z=−hhaLen)
+  const inHha = (x: number, z: number) => x >= -S - 1e-6 && x <= S + ov + 1e-6 && z >= -hhaLen - 1e-6 && z <= 1e-6;
+  const sub = minTent([0, 1], planes, inSub);
+  const hha = minTent([0, 2, 3], planes, inHha);
+  const sample = maxTents([sub, hha]);
+  const regions: Pt[][] = [
+    [[-S, 0], [S, 0], [S, subLen], [-S, subLen]], // sub gable (visible footprint z>0)
+    [[-S, -hhaLen], [S + ov, -hhaLen], [S + ov, 0], [-S, 0]], // hha half-hip (z<0)
+  ];
+  const boundary = unionRects([
+    { x0: -S, x1: S, z0: 0, z1: subLen },
+    { x0: -S, x1: S + ov, z0: -hhaLen, z1: 0 },
+  ]);
+  return meshFromTents(regions, boundary, [], sample, planes, wallH);
+}
+
+// facet labels for verification: centroid (in plan) of each active-plane region, lifted to the roof,
+// tagged with the EagleView letter — so a top-down render reads like the EagleView notes diagram.
+export interface LabeledRoof extends PrimRoof {
+  labels: { id: string; pos: [number, number, number] }[];
+}
+function facetLabels(sample: Tent, idName: Record<number, string>, x0: number, x1: number, z0: number, z1: number): { id: string; pos: [number, number, number] }[] {
+  const acc: Record<number, { sx: number; sz: number; n: number }> = {};
+  const N = 96;
+  for (let i = 0; i <= N; i++)
+    for (let j = 0; j <= N; j++) {
+      const x = x0 + ((x1 - x0) * i) / N,
+        z = z0 + ((z1 - z0) * j) / N;
+      const s = sample(x, z);
+      if (!s) continue;
+      const a = acc[s.id] ?? (acc[s.id] = { sx: 0, sz: 0, n: 0 });
+      a.sx += x;
+      a.sz += z;
+      a.n++;
+    }
+  const out: { id: string; pos: [number, number, number] }[] = [];
+  for (const k in acc) {
+    const id = +k,
+      a = acc[id];
+    const cx = a.sx / a.n,
+      cz = a.sz / a.n;
+    const s = sample(cx, cz);
+    out.push({ id: idName[id] ?? String(id), pos: [cx, (s ? s.h : 0) + 0.5, cz] });
+  }
+  return out;
+}
+
+// CRESTRIDGE reconstruction (19428 Crestridge Dr, EagleView 68324055). Built prim-by-prim from
+// Antonio's decomposition (p1 central hip + p2 north half-hip + p4/p3 SE + p5/p6 SW). One shared plane
+// table, composed by MAX-OF-TENTS. Proportional dims first (validate topology), then refine to feet.
+// +X = east (right in the plan), +Z = north (up in the plan), all pitch 8/12.
+// STAGE 2: p1 (central HIP, ridge N-S, I diminished) + p2 (NORTH half-hip H/J/L). p2 spawns north off
+// p1's north end (F), its EAST slope coplanar with L (shared), west slope H, north hip-end J. It melds
+// into F (the host wins where taller) — degenerating F into the long NW facet.
+export function buildCrestridge(): LabeledRoof {
+  const wallH = 2.6,
+    pitch = 8 / 12;
+  // GROUNDED IN EAGLEVIEW FEET (68324055 length diagram): p1 core ≈ 52 ft E-W × 46 ft N-S ⇒ long axis
+  // E-W ⇒ ridge runs E-W with length 52−46 = 6 ft (the "+6" ridge). K=W side, L=E side (the big coplanar
+  // faces extended by the wings), F=N side, I=S side (diminished). +X=east, +Z=north.
+  const Wx = 26, // p1 E-W half-width (52 ft: west eave −26 .. east eave +26)
+    Wz = 23; // p1 N-S half-width (46 ft); ridge E-W, length 2(Wx−Wz)=6 ✓ the "+6"
+  const dimI = 2.0; // facet I (south side) DIMINISHED — eave raised (modest)
+  const p2W = -14, // p2 west eave x (H): 12 ft east of K@−26 ⇒ the measured "12" step
+    p2N = 38; // p2 north eave z (J hip-end): 40 ft wide (−14..+26), 15 ft north of p1 (the "15" west eave)
+  const planes: Plane[] = [
+    mkPlane([1, 0], [-Wx, 0], wallH, pitch), // 0 K — west side (faces −X)
+    mkPlane([-1, 0], [Wx, 0], wallH, pitch), // 1 L — east side (faces +X) — SHARED coplanar with p2
+    mkPlane([0, -1], [0, Wz], wallH, pitch), // 2 F — north end (faces +Z)
+    mkPlane([0, 1], [0, -Wz], wallH + dimI, pitch), // 3 I — south end (faces −Z), diminished
+    mkPlane([1, 0], [p2W, 0], wallH, pitch), // 4 H — p2 west slope (faces −X)
+    mkPlane([0, -1], [0, p2N], wallH, pitch), // 5 J — p2 north hip-end (faces +Z)
+    // SE wing (p3 half-hip G/E/D). Ridge N-S ("11"); overhangs p1's east (L@+26) by +9 (E@+35);
+    // south end = gable (17+17=34 wide); north hip-end D melds into p1's south slope I.
+    mkPlane([1, 0], [1, 0], wallH, pitch), // 6 G — SE west slope (faces −X), shared with p4. eave x=1 (gable 34 w/ E@35)
+    mkPlane([-1, 0], [35, 0], wallH, pitch), // 7 E — SE east slope (faces +X), overhang +9 past L@26
+    mkPlane([0, -1], [0, -17], wallH, pitch), // 8 D — SE north hip-end (faces +Z); eave z=−17 (the +9 overhang north)
+    // SW wing (p5 sub C/B/K + p6 gable A/K). Both coplanar with p1 at K (west, id 0). Small; melds into
+    // p1's diminished I (south). p6 spawns from p5. Ridges N-S; south ends are gables (rakes 12/12).
+    mkPlane([-1, 0], [-16, 0], wallH, pitch), // 9  A — p6 gable east slope (faces +X), melds into I
+    mkPlane([-1, 0], [-8, 0], wallH, pitch), // 10 B — p5 sub east slope (faces +X)
+    mkPlane([0, 1], [0, -32], wallH, pitch), // 11 C — p5 sub south hip-end (faces −Z)
+  ];
+  const inP1 = (x: number, z: number) => x >= -Wx - 1e-6 && x <= Wx + 1e-6 && z >= -Wz - 1e-6 && z <= Wz + 1e-6;
+  // p2 extends inward (south) under p1, melding into F; hidden where p1 (F) is taller. Bounded at z=0
+  // (p1's E-W ridge line) so it can't cross to the south slope.
+  const inP2 = (x: number, z: number) => x >= p2W - 1e-6 && x <= Wx + 1e-6 && z >= 0 - 1e-6 && z <= p2N + 1e-6;
+  // SE wing p3 (half-hip): G(west)+E(east overhang)+D(north hip-end). Extends south to the gable (zSeS),
+  // hip-end D melds into p1's south. East overhangs to x=35 (past L@26). South end zSeS is a gable (rake).
+  const seW = 1,
+    seE = 35,
+    zSeS = -42; // SE: west eave x=1, east eave x=35 (gable 34 wide), south gable z=−42 ⇒ E eave 25 (the "25")
+  const zDEave = -17; // facet D (SE hip-end) eave — the +9 overhang's north perimeter (z=−17)
+  const inP3 = (x: number, z: number) => x >= seW - 1e-6 && x <= seE + 1e-6 && z >= zSeS - 1e-6 && z <= zDEave + 1e-6;
+  // p4 (gable SUB, G/L): east slope = L (coplanar p1), west slope = G (coplanar p3). It melds into p1
+  // AND hosts p3 — the required intermediate so p3 has a defined host to spawn from (build order main→sub→ext).
+  const inP4 = (x: number, z: number) => x >= seW - 1e-6 && x <= Wx + 1e-6 && z >= zSeS - 1e-6 && z <= -8 + 1e-6;
+  // SW wing: p5 (sub C/B/K) + p6 (gable A/K). Both share K (west, id 0) coplanar w/ p1; meld into I.
+  const swW = -26, // = −Wx (K, coplanar with p1's west) ; SW shares the west face, no west overhang
+    swE = -8, // p5 east extent
+    zSwS = -34; // SW south gable z
+  const inP5 = (x: number, z: number) => x >= swW - 1e-6 && x <= swE + 1e-6 && z >= zSwS - 1e-6 && z <= -16 + 1e-6;
+  const inP6 = (x: number, z: number) => x >= swW - 1e-6 && x <= -16 + 1e-6 && z >= zSwS - 1e-6 && z <= -16 + 1e-6;
+  const p1 = minTent([0, 1, 2, 3], planes, inP1);
+  const p2 = minTent([1, 4, 5], planes, inP2); // L(east, shared) + H(west) + J(north hip-end)
+  const p4 = minTent([1, 6], planes, inP4); // SE SUB gable: L(east, coplanar p1) + G(west, coplanar p3)
+  const p3 = minTent([6, 7, 8], planes, inP3); // SE EXT half-hip: G(west, coplanar p4) + E(east overhang) + D(hip-end)
+  const p5 = minTent([0, 10, 11], planes, inP5); // SW SUB: K(west, coplanar p1) + B(east) + C(south hip-end)
+  const p6 = minTent([0, 9], planes, inP6); // SW EXT gable: K(west, coplanar p1) + A(east, melds into I)
+  const sample = maxTents([p1, p2, p4, p5, p3, p6]); // hierarchy order: main → subs → exts
+  const boundary = unionRects([
+    { x0: -Wx, x1: Wx, z0: -Wz, z1: Wz }, // p1
+    { x0: p2W, x1: Wx, z0: Wz, z1: p2N }, // p2 (north)
+    { x0: seW, x1: seE, z0: zSeS, z1: -Wz }, // SE south band
+    { x0: Wx, x1: seE, z0: -Wz, z1: zDEave }, // SE overhang
+    { x0: swW, x1: swE, z0: zSwS, z1: -Wz }, // SW south band
+  ]);
+  // mesh the WHOLE union footprint as ONE region — the crease-splitter handles every internal facet
+  // boundary, so there are NO inter-region T-junction seams (Crestridge has no vertical step-walls).
+  const regions: Pt[][] = [boundary];
+  const idName: Record<number, string> = { 0: "K", 1: "L", 2: "F", 3: "I", 4: "H", 5: "J", 6: "G", 7: "E", 8: "D", 9: "A", 10: "B", 11: "C" };
+  const labels = facetLabels(sample, idName, -Wx, seE, zSeS, p2N);
+  return { ...meshFromTents(regions, boundary, [], sample, planes, wallH), labels };
 }
 
 // ---- prim driver -------------------------------------------------------------------------------

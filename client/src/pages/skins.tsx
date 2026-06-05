@@ -1,21 +1,17 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, Lightformer, ContactShadows, Outlines, Grid } from "@react-three/drei";
+import { Environment, Lightformer, ContactShadows, Outlines, Grid, Html } from "@react-three/drei";
 import { EffectComposer, Pixelation, Bloom, BrightnessContrast, Vignette, Noise } from "@react-three/postprocessing";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { buildDimHipGableExt } from "@/lib/tr3/solver2";
+import { buildCrestridge } from "@/lib/tr3/solver2";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// FROM SCRATCH — step 1: ONLY the central diminished hip. Back facet f_a (+Z) eave raised by 1.4 →
-// f_a is short, ridge shifts toward it; f_b (−Z) long & normal.
-// central diminished hip + gable ext at the +X corner: coplanar +X side (facet K shared), facet A
-// melting into the diminished f_a, raised-eave wall eats the wing (no bridge). dimFrac 0.08 = f_a
-// rafter 8% shorter than f_b (modest, so the melt interface stays generous).
-const CROSS = buildDimHipGableExt(14, 8, 2.6, 8 / 12, 0.08, 2, 5);
+// CRESTRIDGE reconstruction — STAGE 1: p1 only (central hip, I diminished). +X=east, +Z=north.
+const CROSS = buildCrestridge();
 
 // SKIN SWITCHER — one scene (geometry × camera arc), N skins. Proves the render is a separable
 // layer: a declarative descriptor { material, palette, post-FX, lighting, props } peels off the
@@ -123,8 +119,25 @@ function Brick({ args, position, rotation, color, map, skin }: { args: [number, 
   );
 }
 
-function GablePrim({ skin }: { skin: Skin }) {
+function GablePrim({ skin, plan }: { skin: Skin; plan: boolean }) {
   const p = skin.pal;
+  if (plan)
+    // mirror X so the north-up top-down reads east-right / west-left like the EagleView plan
+    return (
+      <group scale={[-1, 1, 1]}>
+        <mesh geometry={CROSS.walls}>
+          <meshStandardMaterial color="#d6cfbf" roughness={0.98} metalness={0} side={THREE.DoubleSide} flatShading />
+        </mesh>
+        <mesh geometry={CROSS.roof}>
+          <meshStandardMaterial color="#efeadf" roughness={0.92} metalness={0} side={THREE.DoubleSide} flatShading />
+        </mesh>
+        {CROSS.labels.map((l, i) => (
+          <Html key={i} position={l.pos} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+            <div style={{ color: "#1d1d1d", font: "700 15px 'JetBrains Mono', monospace", textShadow: "0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff" }}>{l.id}</div>
+          </Html>
+        ))}
+      </group>
+    );
   return (
     <group>
       <mesh geometry={CROSS.walls} castShadow receiveShadow>
@@ -260,16 +273,25 @@ function ToneMap({ mode }: { mode: "aces" | "none" }) {
 }
 
 const KF = [
-  { p: 0.0, pos: [0.5, 27, 0.01] }, // EWS bird's-eye (whole L-footprint)
-  { p: 0.34, pos: [18, 12, 20] }, // orbit on the +X/+Z corner ext
-  { p: 0.64, pos: [0.5, 7, 22] }, // MS frontal (looks at the +Z faces + gable end)
-  { p: 1.0, pos: [4, 5, 14] }, // MCU close on the ext valley
+  { p: 0.0, pos: [0.001, 78, 6.02] }, // straight top-down (compare to the plan diagram)
+  { p: 0.34, pos: [34, 28, 46] }, // iso from NE (p2 north wing + p1)
+  { p: 0.64, pos: [0, 18, -46] }, // from the south (−Z): the diminished I end
+  { p: 1.0, pos: [30, 22, 40] }, // 3/4 close on the p1↔p2 meld (north)
 ] as const;
 
-function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
+function CameraRig({ progress, plan }: { progress: React.MutableRefObject<number>; plan: boolean }) {
   const { camera } = useThree();
-  const target = useMemo(() => new THREE.Vector3(0.5, 3, 2.5), []);
+  const target = useMemo(() => new THREE.Vector3(0, 5, 6), []);
+  const planTarget = useMemo(() => new THREE.Vector3(4, 0, -2), []);
   useFrame(() => {
+    if (plan) {
+      // fixed NORTH-UP top-down: +Z (building north) → screen up, +X (east) → screen right
+      camera.up.set(0, 0, 1);
+      camera.position.set(4, 124, -2);
+      camera.lookAt(planTarget);
+      return;
+    }
+    camera.up.set(0, 1, 0);
     const p = clamp01(progress.current);
     let a = KF[0] as { p: number; pos: readonly number[] };
     let b = KF[KF.length - 1] as { p: number; pos: readonly number[] };
@@ -285,6 +307,7 @@ export default function Skins() {
   const root = useRef<HTMLDivElement>(null);
   const progress = useRef(0);
   const [skinId, setSkinId] = useState("editorial");
+  const [plan, setPlan] = useState(true); // PLAN = flat labeled facets + compass, north-up top-down (verification)
   const skin = SKINS.find((s) => s.id === skinId)!;
 
   useEffect(() => {
@@ -307,22 +330,42 @@ export default function Skins() {
       <section className="sk relative h-[520vh]">
         <div className="sk-stage sticky top-0 h-screen overflow-hidden" style={{ background: skin.bg, transition: "background 240ms ease" }}>
           <Canvas shadows camera={{ position: [0, 16, 0.01], fov: 42 }} dpr={[1, 1.75]} gl={{ antialias: true }}>
-            <color attach="background" args={[skin.bg]} />
-            {skin.fog && <fog attach="fog" args={[skin.fog.c, skin.fog.n, skin.fog.f]} />}
-            <ToneMap mode={skin.tone} />
+            <color attach="background" args={[plan ? "#f5f2ec" : skin.bg]} />
+            {!plan && skin.fog && <fog attach="fog" args={[skin.fog.c, skin.fog.n, skin.fog.f]} />}
+            <ToneMap mode={plan ? "none" : skin.tone} />
+            {plan && <ambientLight intensity={0.65} />}
+            {plan && <directionalLight position={[8, 20, 10]} intensity={1.15} />}
             <Suspense fallback={null}>
-              <group key={skin.id}>
-                <Lights skin={skin} />
-                <EnvRig skin={skin} />
-                <Ground skin={skin} />
-                <GablePrim skin={skin} />
-                {skin.props && <Props skin={skin} />}
+              <group key={skin.id + String(plan)}>
+                {!plan && <Lights skin={skin} />}
+                {!plan && <EnvRig skin={skin} />}
+                {!plan && <Ground skin={skin} />}
+                <GablePrim skin={skin} plan={plan} />
+                {!plan && skin.props && <Props skin={skin} />}
               </group>
             </Suspense>
-            {skin.contact && <ContactShadows position={[0, 0.01, 0]} opacity={skin.contact.o} blur={2.4} scale={42} color={skin.contact.c} />}
-            <CameraRig progress={progress} />
-            <Post skin={skin} />
+            {!plan && skin.contact && <ContactShadows position={[0, 0.01, 0]} opacity={skin.contact.o} blur={2.4} scale={42} color={skin.contact.c} />}
+            <CameraRig progress={progress} plan={plan} />
+            {!plan && <Post skin={skin} />}
           </Canvas>
+
+          {/* compass (PLAN mode) — oriented like the EagleView diagram: N up-and-right (~30° CW) */}
+          {plan && (
+            <div className="pointer-events-none absolute bottom-10 right-12 z-40">
+              <svg width="104" height="104" viewBox="-52 -52 104 104">
+                <circle cx="0" cy="0" r="46" fill="none" stroke="#1d1d1d" strokeOpacity="0.25" />
+                <g transform="rotate(30)">
+                  <line x1="0" y1="42" x2="0" y2="-42" stroke="#1d1d1d" strokeWidth="1.4" />
+                  <line x1="-42" y1="0" x2="42" y2="0" stroke="#1d1d1d" strokeWidth="1" strokeOpacity="0.45" />
+                  <polygon points="0,-46 -5.5,-33 5.5,-33" fill="#1d1d1d" />
+                </g>
+                <text x="22" y="-34" textAnchor="middle" fontSize="14" fontWeight="700" fill="#1d1d1d">N</text>
+                <text x="37" y="25" textAnchor="middle" fontSize="11" fill="#1d1d1d">E</text>
+                <text x="-20" y="40" textAnchor="middle" fontSize="11" fill="#1d1d1d">S</text>
+                <text x="-37" y="-18" textAnchor="middle" fontSize="11" fill="#1d1d1d">W</text>
+              </svg>
+            </div>
+          )}
 
           {/* switcher */}
           <div className="pointer-events-none absolute inset-x-0 top-0 flex flex-col items-center gap-3 px-4 pt-6">
@@ -341,6 +384,13 @@ export default function Skins() {
                   </button>
                 );
               })}
+              <button
+                onClick={() => setPlan((v) => !v)}
+                style={MONO}
+                className={`rounded-full px-3.5 py-1.5 text-[10px] uppercase tracking-[0.18em] transition-colors ${plan ? "bg-[#C4897A] text-[#15171c]" : "text-[#EDE9DF]/65 hover:text-[#EDE9DF]"}`}
+              >
+                Plan
+              </button>
             </div>
             <p style={MONO} className="rounded-sm bg-black/30 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#EDE9DF]/70 backdrop-blur-sm">
               {skin.material} · {skin.id === "nes" || skin.id === "blueprint" || skin.id === "noir" ? "+post" : "no post"} · {skin.blurb}

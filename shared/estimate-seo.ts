@@ -12,8 +12,8 @@
 
 export const BIZ = {
   name: "Sigma Roofing LLC",
-  url: "https://oksigma.com",
-  origin: "https://oksigma.com",
+  url: "https://www.oksigma.com",
+  origin: "https://www.oksigma.com",
   telephone: "+14059025266",
   telephoneDisplay: "(405) 902-5266",
   email: "aescalante@oksigma.com",
@@ -25,7 +25,7 @@ export const BIZ = {
   lat: 35.6529,
   lng: -97.4779,
   license: "LIC#80006734",
-  logo: "https://oksigma.com/sigma-logo.png",
+  logo: "https://www.oksigma.com/sigma-logo.png",
   sameAs: ["https://www.tiktok.com/@sigmaroofing405", "https://www.instagram.com/sigmaroofing405"],
   areaServed: ["Edmond", "Oklahoma City", "Norman", "Moore", "Yukon", "Mustang", "Bethany", "Del City", "Midwest City", "Piedmont", "Deer Creek", "Nichols Hills"],
   priceRange: "$$",
@@ -35,7 +35,7 @@ export const ESTIMATE_SEO = {
   title: "Roof Replacement Cost: 2,200 Sq Ft House in OKC | Sigma Roofing",
   description:
     "Roof replacement on a 2,200 sq ft house runs about $10,500–$13,000 in the OKC metro. Get an instant, address-measured estimate from Sigma Roofing — free, no phone call.",
-  canonical: "https://oksigma.com/estimate",
+  canonical: "https://www.oksigma.com/estimate",
   h1: "How much does it cost to replace a roof on a 2,200 sq ft house?",
   intro:
     "In the Oklahoma City metro, replacing the roof on a typical 2,200 sq ft single-story home runs about $10,500–$13,000 for a full architectural-shingle tear-off — roughly 24 squares of roof. The same floor area spread over two stories has a smaller roof footprint and costs less. Because “2,200 sq ft” is your floor area, not your roof area, the real number depends on your roof's footprint, pitch, and shape. Enter your address and Sigma Roofing measures your actual roof from aerial data in seconds.",

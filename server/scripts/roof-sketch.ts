@@ -17,7 +17,6 @@ import fs from 'fs';
 import path from 'path';
 import { fromArrayBuffer } from 'geotiff';
 import { PNG } from 'pngjs';
-import { fileURLToPath } from 'url';
 import { geocode, degToRad } from '../estimate/measure';
 
 const ROOFS: { address: string; slug: string }[] = [
@@ -171,7 +170,13 @@ async function main() {
   }
 }
 
-// CLI only when run directly — importing this module (e.g. the /api/roof-image endpoint) must NOT fire main().
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+// CLI only when run directly (`tsx server/scripts/roof-sketch.ts`).
+// IMPORTANT: routes.ts imports this module (for /api/roof-image), so esbuild bundles it into dist/index.js.
+// Inside that bundle import.meta.url === dist/index.js === process.argv[1], so the old identity check passed
+// and main() fired on EVERY production boot — rendering R&D demo addresses via the paid Solar Data-Layers SKU,
+// and crash-looping the whole server (process.exit) when GOOGLE_API_KEY was absent. Gate on the entry basename:
+// it equals "roof-sketch" only when THIS file is the real CLI entry, never when bundled as dist/index.js.
+const __entry = process.argv[1] ? path.basename(process.argv[1]).replace(/\.[cm]?[jt]s$/, "") : "";
+if (__entry === "roof-sketch") {
   main().catch((e) => { console.error(e?.message || e); process.exit(1); });
 }

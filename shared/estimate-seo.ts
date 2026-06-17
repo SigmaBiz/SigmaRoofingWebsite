@@ -45,27 +45,27 @@ export const ESTIMATE_SEO = {
 export const ESTIMATE_FAQ: { q: string; a: string }[] = [
   {
     q: "How much does it cost to replace a roof on a 2,200 sq ft house?",
-    a: "In the Oklahoma City metro, a 2,200 sq ft single-story home has about 24 squares of roof and typically runs $10,500–$13,000 for a full architectural-shingle replacement with tear-off. A two-story home with the same floor area has a smaller roof footprint and usually costs less. Enter your address for an exact measured estimate.",
+    a: "The difference the details make on the cost of a roof make a generalized estimate of little use. That is why we created our tool which will give you the cost (with the products we know and trust) of what is required on all roofs including edge metal, underlayment, shingles, hip and ridge caps, ventilation, standard flashing components, and additional supplies and labors necessary to get the job done.",
   },
   {
-    q: "How many squares is a 2,200 square foot roof?",
-    a: "A “square” is 100 sq ft of roof surface. A 2,200 sq ft single-story home covers roughly 2,400 sq ft of roof — about 24 squares — once pitch and overhangs are included. The same floor area over two stories is closer to 13 squares.",
+    q: "How long will it take to replace my roof?",
+    a: "Medium (30 SQ) to medium-large (45 SQ) roofs can generally be done in a day since for these jobs more crew members work together. A roofing square (SQ) is 100 square feet. When roofs are more complex such as having multiple roofing layers, multiple felt layers, steep, multi-story, hard access, severe wear and tear (non walkable surface), etc. will add to that time frame.",
   },
   {
-    q: "How much does a new roof cost in Oklahoma City?",
-    a: "Most full architectural-shingle replacements in the OKC metro fall between about $4.50 and $7.00 per square foot of roof — roughly $9,000 to $20,000+ depending on the roof's size, pitch, number of facets, and complexity.",
+    q: "When is it time to replace my roof?",
+    a: "In Oklahoma the lifecycle of a roof will be affected by our intense weather and the elements. Around the 10-15 year mark a roof will be heavily degraded from the sun, severe wind and hail, rainfall, and sometimes improper installation can speed up this degradation of the roof. It's a good plan to budget for roof repairs long before planning to do major repairs on a roof.",
   },
   {
-    q: "What's included in a roof replacement estimate?",
-    a: "A full tear-off (no re-decking), underlayment, architectural shingles, starter strip, drip edge, hip and ridge cap, ridge ventilation, and pipe-jack and gas-vent flashing. Decking replacement, chimney and skylight flashing, and gutters are priced separately at the inspection.",
+    q: "What's included in this website's roof replacement estimate?",
+    a: "Our roof estimate includes what is required and common to all roofs and excludes the following which require physical verification: roof steepness, number of stories, how many layers of shingles, how many layers of underlayment, chimney present, skylight present, custom components present, wall flashing, gutters detach and reset, gutter replacement, roof redeck, deck repairs, among others. All these factors can drive up the cost on top of the base cost.",
   },
   {
-    q: "Does the price depend on roof pitch and shape?",
-    a: "Yes. Steeper pitches add material and labor, and more facets, hips, and valleys add cut waste and flashing. That's why two same-size houses can differ by thousands of dollars — and why Sigma measures your actual roof from aerial data instead of guessing from floor area.",
+    q: "What if I need an estimate after severe hail or wind storm damaged my roof?",
+    a: "When an event such as hail or windstorm affects a home it can adversely impact or void warranties with your roofing contractor and by extension with the roofing material manufacturers for the material installed on your home. That means it is on the homeowner to address the damage assessment and repairs of the roof and consult a professional. Our online estimate is a good starting point however we recommend you seek a consult to fully assess the scope of the damage. The estimator has built in options to facilitate getting an agent to help you precisely with these types of situations.",
   },
   {
     q: "Is the instant roof estimate a real quote?",
-    a: "It's an accurate ballpark built from Google aerial measurements and real Oklahoma City material and labor prices, meant to set expectations. The exact, guaranteed number comes from a free on-site inspection.",
+    a: "Yes, it is for many roofs in Oklahoma our instant estimate will be spot on as most roofs don't necessarily have multiple layers or steep slopes nor any of the other “details” which add on to the price. So odds are that our instant estimator will be in line with the final quote you get especially if you get it from us.",
   },
 ];
 

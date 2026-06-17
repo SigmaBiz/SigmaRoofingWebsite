@@ -893,7 +893,6 @@ function ResultCard({ status, card, inspectionMsg, code, onBook, onReset, onLock
           <Button onClick={onLockIn} className="h-12 bg-[hsl(43,74%,52%)] font-bold text-[#1a1304] hover:bg-[hsl(43,74%,46%)]"><Lock className="mr-1.5 h-4 w-4" />Lock in your 5%</Button>
           <Button onClick={onQuestion} variant="outline" className="h-12 border-white/40 bg-white/5 font-semibold text-white hover:bg-white/15 hover:text-white"><HelpCircle className="mr-1.5 h-4 w-4" />Got a question?</Button>
         </div>
-        <p className="mt-3 text-[11px] leading-relaxed text-white/55"><ShieldCheck className="mr-1 -mt-0.5 inline h-3.5 w-3.5" />Ballpark from Google Solar — not a quote. Footprint © OpenStreetMap (ODbL).</p>
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import { logQuoteLead } from "./leads";
 
 export async function registerRoutes(app: Express): Promise<Express> {
   // ---- SEO: real crawlable robots.txt + sitemap.xml (registered BEFORE the SPA catch-all so they serve as files) ----
-  const SITE = "https://oksigma.com";
+  const SITE = "https://www.oksigma.com";
   const SITEMAP_PAGES = [
     { path: "/", priority: "1.0", changefreq: "weekly" },
     { path: "/estimate", priority: "0.9", changefreq: "weekly" },

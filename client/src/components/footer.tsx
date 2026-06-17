@@ -19,10 +19,10 @@ export default function Footer() {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-3 mb-6">
-              <img 
-                src="/sigma-logo.png" 
-                alt="Sigma Roofing LLC Logo" 
-                className="w-12 h-12 object-contain"
+              <img
+                src="/sigma-logo-white.png"
+                alt="Sigma Roofing LLC Logo"
+                className="w-16 h-16 object-contain"
               />
               <div>
                 <h3 className="font-bold text-xl">Sigma Roofing LLC</h3>

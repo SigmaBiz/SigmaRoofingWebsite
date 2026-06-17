@@ -3,9 +3,36 @@ import { storage } from "./storage";
 import { insertContactRequestSchema, insertSocialVideoSchema } from "@shared/schema";
 import { emailService } from "./email-service";
 import { stormDataService } from "./storm-data-service-final";
+import { computeMeasurement, EstimateError } from "./estimate/measure";
+import { priceEstimate } from "./estimate/pricing";
+import { renderRoofSketch } from "./scripts/roof-sketch";
+import { getReviews } from "./reviews";
+import { logQuoteLead } from "./leads";
 
 
 export async function registerRoutes(app: Express): Promise<Express> {
+  // ---- SEO: real crawlable robots.txt + sitemap.xml (registered BEFORE the SPA catch-all so they serve as files) ----
+  const SITE = "https://oksigma.com";
+  const SITEMAP_PAGES = [
+    { path: "/", priority: "1.0", changefreq: "weekly" },
+    { path: "/estimate", priority: "0.9", changefreq: "weekly" },
+    { path: "/hail-damage", priority: "0.7", changefreq: "monthly" },
+    { path: "/tornado-damage", priority: "0.7", changefreq: "monthly" },
+    // "/social" (SocHub) omitted from the sitemap until it has videos — don't let Google index an empty page (Antonio, 2026-06-16)
+    { path: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
+    { path: "/terms-of-service", priority: "0.3", changefreq: "yearly" },
+  ];
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send(`User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+  });
+  app.get("/sitemap.xml", (_req, res) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const urls = SITEMAP_PAGES.map(
+      (p) => `  <url>\n    <loc>${SITE}${p.path}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>`,
+    ).join("\n");
+    res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`);
+  });
+
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
     try {
@@ -498,121 +525,21 @@ export async function registerRoutes(app: Express): Promise<Express> {
   // Google Business Profile reviews for Sigma Roofing LLC
   app.get("/api/reviews", async (req, res) => {
     try {
-      const apiKey = process.env.GOOGLE_API_KEY;
-      console.log("API Key present:", !!apiKey);
-
-      if (!apiKey) {
-        return res.status(500).json({ success: false, message: "Google Business API key not configured" });
+      // Live Google rating/reviews, cached ~6h in server/reviews.ts (was: 2 Places calls on EVERY hit).
+      const data = await getReviews();
+      if (!data) {
+        return res.status(500).json({ success: false, message: "Unable to fetch reviews from Google Business Profile" });
       }
-
-      // Try direct search for Sigma Roofing LLC in Edmond, OK
-      const searchQuery = "SIGMA ROOFING LLC Edmond OK";
-      console.log("Searching for:", searchQuery);
-
-      const searchResponse = await fetch(
-        `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name&key=${apiKey}`
-      );
-
-      const searchData = await searchResponse.json();
-      console.log("Search response:", searchData);
-
-      if (searchData.status !== "OK" || !searchData.candidates.length) {
-        // If specific business not found, let's try a broader search
-        const broaderSearch = await fetch(
-          `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent("SIGMA ROOFING LLC Edmond Oklahoma")}&key=${apiKey}`
-        );
-        
-        const broaderData = await broaderSearch.json();
-        console.log("Broader search response:", broaderData);
-        
-        if (broaderData.status !== "OK" || !broaderData.results.length) {
-          throw new Error(`Business not found in Google Places. Status: ${searchData.status}`);
-        }
-        
-        const placeId = broaderData.results[0].place_id;
-        console.log("Found place ID:", placeId);
-        
-        // Get reviews using the place_id
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,rating,user_ratings_total,name&key=${apiKey}`
-        );
-        
-        const data = await response.json();
-        console.log("Place details response:", data);
-        
-        if (data.status !== "OK") {
-          throw new Error(`Google API status: ${data.status}`);
-        }
-        
-        const reviews = data.result.reviews || [];
-        const formattedReviews = reviews.map((review: any) => ({
-          name: review.author_name,
-          role: "Verified Customer", 
-          rating: review.rating,
-          review: review.text,
-          date: new Date(review.time * 1000).toLocaleDateString(),
-          initials: review.author_name
-            .split(' ')
-            .map((n: string) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2)
-        }));
-        
-        res.json({ 
-          success: true, 
-          reviews: formattedReviews,
-          businessRating: data.result.rating || 5.0,
-          totalReviews: data.result.user_ratings_total || reviews.length,
-          businessName: data.result.name
-        });
-      } else {
-        const placeId = searchData.candidates[0].place_id;
-        console.log("Found place ID:", placeId);
-        
-        // Get reviews using the place_id
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,rating,user_ratings_total,name&key=${apiKey}`
-        );
-        
-        const data = await response.json();
-        console.log("Place details response:", data);
-        
-        if (data.status !== "OK") {
-          throw new Error(`Google API status: ${data.status}`);
-        }
-        
-        const reviews = data.result.reviews || [];
-        const formattedReviews = reviews.map((review: any) => ({
-          name: review.author_name,
-          role: "Verified Customer",
-          rating: review.rating,
-          review: review.text,
-          date: new Date(review.time * 1000).toLocaleDateString(),
-          initials: review.author_name
-            .split(' ')
-            .map((n: string) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2)
-        }));
-        
-        res.json({ 
-          success: true, 
-          reviews: formattedReviews,
-          businessRating: data.result.rating || 5.0,
-          totalReviews: data.result.user_ratings_total || reviews.length,
-          businessName: data.result.name
-        });
-      }
-      
+      res.json({
+        success: true,
+        reviews: data.reviews,
+        businessRating: data.ratingValue,
+        totalReviews: data.reviewCount,
+        businessName: data.businessName,
+      });
     } catch (error) {
       console.error("Error fetching Google reviews:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Unable to fetch reviews from Google Business Profile",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
+      res.status(500).json({ success: false, message: "Unable to fetch reviews from Google Business Profile" });
     }
   });
 
@@ -1467,6 +1394,214 @@ export async function registerRoutes(app: Express): Promise<Express> {
     } catch (error) {
       console.error("TikTok oEmbed error:", error);
       res.json({ thumbnail_url: null });
+    }
+  });
+
+  // Instant roof estimate: address -> Google Solar measurement + ballpark price.
+  // Cost guard #1 (spec §10): cache by normalized address — a roof doesn't change between
+  // reroofs, so we never pay to look the same address up twice (24h TTL).
+  const estimateCache = new Map<string, { result: any; ts: number }>();
+  const ESTIMATE_TTL_MS = 1000 * 60 * 60 * 24;
+  const normalizeAddress = (a: string) =>
+    a.toLowerCase().replace(/[.,]/g, ' ').replace(/\busa\b/g, '').replace(/\s+/g, ' ').trim();
+
+  // Cost guard #2: an app-level DAILY CAP on *live* (cache-miss) estimates — the real "50% of free tier" limit,
+  // since Google's Solar API has no per-day quota. Beyond the cap the page flips to the email/phone capture (no
+  // Google call, lead still captured). Resets at local (Central) midnight. Cap = one env-tunable number.
+  const DAILY_CAP = Number(process.env.ESTIMATE_DAILY_CAP) || 150;
+  const USER_LIMIT = Number(process.env.ESTIMATE_USER_LIMIT) || 2; // per-browser (clientId) NEW estimates/day before the capture
+  const capDay = () => new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" }); // YYYY-MM-DD
+  const dailyCap = { day: "", n: 0 };
+  const perUser: { day: string; map: Map<string, number> } = { day: "", map: new Map() };
+
+  app.post("/api/estimate", async (req, res) => {
+    try {
+      const address = (req.body?.address ?? "").toString().trim();
+      if (address.length < 5) {
+        return res.status(400).json({ success: false, message: "Please enter a full street address." });
+      }
+
+      // Cost guard #3: the BOT WALL — verify the Turnstile token before ANY Google call. A bot hitting this
+      // endpoint directly carries no valid token -> rejected -> $0 spent. (Skips if TURNSTILE_SECRET_KEY unset.)
+      const { verifyTurnstile } = await import("./estimate/turnstile");
+      const captcha = await verifyTurnstile(req.body?.turnstileToken, req.ip);
+      if (!captcha.ok) {
+        return res.status(403).json({ success: false, captcha: true, message: "We couldn't verify your browser — please retry." });
+      }
+
+      const key = process.env.GOOGLE_API_KEY;
+      if (!key) {
+        console.error("Estimate: GOOGLE_API_KEY not configured");
+        return res.status(500).json({ success: false, message: "The estimator is temporarily unavailable." });
+      }
+
+      const cacheKey = normalizeAddress(address);
+      const hit = estimateCache.get(cacheKey);
+      if (hit && Date.now() - hit.ts < ESTIMATE_TTL_MS) {
+        // a cached roof costs nothing -> always served, never counts against the per-user or daily caps
+        return res.json({ success: true, measured: true, source: "cache", ...hit.result });
+      }
+
+      const today = capDay();
+
+      // Per-user soft limit: a browser-stored clientId gets USER_LIMIT *new* estimates/day, then the "Got a question?"
+      // capture. Spoofable (incognito / cleared storage resets it) -> a deterrent for casual over-use, NOT a hard wall;
+      // the global cap + Turnstile are the real bounds. Skipped if the client sent no id.
+      const cid = (req.body?.clientId ?? "").toString().slice(0, 64);
+      if (perUser.day !== today) { perUser.day = today; perUser.map.clear(); }
+      if (cid && (perUser.map.get(cid) || 0) >= USER_LIMIT) {
+        return res.json({ success: true, measured: false, user_limit: true });
+      }
+
+      // live estimate (will spend Google $) -> gate on the GLOBAL daily cap
+      if (dailyCap.day !== today) { dailyCap.day = today; dailyCap.n = 0; }
+      if (dailyCap.n >= DAILY_CAP) {
+        return res.json({
+          success: true, measured: false, over_capacity: true,
+          message: "We've reached today's limit for instant estimates. Leave your email or phone and we'll send your estimate personally.",
+        });
+      }
+      dailyCap.n++; // reserve a slot (we're committing to the Google calls)
+      if (cid) perUser.map.set(cid, (perUser.map.get(cid) || 0) + 1); // count this user's live estimate
+
+      // dev: ESTIMATE_FORCE_RATE_LIMIT=1 simulates a Google per-minute 429, to test the "busy, try again" UX without hammering the API.
+      if (process.env.ESTIMATE_FORCE_RATE_LIMIT === "1") throw new EstimateError("RATE_LIMITED", "forced (dev test)");
+
+      const measurement = await computeMeasurement(address, key);
+      const pricing = priceEstimate(measurement);
+      const result = { ...measurement, pricing };
+      estimateCache.set(cacheKey, { result, ts: Date.now() });
+
+      console.log(
+        `🏠 Estimate: ${measurement.address} -> ${measurement.totals.squares} sq, ${measurement.totals.predominant_pitch}, conf ${measurement.confidence.tier}`,
+      );
+      res.json({ success: true, measured: true, source: "live", ...result });
+    } catch (error) {
+      // Soft-fail (still success:true) -> the client shows the "book an inspection" branch,
+      // which IS the conversion event for roofs we can't auto-measure.
+      if (error instanceof EstimateError) {
+        if (error.code === "RATE_LIMITED") {
+          // Google rejected the call (per-minute quota) -> it wasn't billed, so don't burn a daily-cap or per-user slot.
+          dailyCap.n = Math.max(0, dailyCap.n - 1);
+          const cid = (req.body?.clientId ?? "").toString().slice(0, 64);
+          if (cid && perUser.day === capDay()) perUser.map.set(cid, Math.max(0, (perUser.map.get(cid) || 0) - 1));
+          res.setHeader("Retry-After", "60");
+          return res.status(429).json({ success: false, rate_limited: true, message: "Our estimator's in high demand right now — give it about a minute and try again." });
+        }
+        if (error.code === "NO_BUILDING" || error.code === "GEOCODE_ZERO") {
+          return res.json({
+            success: true,
+            measured: false,
+            reason: error.code.toLowerCase(),
+            message:
+              "We couldn't auto-measure this roof from the air — let's get eyes on it with a free inspection.",
+          });
+        }
+        // NOT_ENABLED / GEOCODE_DENIED / SOLAR_ERROR -> our problem, log it.
+        console.error(`Estimate error [${error.code}]:`, error.message);
+        return res.status(502).json({ success: false, message: "Couldn't reach the measurement service. Please try again." });
+      }
+      console.error("Estimate unexpected error:", error);
+      res.status(500).json({ success: false, message: "Something went wrong generating your estimate." });
+    }
+  });
+
+  // Roof facet-map image for the estimate card (DSM aspect+hillshade). Heavier call (Solar `dataLayers`) so cache HARD
+  // (24h, by normalized address) — same cost guard as /api/estimate. A missing image is non-fatal: the card falls back
+  // to a default illustration, so failures return 404 rather than breaking the estimate flow.
+  const roofImageCache = new Map<string, { buffer: Buffer; ts: number }>();
+  app.get("/api/roof-image", async (req, res) => {
+    try {
+      const address = (req.query?.address ?? "").toString().trim();
+      if (address.length < 5) return res.status(400).json({ success: false, message: "address required" });
+      const key = process.env.GOOGLE_API_KEY;
+      if (!key) return res.status(500).json({ success: false, message: "image service unavailable" });
+
+      const cacheKey = normalizeAddress(address);
+      const hit = roofImageCache.get(cacheKey);
+      let buffer: Buffer;
+      if (hit && Date.now() - hit.ts < ESTIMATE_TTL_MS) {
+        buffer = hit.buffer;
+      } else {
+        const out = await renderRoofSketch(address, key);
+        buffer = out.buffer;
+        roofImageCache.set(cacheKey, { buffer, ts: Date.now() });
+        console.log(`🖼️  Roof image: ${address} -> ${out.W}x${out.H}px · ${out.secs}s`);
+      }
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.send(buffer);
+    } catch (error: any) {
+      console.error("Roof image error:", error?.message || error);
+      res.status(404).json({ success: false, message: "no roof image" });
+    }
+  });
+
+  // ── POC (cost): a roof "sketch" from buildingInsights ONLY (no Data Layers) → SVG; + a satellite static-map option. ──
+  app.get("/api/roof-facet-sketch", async (req, res) => {
+    try {
+      const address = (req.query?.address ?? "").toString().trim();
+      const key = process.env.GOOGLE_API_KEY;
+      if (address.length < 5 || !key) return res.status(400).send("address + key required");
+      const { renderFacetSketchSvg } = await import("./scripts/roof-facet-sketch");
+      const out = await renderFacetSketchSvg(address, key);
+      res.setHeader("Content-Type", "image/svg+xml");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.send(out.svg);
+    } catch (error: any) {
+      const msg = (error?.message || error).toString().replace(/[<&>]/g, "");
+      res.status(500).type("image/svg+xml").send(`<svg xmlns="http://www.w3.org/2000/svg" width="560" height="160"><rect width="560" height="160" fill="#1a1f27"/><text x="20" y="80" fill="#f87171" font-family="system-ui" font-size="14">sketch error: ${msg}</text></svg>`);
+    }
+  });
+  app.get("/api/roof-satellite", async (req, res) => {
+    try {
+      const address = (req.query?.address ?? "").toString().trim();
+      const key = process.env.GOOGLE_API_KEY;
+      if (address.length < 5 || !key) return res.status(400).end();
+      const zoom = Math.min(22, Math.max(17, parseInt(String(req.query?.zoom)) || 21)); // tighter on the roof; ?zoom=N to tune
+      const { geocode, buildingInsights } = await import("./estimate/measure");
+      const { location } = await geocode(address, key);
+      let overlays = "";
+      if (req.query?.pin) overlays += `&markers=color:0xf2b01e%7C${location.lat},${location.lng}`; // ?pin=1 → drop a pin on the target
+      if (req.query?.outline) {
+        // ?outline=1 → gold highlight tracing the measured building footprint (marks the target roof without obscuring it)
+        try {
+          const bb = (await buildingInsights(location, key))?.boundingBox;
+          if (bb?.sw && bb?.ne) {
+            const pts = [[bb.sw.latitude, bb.sw.longitude], [bb.sw.latitude, bb.ne.longitude], [bb.ne.latitude, bb.ne.longitude], [bb.ne.latitude, bb.sw.longitude], [bb.sw.latitude, bb.sw.longitude]]
+              .map((p) => `${p[0]},${p[1]}`).join("%7C");
+            overlays += `&path=color:0xffd24aff%7Cweight:3%7Cfillcolor:0xffd24a1f%7C${pts}`;
+          }
+        } catch { /* no bbox → skip the outline, still serve the photo */ }
+      }
+      const u = `https://maps.googleapis.com/maps/api/staticmap?center=${location.lat},${location.lng}&zoom=${zoom}&size=560x560&scale=2&maptype=satellite${overlays}&key=${key}`;
+      const r = await fetch(u);
+      if (!r.ok) return res.status(502).end();
+      res.setHeader("Content-Type", r.headers.get("content-type") || "image/png");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.end(Buffer.from(await r.arrayBuffer()));
+    } catch {
+      res.status(502).end();
+    }
+  });
+
+  // Quote-funnel lead from /estimate ("Lock in 5%" / "Got a question?"). Minimal capture → emails Antonio (no DB; manual follow-up).
+  app.post("/api/quote-lead", async (req, res) => {
+    try {
+      const { ctaType, code, address, estimate, firstName, phone, email, question, preference } = req.body ?? {};
+      if (!ctaType || !address) return res.status(400).json({ success: false, message: "Missing details." });
+      if (!phone && !email) return res.status(400).json({ success: false, message: "Please add a phone or email so we can reach you." });
+      // 1) DURABLE capture first — the lead is saved to data/quote-leads.jsonl no matter what (email may be down).
+      logQuoteLead({ ctaType, code, address, estimate, firstName, phone, email, question, preference });
+      // 2) Best-effort email notification (currently failing — SENDGRID_API_KEY returns 401; the file still has the lead).
+      const sent = await emailService.sendQuoteLead({ ctaType, code, address, estimate, firstName, phone, email, question, preference });
+      if (!sent) console.error(`⚠️  Lead SAVED to data/quote-leads.jsonl but EMAIL FAILED (fix SENDGRID_API_KEY) — ${code} · ${address}`);
+      // 3) Branded confirmation to the CUSTOMER (only if they gave an email; fire-and-forget so it never blocks the response).
+      if (email) emailService.sendCustomerConfirmation({ code, address, estimate, email, ctaType }).catch(() => {});
+      res.json({ success: true, message: ctaType === "lock-in" ? "Locked in! An agent will reach out to confirm your 5%." : "Sent — we'll text or email you back shortly." });
+    } catch (error) {
+      console.error("Quote-lead error:", error);
+      res.status(500).json({ success: false, message: "Something went wrong — please call (405) 902-5266." });
     }
   });
 

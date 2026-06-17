@@ -13,7 +13,7 @@ import DebugPanel from "@/components/debug-panel";
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#f4efe6]">
       <Header />
       <Hero />
       <Services />
@@ -23,7 +23,7 @@ export default function Home() {
       <SocHubTeaser />
       <Testimonials />
       <FAQ />
-      <MVP3ContactForm />
+      <MVP3ContactForm bgClassName="bg-gradient-to-br from-[#f5f0e6] to-[#ece5d3]" />
       <Footer />
       <DebugPanel />
     </div>

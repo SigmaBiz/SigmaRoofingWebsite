@@ -201,7 +201,7 @@ export function buildDiminishedHip(L: number, W: number, wallH: number, pitch: n
 // hips/valleys/ridges. (A global lower-envelope of ALL eaves is still wrong — it cuts the host.)
 
 // a roof plane: height field + analytic surface normal + 2-D up-slope (for shingle UV)
-interface Plane {
+export interface Plane {
   h: (x: number, z: number) => number;
   nrm: [number, number, number];
   up: Pt;
@@ -508,10 +508,21 @@ export function buildHalfHipOverhang(wallH: number, pitch: number, S: number, ov
 
 // facet labels for verification: centroid (in plan) of each active-plane region, lifted to the roof,
 // tagged with the EagleView letter — so a top-down render reads like the EagleView notes diagram.
-export interface LabeledRoof extends PrimRoof {
-  labels: { id: string; pos: [number, number, number] }[];
+export interface CreaseLine {
+  a: [number, number, number]; // 3D endpoint
+  b: [number, number, number];
+  n1: [number, number, number]; // the two adjacent facet normals (for cap draping)
+  n2: [number, number, number];
 }
-function facetLabels(sample: Tent, idName: Record<number, string>, x0: number, x1: number, z0: number, z1: number): { id: string; pos: [number, number, number] }[] {
+export interface LabeledRoof extends PrimRoof {
+  labels: { id: string; plane: number; pos: [number, number, number] }[];
+  planes: Plane[];
+  boundary: Pt[];
+  eaveY: number;
+  creases: CreaseLine[]; // analytic hips + ridges (full lines, no mesh fragments)
+  heightAt: (x: number, z: number) => number; // roof-surface height at a plan point (for overhang/fascia/soffit)
+}
+function facetLabels(sample: Tent, idName: Record<number, string>, x0: number, x1: number, z0: number, z1: number): { id: string; plane: number; pos: [number, number, number] }[] {
   const acc: Record<number, { sx: number; sz: number; n: number }> = {};
   const N = 96;
   for (let i = 0; i <= N; i++)
@@ -525,14 +536,14 @@ function facetLabels(sample: Tent, idName: Record<number, string>, x0: number, x
       a.sz += z;
       a.n++;
     }
-  const out: { id: string; pos: [number, number, number] }[] = [];
+  const out: { id: string; plane: number; pos: [number, number, number] }[] = [];
   for (const k in acc) {
     const id = +k,
       a = acc[id];
     const cx = a.sx / a.n,
       cz = a.sz / a.n;
     const s = sample(cx, cz);
-    out.push({ id: idName[id] ?? String(id), pos: [cx, (s ? s.h : 0) + 0.5, cz] });
+    out.push({ id: idName[id] ?? String(id), plane: id, pos: [cx, (s ? s.h : 0) + 0.5, cz] });
   }
   return out;
 }
@@ -660,12 +671,190 @@ function meshFromTentsExact(tents: TentSpec[], planes: Plane[], boundary: Pt[], 
 // Antonio's decomposition (p1 central hip + p2 north half-hip + p4/p3 SE + p5/p6 SW). One shared plane
 // table, composed by MAX-OF-TENTS. Proportional dims first (validate topology), then refine to feet.
 // +X = east (right in the plan), +Z = north (up in the plan), all pitch 8/12.
+// ---- ANALYTIC HIP/RIDGE LINES ----------------------------------------------------------------
+// Hips & ridges are EXACTLY the edges where two planes of the SAME tent are equal AND on the surface (the
+// lower-envelope creases). Computed from the same exact facet polygons the mesher emits, then each plane-pair's
+// edges are interval-merged along the crease direction ⇒ ONE full line per hip/ridge (no mesh fragments, no
+// T-junction gaps, nothing missed). Valleys (inter-tent ties) and eaves/rakes don't satisfy {P==Q, Q∈tent}.
+function hipRidgeCreases(tents: TentSpec[], planes: Plane[]): CreaseLine[] {
+  const EPS = 1e-7;
+  const clipHalf = (poly: Pt[], val: (p: Pt) => number): Pt[] => {
+    const out: Pt[] = [], n = poly.length;
+    for (let i = 0; i < n; i++) {
+      const A = poly[i], B = poly[(i + 1) % n], va = val(A), vb = val(B);
+      if (va <= EPS) out.push(A);
+      if ((va < -EPS && vb > EPS) || (va > EPS && vb < -EPS)) {
+        const t = va / (va - vb);
+        out.push([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t]);
+      }
+    }
+    return out;
+  };
+  const rectPoly = (r: Rect): Pt[] => [[r.x0, r.z0], [r.x1, r.z0], [r.x1, r.z1], [r.x0, r.z1]];
+  const hP = (id: number, p: Pt) => planes[id].h(p[0], p[1]);
+  const surfaceH = (x: number, z: number) => {
+    let best = -Infinity;
+    for (const T of tents) {
+      if (x < T.rect.x0 - 1e-6 || x > T.rect.x1 + 1e-6 || z < T.rect.z0 - 1e-6 || z > T.rect.z1 + 1e-6) continue;
+      let mn = Infinity;
+      for (const id of T.ids) mn = Math.min(mn, planes[id].h(x, z));
+      best = Math.max(best, mn);
+    }
+    return best;
+  };
+  // the plane id that IS the final surface at (x,z) = argmax-over-tents of (argmin-over-ids)
+  const activePlane = (x: number, z: number): number => {
+    let best = -Infinity, bid = -1;
+    for (const T of tents) {
+      if (x < T.rect.x0 - 1e-6 || x > T.rect.x1 + 1e-6 || z < T.rect.z0 - 1e-6 || z > T.rect.z1 + 1e-6) continue;
+      let mn = Infinity, mid = -1;
+      for (const id of T.ids) { const h = planes[id].h(x, z); if (h < mn) { mn = h; mid = id; } }
+      if (mn > best) { best = mn; bid = mid; }
+    }
+    return bid;
+  };
+  // collect crease edges per (tent, P<Q) plane-pair, exactly as the facets are clipped
+  const groups = new Map<string, { P: number; Q: number; pts: Pt[] }>();
+  tents.forEach((T, ti) => {
+    for (const P of T.ids) {
+      let base = rectPoly(T.rect);
+      for (const Q of T.ids) if (Q !== P) base = clipHalf(base, (p) => hP(P, p) - hP(Q, p));
+      if (base.length < 3) continue;
+      let pieces: Pt[][] = [base];
+      for (const U of tents) {
+        if (U === T) continue;
+        const cons: ((p: Pt) => number)[] = [
+          (p) => U.rect.x0 - p[0],
+          (p) => p[0] - U.rect.x1,
+          (p) => U.rect.z0 - p[1],
+          (p) => p[1] - U.rect.z1,
+          ...U.ids.map((q) => (p: Pt) => hP(P, p) - hP(q, p)),
+        ];
+        const next: Pt[][] = [];
+        for (const piece of pieces) {
+          let remaining = piece;
+          for (const ck of cons) {
+            const outside = clipHalf(remaining, (p) => -ck(p));
+            if (outside.length >= 3) next.push(outside);
+            remaining = clipHalf(remaining, ck);
+            if (remaining.length < 3) break;
+          }
+        }
+        pieces = next;
+        if (!pieces.length) break;
+      }
+      for (const piece of pieces) {
+        const n = piece.length;
+        for (let i = 0; i < n; i++) {
+          const A = piece[i], B = piece[(i + 1) % n];
+          const mid: Pt = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2];
+          const hm = hP(P, mid);
+          if (Math.abs(surfaceH(mid[0], mid[1]) - hm) > 2e-3) continue; // hidden under a wing ⇒ no cap
+          for (const Q of T.ids) {
+            if (P >= Q) continue; // record each pair once, from the lower-id facet
+            if (Math.abs(hm - hP(Q, mid)) > 1e-4) continue; // edge not on {P==Q} ⇒ eave/rake/valley, skip
+            // STRUCTURAL guard: both sides of the edge must really be facets P and Q on the FINAL surface. Else the
+            // line is over-extending into a region a THIRD prim owns (tracing a constituent prim's hip, not the whole
+            // structure's hip) ⇒ drop it. An off-roof side (−1, the perimeter) is not penalized.
+            const ex = B[0] - A[0], ez = B[1] - A[1], el = Math.hypot(ex, ez) || 1;
+            const sx = -ez / el, sz = ex / el, dd = 0.3; // unit perpendicular to the edge, in plan
+            const a1: Pt = [mid[0] + sx * dd, mid[1] + sz * dd], a2: Pt = [mid[0] - sx * dd, mid[1] - sz * dd];
+            const pLo = hP(P, a1) <= hP(Q, a1); // facet P sits on the lower-plane side of the crease
+            const apP = activePlane(...(pLo ? a1 : a2)), apQ = activePlane(...(pLo ? a2 : a1));
+            if ((apP !== -1 && apP !== P) || (apQ !== -1 && apQ !== Q)) continue;
+            const key = ti + "|" + P + "|" + Q;
+            let g = groups.get(key);
+            if (!g) groups.set(key, (g = { P, Q, pts: [] }));
+            g.pts.push(A, B);
+            break;
+          }
+        }
+      }
+    }
+  });
+  // span each pair's collinear edges (interval-merge, bridging ≤0.5 ft T-junction gaps) into full lines
+  const out: CreaseLine[] = [];
+  type E = { lo: number; hi: number; plo: Pt; phi: Pt };
+  for (const g of Array.from(groups.values())) {
+    const uP = planes[g.P].up, uQ = planes[g.Q].up;
+    const gx = uP[0] - uQ[0], gz = uP[1] - uQ[1]; // ∝ ∇(hP−hQ); crease runs perpendicular to it
+    const dl = Math.hypot(gx, gz) || 1;
+    const dn: Pt = [-gz / dl, gx / dl];
+    const pr = (p: Pt) => p[0] * dn[0] + p[1] * dn[1];
+    const edges: E[] = [];
+    for (let i = 0; i + 1 < g.pts.length; i += 2) {
+      const A = g.pts[i], B = g.pts[i + 1], tA = pr(A), tB = pr(B);
+      edges.push(tA <= tB ? { lo: tA, hi: tB, plo: A, phi: B } : { lo: tB, hi: tA, plo: B, phi: A });
+    }
+    edges.sort((a, b) => a.lo - b.lo);
+    const flush = (e: E) => {
+      if (e.hi - e.lo < 0.2) return;
+      out.push({
+        a: [e.plo[0], planes[g.P].h(e.plo[0], e.plo[1]), e.plo[1]],
+        b: [e.phi[0], planes[g.P].h(e.phi[0], e.phi[1]), e.phi[1]],
+        n1: planes[g.P].nrm,
+        n2: planes[g.Q].nrm,
+      });
+    };
+    let cur: E | null = null;
+    for (const e of edges) {
+      if (!cur) cur = { ...e };
+      else if (e.lo <= cur.hi + 0.5) { if (e.hi > cur.hi) { cur.hi = e.hi; cur.phi = e.phi; } }
+      else { flush(cur); cur = { ...e }; }
+    }
+    if (cur) flush(cur);
+  }
+  return out;
+}
+
+// JUNCTION-GRAPH trim. A hip/ridge that ENDS free in mid-slope — not at an eave, and not at a NODE shared with another
+// crease — is a residual: the constituent prim's line running a little past the structural turn. Trim that end back to
+// the nearest node (where another crease meets this one). Ends at an eave (low y) or a shared node (e.g. a hip dying
+// INTO a ridge) are left alone — that distinction is what protects the legitimate terminations.
+function trimResidualEnds(cr: CreaseLine[], eaveY: number): CreaseLine[] {
+  type P3 = [number, number, number];
+  const SNAP = 0.9, MAXTRIM = 5.5, N = 20;
+  const d3 = (a: P3, b: P3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  const distToSeg = (p: P3, a: P3, b: P3) => {
+    const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2], L2 = dx * dx + dy * dy + dz * dz || 1;
+    let t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy + (p[2] - a[2]) * dz) / L2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p[0] - (a[0] + dx * t), p[1] - (a[1] + dy * t), p[2] - (a[2] + dz * t));
+  };
+  const meetsOther = (p: P3, self: number) => {
+    for (let j = 0; j < cr.length; j++) {
+      if (j === self) continue;
+      if (d3(p, cr[j].a) < SNAP || d3(p, cr[j].b) < SNAP) return true; // another crease's endpoint = a node
+      if (distToSeg(p, cr[j].a, cr[j].b) < SNAP) return true; // another crease's interior crosses here = a node
+    }
+    return false;
+  };
+  const out: CreaseLine[] = [];
+  for (let i = 0; i < cr.length; i++) {
+    let a: P3 = [cr[i].a[0], cr[i].a[1], cr[i].a[2]], b: P3 = [cr[i].b[0], cr[i].b[1], cr[i].b[2]];
+    for (let side = 0; side < 2; side++) {
+      const E: P3 = side === 0 ? a : b, F: P3 = side === 0 ? b : a;
+      if (E[1] < eaveY + 3) continue; // at an eave → keep
+      if (meetsOther(E, i)) continue; // at a node → keep
+      for (let k = 1; k <= N; k++) { // free end: walk inward to the nearest node, trim there
+        const t = k / N;
+        const Pp: P3 = [E[0] + (F[0] - E[0]) * t, E[1] + (F[1] - E[1]) * t, E[2] + (F[2] - E[2]) * t];
+        if (meetsOther(Pp, i)) {
+          if (d3(E, Pp) < MAXTRIM) { if (side === 0) a = Pp; else b = Pp; }
+          break;
+        }
+      }
+    }
+    if (d3(a, b) > 0.5) out.push({ a, b, n1: cr[i].n1, n2: cr[i].n2 });
+  }
+  return out;
+}
+
 // STAGE 2: p1 (central HIP, ridge N-S, I diminished) + p2 (NORTH half-hip H/J/L). p2 spawns north off
 // p1's north end (F), its EAST slope coplanar with L (shared), west slope H, north hip-end J. It melds
 // into F (the host wins where taller) — degenerating F into the long NW facet.
-export function buildCrestridge(): LabeledRoof {
-  const wallH = 2.6,
-    pitch = 8 / 12;
+export function buildCrestridge(wallH = 2.6): LabeledRoof {
+  const pitch = 8 / 12;
   // GROUNDED IN EAGLEVIEW FEET (68324055 length diagram): p1 core ≈ 52 ft E-W × 46 ft N-S ⇒ long axis
   // E-W ⇒ ridge runs E-W with length 52−46 = 6 ft (the "+6" ridge). K=W side, L=E side (the big coplanar
   // faces extended by the wings), F=N side, I=S side (diminished). +X=east, +Z=north.
@@ -737,7 +926,17 @@ export function buildCrestridge(): LabeledRoof {
   ];
   const idName: Record<number, string> = { 0: "K", 1: "L", 2: "F", 3: "I", 4: "H", 5: "J", 6: "G", 7: "E", 8: "D", 9: "A", 10: "B", 11: "C" };
   const labels = facetLabels(sample, idName, -Wx, seE, zSeS, p2N);
-  return { ...meshFromTentsExact(tents, planes, boundary, wallH), labels };
+  const heightAt = (x: number, z: number): number => {
+    let best = -Infinity;
+    for (const T of tents) {
+      if (x < T.rect.x0 - 1e-6 || x > T.rect.x1 + 1e-6 || z < T.rect.z0 - 1e-6 || z > T.rect.z1 + 1e-6) continue;
+      let mn = Infinity;
+      for (const id of T.ids) mn = Math.min(mn, planes[id].h(x, z));
+      best = Math.max(best, mn);
+    }
+    return isFinite(best) ? best : wallH;
+  };
+  return { ...meshFromTentsExact(tents, planes, boundary, wallH), labels, planes, boundary, eaveY: wallH, creases: trimResidualEnds(hipRidgeCreases(tents, planes), wallH), heightAt };
 }
 
 // ---- prim driver -------------------------------------------------------------------------------

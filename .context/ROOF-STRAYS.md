@@ -100,6 +100,6 @@ said, not what was meant) · **belief** (rested on a false assumption about the 
 
 ### Meta-lesson (why these happened)
 Most strays were me **bending a Z₂ invariant to force a Z₁ case** (S1 especially) or **letting the
-renderer's convenience model dictate the geometry** (S3, S4). The pre-flight in `ROOF-WORKING-MEMORY.md`
+renderer's convenience model dictate the geometry** (S3, S4). The pre-flight in `Pulse.md`
 exists to catch exactly this: classify Z₂ vs Z₁, never hack a Z₁ case into the core, and verify by
 screenshot before declaring victory.

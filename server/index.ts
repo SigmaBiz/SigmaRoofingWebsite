@@ -3,6 +3,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { createServer } from "http";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { refreshReviews } from "./reviews";
 
 const app = express();
 app.use(express.json());
@@ -68,5 +69,7 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
     console.log(`Server accessible at http://localhost:${port}`);
     console.log(`Also try: http://0.0.0.0:${port}`);
+    // Warm the Google-reviews cache so the first /estimate crawl already carries aggregateRating.
+    refreshReviews().catch(() => {});
   });
 })();

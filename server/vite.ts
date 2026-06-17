@@ -5,6 +5,7 @@ import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
+import { injectSeo } from "./seo";
 
 const viteLogger = createLogger();
 
@@ -58,7 +59,7 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
       const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      res.status(200).set({ "Content-Type": "text/html" }).end(injectSeo(url, page));
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -78,8 +79,9 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // fall through to index.html if the file doesn't exist (inject per-route SEO into the served shell)
+  app.use("*", (req, res) => {
+    const html = fs.readFileSync(path.resolve(distPath, "index.html"), "utf-8");
+    res.status(200).set({ "Content-Type": "text/html" }).end(injectSeo(req.originalUrl, html));
   });
 }

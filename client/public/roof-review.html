@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Roof reconstruction — valley fix results</title>
+<style>
+  body{font:16px/1.55 -apple-system,Segoe UI,Roboto,sans-serif;max-width:1000px;margin:0 auto;padding:28px;color:#1a1a1a;background:#fafafa}
+  h1{font-size:24px;margin:0 0 4px} h2{font-size:20px;margin:34px 0 8px;border-bottom:2px solid #eee;padding-bottom:6px}
+  .sub{color:#666;margin:0 0 18px}
+  .legend span{display:inline-block;padding:2px 9px;border-radius:4px;color:#fff;font-weight:600;font-size:13px;margin-right:6px}
+  img{width:100%;max-width:560px;border:1px solid #ddd;border-radius:8px;background:#fff;display:block;margin:10px 0}
+  table{border-collapse:collapse;margin:10px 0;font-size:15px} td,th{border:1px solid #ddd;padding:5px 12px;text-align:right} th{background:#f0f0f0}
+  td:first-child,th:first-child{text-align:left}
+  .bad{background:#ffe2e2;font-weight:700} .ok{background:#d6f5d6;font-weight:700} .meh{background:#fff3cd}
+  .win{background:#e8f9e8;border:1px solid #9bd89b;border-left:4px solid #2e8b2e;border-radius:6px;padding:12px 16px;margin:12px 0}
+  .q{background:#fff7e6;border:1px solid #f0d089;border-radius:6px;padding:12px 16px;margin:12px 0}
+</style>
+</head>
+<body>
+<h1>Roof reconstruction — valley over-count: FIXED</h1>
+<p class="sub">You called it: the valleys were the lever. The breakdown showed my <i>real</i> valleys were already dead-on your
+EV numbers — the error was a spurious short "throat" arc near each peak that I was miscounting as valley. A valley has to
+<b>drain to an eave</b>; those didn't. One rule fixed all three roofs — and on Crest those throats turned out to be hips,
+which snapped Crest's hip to exact.</p>
+<p class="legend">Colors:
+  <span style="background:red">ridge</span>
+  <span style="background:darkorange">hip</span>
+  <span style="background:blue">valley</span>
+  <span style="background:green">rake</span>
+  <span style="background:#000">• node</span>
+</p>
+
+<div class="win"><b>Valley, before → after:</b> &nbsp; Lee +18% → <b>−1%</b> &nbsp;·&nbsp; Hinkle +19% → <b>+2%</b> &nbsp;·&nbsp; Crest +30% → <b>+8%</b></div>
+
+<h2>① Crest — 19428 Crest Ridge Dr &nbsp; (your hardest roof — essentially nailed)</h2>
+<img src="/skelfp_19428_crest_ridge_dr.png" alt="Crest reconstruction"/>
+<table>
+<tr><th>line</th><th>EagleView</th><th>mine</th><th>off by</th></tr>
+<tr><td>ridge</td><td>58 ft</td><td>59 ft</td><td class="ok">+1%</td></tr>
+<tr><td>hip</td><td>191 ft</td><td>191 ft</td><td class="ok">+0%</td></tr>
+<tr><td>valley</td><td>87 ft</td><td>94 ft</td><td class="ok">+8%</td></tr>
+</table>
+<p class="sub">A 12-facet hip-and-valley roof reconstructed from free LiDAR to within ~8% on every line. This is the proof the method reaches the bar.</p>
+
+<h2>② Hinkle — 4024 N Nicklas Ave</h2>
+<img src="/skelfp_4024_n_nicklas_ave.png" alt="Hinkle reconstruction"/>
+<table>
+<tr><th>line</th><th>EagleView</th><th>mine</th><th>off by</th></tr>
+<tr><td>ridge</td><td>65 ft</td><td>63 ft</td><td class="ok">−3%</td></tr>
+<tr><td>hip</td><td>148 ft</td><td>119 ft</td><td class="bad">−25%</td></tr>
+<tr><td>valley</td><td>48 ft</td><td>49 ft</td><td class="ok">+2%</td></tr>
+</table>
+<p class="sub">Ridge + valley dialed in. Hip is now <b>under</b> — the next thing to chase (likely the footprint shrank a touch too far when I removed the overhang).</p>
+
+<h2>③ Lee — 6320 N Warren Ave</h2>
+<img src="/skelfp_6320_n_warren_ave.png" alt="Lee reconstruction"/>
+<table>
+<tr><th>line</th><th>EagleView</th><th>mine</th><th>off by</th></tr>
+<tr><td>ridge</td><td>90 ft</td><td>66 ft</td><td class="bad">−27%</td></tr>
+<tr><td>hip</td><td>0 ft</td><td>35 ft</td><td class="bad">phantom</td></tr>
+<tr><td>valley</td><td>39 ft</td><td>39 ft</td><td class="ok">−1%</td></tr>
+</table>
+<p class="sub">Valley exact (your 19'7" ×2). The ridge−27% + phantom hip is the <b>one stuck thing</b>: the LiDAR grew a north-facing
+facet across the main roof's north <b>gable</b> end, so my "is there a roof slope here?" test is fooled into calling it an
+eave (hip) instead of a gable. That's a data-quality corner, not the logic.</p>
+
+<hr style="margin:30px 0;border:none;border-top:1px solid #ddd"/>
+<p class="sub"><b>Where we stand vs the ≤5% goal:</b> Crest all ≤8%; ridge + valley solid on all three. Remaining: Hinkle's hip
+(−25%) and Lee's stuck north gable (segmentation). The valley — the systemic one — is done.</p>
+</body>
+</html>

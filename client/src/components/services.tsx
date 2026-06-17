@@ -185,7 +185,7 @@ export default function Services() {
   }, [serviceImages]);
 
   return (
-    <section id="services" className="py-20 bg-gradient-to-br from-blue-50 via-gray-50 to-emerald-50">
+    <section id="services" className="py-20 bg-[#f4efe6]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="font-bold text-4xl text-gray-800 mb-4">Our Services</h2>

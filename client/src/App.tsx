@@ -33,6 +33,15 @@ const PullBack = lazy(() => import("@/pages/pullback"));
 const Scene3D = lazy(() => import("@/pages/scene3d"));
 const Zelda = lazy(() => import("@/pages/zelda"));
 const Skins = lazy(() => import("@/pages/skins"));
+const Inspect = lazy(() => import("@/pages/inspect"));
+const Estimate = lazy(() => import("@/pages/estimate"));
+const ShingleTest = lazy(() => import("@/pages/shingletest"));
+const CapTest = lazy(() => import("@/pages/captest"));
+const SidingTest = lazy(() => import("@/pages/sidingtest"));
+const OverhangTest = lazy(() => import("@/pages/overhangtest"));
+const VeneerTest = lazy(() => import("@/pages/veneertest"));
+const HouseTest = lazy(() => import("@/pages/housetest"));
+const SketchTest = lazy(() => import("@/pages/sketchtest"));
 
 function Router() {
   return (
@@ -47,6 +56,11 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/social" component={SocHub} />
       <Route path="/google-photos-test" component={GooglePhotosTest} />
+      <Route path="/sketchtest">
+        <Suspense fallback={<div className="min-h-screen bg-[#0d1626]" />}>
+          <SketchTest />
+        </Suspense>
+      </Route>
       <Route path="/cascade">
         <Suspense fallback={<div className="min-h-screen bg-[#0b1b30]" />}>
           <Cascade />
@@ -110,6 +124,46 @@ function Router() {
       <Route path="/skins">
         <Suspense fallback={<div className="min-h-screen bg-[#15171c]" />}>
           <Skins />
+        </Suspense>
+      </Route>
+      <Route path="/inspect">
+        <Suspense fallback={<div className="min-h-screen bg-[#d9d3c7]" />}>
+          <Inspect />
+        </Suspense>
+      </Route>
+      <Route path="/estimate">
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Estimate />
+        </Suspense>
+      </Route>
+      <Route path="/shingletest">
+        <Suspense fallback={<div className="min-h-screen bg-[#c9c3b6]" />}>
+          <ShingleTest />
+        </Suspense>
+      </Route>
+      <Route path="/captest">
+        <Suspense fallback={<div className="min-h-screen bg-[#d7d2c6]" />}>
+          <CapTest />
+        </Suspense>
+      </Route>
+      <Route path="/sidingtest">
+        <Suspense fallback={<div className="min-h-screen bg-[#cfe1ef]" />}>
+          <SidingTest />
+        </Suspense>
+      </Route>
+      <Route path="/overhangtest">
+        <Suspense fallback={<div className="min-h-screen bg-[#c9d2d8]" />}>
+          <OverhangTest />
+        </Suspense>
+      </Route>
+      <Route path="/veneertest">
+        <Suspense fallback={<div className="min-h-screen bg-[#cbc5b8]" />}>
+          <VeneerTest />
+        </Suspense>
+      </Route>
+      <Route path="/housetest">
+        <Suspense fallback={<div className="min-h-screen bg-[#cbc5b8]" />}>
+          <HouseTest />
         </Suspense>
       </Route>
       <Route component={NotFound} />

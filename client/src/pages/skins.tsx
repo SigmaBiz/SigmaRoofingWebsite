@@ -119,7 +119,7 @@ function Brick({ args, position, rotation, color, map, skin }: { args: [number, 
   );
 }
 
-function GablePrim({ skin, plan }: { skin: Skin; plan: boolean }) {
+function GablePrim({ skin, plan, overhead }: { skin: Skin; plan: boolean; overhead: boolean }) {
   const p = skin.pal;
   if (plan)
     // mirror X so the north-up top-down reads east-right / west-left like the EagleView plan
@@ -131,11 +131,12 @@ function GablePrim({ skin, plan }: { skin: Skin; plan: boolean }) {
         <mesh geometry={CROSS.roof}>
           <meshStandardMaterial color="#efeadf" roughness={0.92} metalness={0} side={THREE.DoubleSide} flatShading />
         </mesh>
-        {CROSS.labels.map((l, i) => (
-          <Html key={i} position={l.pos} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
-            <div style={{ color: "#1d1d1d", font: "700 15px 'JetBrains Mono', monospace", textShadow: "0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff" }}>{l.id}</div>
-          </Html>
-        ))}
+        {overhead &&
+          CROSS.labels.map((l, i) => (
+            <Html key={i} position={l.pos} center zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+              <div style={{ color: "#1d1d1d", font: "700 15px 'JetBrains Mono', monospace", textShadow: "0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff" }}>{l.id}</div>
+            </Html>
+          ))}
       </group>
     );
   return (
@@ -279,16 +280,31 @@ const KF = [
   { p: 1.0, pos: [30, 22, 40] }, // 3/4 close on the p1↔p2 meld (north)
 ] as const;
 
+// PLAN cinematic sequence (shot-library): DRONE bird's-eye → DROP (pedestal/crane down) → TILT+ORBIT
+// hero ¾ → settle BACK to the north-up working overhead. up: (0,0,1) top-down ↔ (0,1,0) tilted; lerp+norm.
+const PLAN_KF = [
+  { p: 0.0, pos: [4, 250, -1.99], up: [0, 0, 1], tgt: [4, 0, -2] }, // DRONE bird's-eye (high, roof small)
+  { p: 0.18, pos: [4, 110, -1.99], up: [0, 0, 1], tgt: [4, 0, -2] }, // DROP — roof grows to fill frame
+  { p: 0.4, pos: [14, 96, 46], up: [0, 0.55, 0.83], tgt: [4, 6, -2] }, // TILT — crane arcs forward + down
+  { p: 0.64, pos: [64, 78, 80], up: [0, 1, 0], tgt: [4, 9, -2] }, // HERO ¾ high-angle (the glory)
+  { p: 0.84, pos: [-48, 82, 60], up: [0, 1, 0], tgt: [4, 9, -2] }, // ORBIT/arc to the other side
+  { p: 1.0, pos: [4, 124, -2], up: [0, 0, 1], tgt: [4, 0, -2] }, // settle BACK to the working overhead
+] as const;
+
 function CameraRig({ progress, plan }: { progress: React.MutableRefObject<number>; plan: boolean }) {
   const { camera } = useThree();
   const target = useMemo(() => new THREE.Vector3(0, 5, 6), []);
-  const planTarget = useMemo(() => new THREE.Vector3(4, 0, -2), []);
   useFrame(() => {
     if (plan) {
-      // fixed NORTH-UP top-down: +Z (building north) → screen up, +X (east) → screen right
-      camera.up.set(0, 0, 1);
-      camera.position.set(4, 124, -2);
-      camera.lookAt(planTarget);
+      // scroll-driven cinematic: drone bird's-eye → drop → tilt+orbit hero → back to overhead
+      const p = clamp01(progress.current);
+      let a = PLAN_KF[0] as (typeof PLAN_KF)[number];
+      let b = PLAN_KF[PLAN_KF.length - 1] as (typeof PLAN_KF)[number];
+      for (let i = 0; i < PLAN_KF.length - 1; i++) if (p >= PLAN_KF[i].p && p <= PLAN_KF[i + 1].p) ((a = PLAN_KF[i]), (b = PLAN_KF[i + 1]));
+      const t = easeInOut((p - a.p) / (b.p - a.p || 1));
+      camera.position.set(lerp(a.pos[0], b.pos[0], t), lerp(a.pos[1], b.pos[1], t), lerp(a.pos[2], b.pos[2], t));
+      camera.up.set(lerp(a.up[0], b.up[0], t), lerp(a.up[1], b.up[1], t), lerp(a.up[2], b.up[2], t)).normalize();
+      camera.lookAt(lerp(a.tgt[0], b.tgt[0], t), lerp(a.tgt[1], b.tgt[1], t), lerp(a.tgt[2], b.tgt[2], t));
       return;
     }
     camera.up.set(0, 1, 0);
@@ -308,11 +324,24 @@ export default function Skins() {
   const progress = useRef(0);
   const [skinId, setSkinId] = useState("editorial");
   const [plan, setPlan] = useState(true); // PLAN = flat labeled facets + compass, north-up top-down (verification)
+  // labels + compass are working aids: shown ONLY at the settled overhead view (end of the cinematic),
+  // hidden through the drone→drop→tilt→hero→orbit "glory" sequence so it reads clean.
+  const [overhead, setOverhead] = useState(false);
   const skin = SKINS.find((s) => s.id === skinId)!;
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({ trigger: ".sk", start: "top top", end: "bottom bottom", pin: ".sk-stage", scrub: true, onUpdate: (self) => (progress.current = self.progress) });
+      ScrollTrigger.create({
+        trigger: ".sk",
+        start: "top top",
+        end: "bottom bottom",
+        pin: ".sk-stage",
+        scrub: true,
+        onUpdate: (self) => {
+          progress.current = self.progress;
+          setOverhead(self.progress > 0.95); // boolean → only re-renders at the threshold crossing
+        },
+      });
     }, root);
     return () => ctx.revert();
   }, []);
@@ -340,7 +369,7 @@ export default function Skins() {
                 {!plan && <Lights skin={skin} />}
                 {!plan && <EnvRig skin={skin} />}
                 {!plan && <Ground skin={skin} />}
-                <GablePrim skin={skin} plan={plan} />
+                <GablePrim skin={skin} plan={plan} overhead={overhead} />
                 {!plan && skin.props && <Props skin={skin} />}
               </group>
             </Suspense>
@@ -349,8 +378,8 @@ export default function Skins() {
             {!plan && <Post skin={skin} />}
           </Canvas>
 
-          {/* compass (PLAN mode) — oriented like the EagleView diagram: N up-and-right (~30° CW) */}
-          {plan && (
+          {/* compass — shown with the labels, only at the settled overhead working view */}
+          {plan && overhead && (
             <div className="pointer-events-none absolute bottom-10 right-12 z-40">
               <svg width="104" height="104" viewBox="-52 -52 104 104">
                 <circle cx="0" cy="0" r="46" fill="none" stroke="#1d1d1d" strokeOpacity="0.25" />

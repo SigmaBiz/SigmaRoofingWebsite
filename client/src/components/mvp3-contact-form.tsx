@@ -30,7 +30,7 @@ interface AddressSuggestion {
   place_id: string;
 }
 
-export default function MVP3ContactForm() {
+export default function MVP3ContactForm({ prefill, lockService, bgClassName }: { prefill?: Partial<ContactForm>; lockService?: boolean; bgClassName?: string } = {}) {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ContactForm>({
     firstName: "",
@@ -38,8 +38,12 @@ export default function MVP3ContactForm() {
     email: "",
     phone: "",
     address: "",
-    serviceType: ""
+    serviceType: "",
+    ...prefill,
   });
+
+  // /estimate "schedule" path prefills address + locks the service to "lock-in-discount" (home page passes nothing → unchanged).
+  useEffect(() => { if (prefill) setFormData((f) => ({ ...f, ...prefill })); }, [prefill]);
 
   const [emailValid, setEmailValid] = useState(false);
   const [phoneValid, setPhoneValid] = useState(false);
@@ -313,7 +317,7 @@ export default function MVP3ContactForm() {
   };
 
   return (
-    <section id="contact" className="py-24 bg-gradient-to-br from-slate-50 to-gray-50">
+    <section id="contact" className={`py-24 ${bgClassName ?? "bg-gradient-to-br from-slate-50 to-gray-50"}`}>
       <div className="container mx-auto px-6">
         <div className="flex flex-col items-center mb-16">
           <div className="bg-gradient-to-br from-primary/5 to-gray-50 p-8 rounded-2xl shadow-xl border border-primary/15">
@@ -431,15 +435,16 @@ export default function MVP3ContactForm() {
                 </div>
 
                 {/* Service type */}
-                <Select value={formData.serviceType} onValueChange={(value) => handleInputChange('serviceType', value)}>
+                <Select value={formData.serviceType} onValueChange={(value) => handleInputChange('serviceType', value)} disabled={lockService}>
                   <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select Service Type*" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="lock-in-discount">🔒 Lock in 5% online discount</SelectItem>
+                    <SelectItem value="roof-replacement">Roof Replacement</SelectItem>
                     <SelectItem value="roof-repair">Roof Repair</SelectItem>
                     <SelectItem value="storm-damage">Storm Damage Assessment</SelectItem>
                     <SelectItem value="emergency-repair">Emergency Repair</SelectItem>
-                    <SelectItem value="roof-replacement">Roof Replacement</SelectItem>
                     <SelectItem value="inspection">Roof Inspection</SelectItem>
                   </SelectContent>
                 </Select>

@@ -124,3 +124,5 @@ skills-lock.json
 .claude/skills/impeccable
 .claude/skills/design-taste-frontend
 .claude/skills/ui-ux-pro-max
+# quote-funnel leads (PII) — never commit
+data/

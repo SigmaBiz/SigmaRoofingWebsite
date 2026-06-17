@@ -36,27 +36,39 @@ Priority 3: SocHub — video showcase, social links, upload workflow, funnel int
 
 ## Context Preservation Protocol
 
-### The Two Files in .context/
+### The docs in .context/ — by ROLE (hold the pulse of all three)
 
-**STATE.md** — a short snapshot of where we are right now. What's done, what's next, what's broken, what's been tried. Updated at the end of every session. Any fresh session reads this first so it never starts blind.
+Hold the *pulse* of all three roles at all times, and make a context **compaction a NON-EVENT** — the next agent must land EXACTLY where we are, not 99%.
 
-**PLAN.md** — the current feature plan with checkboxes. One active plan at a time. When a feature is done, archive it (rename to plan-feature-name-done.md) and start a new one.
+**1 · NARRATIVE — where/why we are (read FIRST):**
+- **Pulse.md** — THE most important file: the *story* of what we're building and **why**, the throughline, the decision in flight. Compaction keeps the facts but kills the pulse; this file is how the pulse survives. A new teammate should read it in ~2 min and *get it*.
+- **STATE.md** — granular status (done / next / broken / tried). **PLAN.md** — the checklist. Both hang off the narrative.
+
+**2 · MECHANICS — what's true in the domain:**
+- **ROOF-GEOMETRY-RULES.md** (+ **ROOF-STRAYS.md**, what NOT to do) — the roof engine: prims, how they connect, surfaces+seams, the wall/overhang rules.
+- **GRID.md** — the website infrastructure: generic types (object/action/transition), composed.
+
+**3 · META-MECHANICS — how we work:**
+- **METHOD.md** — localhost-as-oracle verification, Pauli clones, pointwise / narrative-first, pattern extraction, push-back.
+
+### ⚙ THE PINNED RULE (compaction-proofing — the most important rule in this file)
+**Every exchange**, spend part of the execution to **re-read** the relevant narrative + mechanics + meta docs, and **update** the ones that changed **before you close the loop.** The loop is not done when the code works — it's done when the docs again describe *exactly* where we are. Then an auto-compact mid-stream changes nothing: the next agent reads the same page we're on. (Past compactions destroyed projects precisely because this step got skipped.)
 
 ### Session Rules
 
-**At session start (do this automatically without being asked):**
-1. Read .context/STATE.md
-2. Read .context/PLAN.md
+**At session start (automatic, unasked):**
+1. Read **Pulse.md** FIRST (the pulse), then **STATE.md** + **PLAN.md**
+2. Skim **METHOD.md** (how we work) + the mechanics doc in play (**ROOF-GEOMETRY-RULES.md** / **GRID.md**)
 3. Briefly confirm current state
 
 **During work:**
 - Offload research, log analysis, docs, and codebase exploration to subagents with a WHY
 - If stuck in a loop, stop. Log what was tried and why to STATE.md. Suggest starting fresh.
 
-**At session end (do this automatically without being asked):**
-1. Update STATE.md
-2. Update PLAN.md
-3. Note any architectural decisions or new documentation needs
+**Every exchange + at session end / before any compaction / when a phase completes (automatic, unasked):**
+1. Update **Pulse.md** first (narrative: where we are, the decision in flight, what's next)
+2. Update **STATE.md** + **PLAN.md**, and any **mechanics / meta** doc that changed (a new rule, pattern, or method)
+3. This closes the loop — per the pinned rule, the docs must describe exactly where we are before the exchange ends
 
 **When a feature is completed:**
 - Archive the plan

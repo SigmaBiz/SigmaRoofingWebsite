@@ -11,6 +11,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
@@ -49,6 +50,7 @@
     "@types/multer": "^1.4.12",
     "@types/node-fetch": "^2.6.12",
     "@types/nodemailer": "^6.4.17",
+    "@types/pngjs": "^6.0.5",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.6.1",
@@ -65,6 +67,7 @@
     "express-session": "^1.18.1",
     "firebase": "^11.8.1",
     "framer-motion": "^11.13.1",
+    "geotiff": "^3.0.5",
     "google-trends-api": "^4.9.2",
     "googleapis": "^149.0.0",
     "gsap": "^3.15.0",
@@ -78,6 +81,7 @@
     "papaparse": "^5.5.3",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "pngjs": "^7.0.0",
     "react": "^18.3.1",
     "react-calendly": "^4.4.0",
     "react-day-picker": "^8.10.1",

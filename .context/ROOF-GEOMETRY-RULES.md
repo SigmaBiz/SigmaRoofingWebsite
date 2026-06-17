@@ -3,7 +3,7 @@
 **This is the CLEAN batch.** Every rule here produced geometry Antonio reviewed and **kept**. The
 rules/interpretations that *strayed* (he defined → I misread → we corrected) are quarantined in
 **`ROOF-STRAYS.md`** — read that too, as the "what NOT to do" list, but it is deliberately separate so
-this file stays the trustworthy spec. Pre-flight checklist: **`ROOF-WORKING-MEMORY.md`**.
+this file stays the trustworthy spec. Pre-flight checklist: **`Pulse.md`**.
 
 Organized with the **ζ-framework**: **Z₂** = invariants (always hold; a violation is a bug);
 **Z₁** = fragile edge-cases (build deliberately, one at a time, verify each).
@@ -162,3 +162,80 @@ Z₂ invariants · derived geometry · ewidth · caps · melt · **max-of-tents*
 #16 wing (ext-on-ext recursion) → faithful Crestridge recreation (needs per-prim dimensions).
 
 → The strayed interpretations we corrected along the way are in **`ROOF-STRAYS.md`** (kept separate).
+
+---
+
+## Wall / overhang rules (recess, underhang, notch) — Antonio, 2026-06-07
+
+So finishes (siding, fascia, soffit, recessed walls) apply by *logic*, and the diminished-facet
+**notches** close generally rather than per-corner. Notation: **W** = a wall's outward normal (away
+from the wall, toward open). **U** = per-edge offset; **U_e** (eaves) default **18"**, **U_r** (rakes)
+default **12"**.
+
+**s0 (State 0)** — the bare structure these rules finish *onto*: walls drop **straight** off the eaves (no offset, no
+fascia), so a diminished facet's raised eave leaves the open notches. Every rule below moves geometry *from* s0.
+(`/shingletest` renders s0 by default — just `HOUSE.roof` + `HOUSE.walls`.)
+
+1. **Wall drop.** A wall drops from its eave straight down to the FIRST surface below it — roof slope,
+   wall, or ground — and stops there. A roof below counts as ground. (General "walls eat roofs," and the
+   notch-killer.)
+2. **One offset, three meanings.** For an edge with offset U, U is at once (a) the overhang (eave-edge →
+   wall), (b) the wall recess, and (c) the underhang width. U > 0 ⇒ the wall dropping from that eave
+   recesses by U toward **−W** (inward), and the underhang reaches back the same U to meet it.
+3. **Underhang (soffit) surface.** Bounded by the roof edge and the recessed wall's top edge. At an
+   **eave** it is horizontal (∥ ground); at a **rake** it **follows the rake slope**. Normal points down.
+4. **Dropped fascia (kept).** The fascia is a real board off the roof edge (≈7.25" / 1×8); the soffit
+   sits at the fascia's bottom, not flush at the eave line. The geometry carries the drop.
+5. **Prim-interface (notch) rule.** Where two prims meet with DIFFERENT eave levels, the LOWER prim's
+   roof extends UNDER the higher prim's eave by that higher eave's **U_e** — giving the recessed wall
+   (rule 1) a roof to land on instead of an open triangle. The lower roof goes continuous through the old
+   seam; the step relocates to a real wall at the recess line. (General form of the hand-fix we reverted;
+   the extension is U_e — **not** the ad-hoc 36" first tried.)
+
+**Crestridge test case (`/shingletest`):** facet I (p1 south slope) is diminished — eave raised dimI=2
+ft — so the SE wing (G, eave x=1) and SW wing (B, eave x=−8) abut it 2 ft low and left open
+right-triangle notches. **Current closure (s0 + dumb wall):** apply *only* rule 1 — drop a wall from facet I's eave straight to the first
+surface below (the wing roof). A plain vertical **seam triangle** per corner (`notch.ts` → `buildNotchWalls`),
+Antonio-verified covered. Overhang/recess (rules 2–5) is **decoupled** for now — close the hole first, fascia later.
+The rule-5 version (wing tongue under the eave + recessed step-wall — a trapezoid+triangle because facet I climbs
+inward) is the *finished* form, parked.
+
+## Pattern (infrastructural) — SURFACES + SEAMS
+
+Reusable takeaway, and it's grid-shaped (generic types, composed): **max-of-tents emits the roof SURFACES (each facet's
+top); it never emits the vertical SEAMS where two surfaces of different height meet.** Seams are a separate, *derived*
+class — found from height discontinuities, not from the surfaces. Two flavors, one operation: a **perimeter seam**
+(roof → ground) is an ordinary wall; an **interior seam** (roof → a lower roof) is a step-wall — *the notch was one.*
+The operation = rule 1: drop from the higher edge to the **first surface below**. The notch existed only because our
+seam-finder walked the **outline** alone — nobody looked for interior seams. So the durable fix for *any* open-gap
+artifact isn't "patch the hole," it's **"find the missing seam."**  Roof = `{SURFACE}` ∘ `{SEAM}`.
+
+**The constraining assumption (and its repair) — footprint ≠ exposed edge.** `buildFascia`/`buildSoffit`/`recedeWalls`
+all iterate the **union-footprint outline** (`boundary` from `unionRects`). The baked-in assumption: *"the roof's
+exposed edges ARE the footprint outline; everything inside the outline is roof-over-roof, so it carries no fascia/soffit/
+wall."* That holds for a normal hip/gable — but a **diminished (raised) eave breaks it.** When facet I's south eave is
+raised by `dimI`, the lower wing roof passes **under** it and, because the eave is *higher*, the wing roof is **visible**
+under the overhang — an exposed roof edge that is **interior to the footprint** (it runs inward from the eave line
+z=−23 to the raised prim's receded wall z=−21.5, hidden inside the 2D projection). The outline says "interior =
+covered"; the raised eave proves otherwise. **Updated assumption:** *the exposed edges = the footprint outline **PLUS**
+the interior edges a diminished eave opens up — where a higher prim's eave is raised above a lower prim's roof, the lower
+roof continues as an exposed **tongue** (its own eave → fascia + soffit) running inward until it reaches the higher
+prim's receded wall.* This is the **prim-interface rule made constructive**: don't just drop a step-wall at the
+interface — first carry the lower roof (and its eave finish) *under* the raised eave, then the higher eave's wall widens
+to meet the tongue's wall. (Built on `/shingletest`: `buildNotchTongueRoof` + `buildNotchTongueEave`; the eave is level,
+not a rake, because the wing planes are z-independent.)
+
+**Gotcha — `heightAt` spikes at overlapping-facet corners.** `heightAt` returns the *top* surface. Where a boundary
+edge meets a corner that a TALLER facet overlaps (e.g. diminished facet I covering a wing's eave at the notch),
+`heightAt` there returns the *taller* facet, not the edge's own eave. **Three symptoms from this one spike:** (1) a
+fascia/soffit tracing it **twists up** to the foreign facet (the "twisted leg") — guard: clamp a sudden jump (≫ any
+eave/rake per-segment slope) to the lower true-eave value; (2) the edge gets **mis-classified eave→rake** because the
+spike inflates its height variance, so its soffit takes the sloped branch and shoots up (a vertical strip at the corner)
+— guard: classify by the edge's **INTERIOR** (sample away from the endpoints); **(3)** a perimeter **eave wall's top**
+rises to the spiking facet and **PIERCES the overhang/tongue** (the wall shoots ~2 ft above the roof it carries) — guard:
+clamp **eave** wall-tops to the edge's *min* `heightAt` (an eave is level, so its min is the true eave; rakes still follow
+the slope per sample). All three guards live in `walls.ts` (`buildFascia`/`buildSoffit` clamp · `isRake` interior sampling
+· `recedeWalls` eave-top clamp). *Note (model-error log):* the pierce was first mis-attributed to the diminished-eave
+*free* wall and "fixed" by clipping ITS top — which only opened a notch in the back wall. The real culprit was the
+adjacent **wing eave wall**. Lesson: at a notch the spike hits **every** eave whose receded line passes under the taller
+facet — check which wall actually rises, with debug colors, before clamping.

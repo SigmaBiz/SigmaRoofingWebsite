@@ -82,7 +82,7 @@ export default function Testimonials() {
   });
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-[#f4efe6]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="font-bold text-4xl text-sigma-charcoal mb-4">What Our Customers Say</h2>
@@ -104,7 +104,7 @@ export default function Testimonials() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {reviews.map((review, index) => (
-            <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow border-l-4 border-l-sigma-emerald">
+            <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8">
                 <div className="flex items-center mb-4">
                   <div className="flex text-sigma-emerald text-lg">

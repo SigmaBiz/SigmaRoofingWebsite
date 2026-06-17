@@ -1,4 +1,4 @@
-import { users, contactRequests, projects, websiteImages, type User, type InsertUser, type ContactRequest, type InsertContactRequest, type Project, type InsertProject, type WebsiteImages, type InsertWebsiteImages } from "@shared/schema";
+import { users, contactRequests, projects, websiteImages, socialVideos, type User, type InsertUser, type ContactRequest, type InsertContactRequest, type Project, type InsertProject, type WebsiteImages, type InsertWebsiteImages, type SocialVideo, type InsertSocialVideo } from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -12,6 +12,9 @@ export interface IStorage {
   saveProjects(projects: any[]): Promise<boolean>;
   getWebsiteImages(): Promise<WebsiteImages | undefined>;
   updateWebsiteImages(images: InsertWebsiteImages): Promise<WebsiteImages>;
+  getSocialVideos(): Promise<SocialVideo[]>;
+  createSocialVideo(video: InsertSocialVideo): Promise<SocialVideo>;
+  deleteSocialVideo(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -19,17 +22,21 @@ export class MemStorage implements IStorage {
   private contactRequests: Map<number, ContactRequest>;
   private projects: Map<number, Project>;
   private websiteImages: WebsiteImages | undefined;
+  private socialVideosMap: Map<number, SocialVideo>;
   private currentUserId: number;
   private currentContactId: number;
   private currentProjectId: number;
+  private currentSocialVideoId: number;
 
   constructor() {
     this.users = new Map();
     this.contactRequests = new Map();
     this.projects = new Map();
+    this.socialVideosMap = new Map();
     this.currentUserId = 1;
     this.currentContactId = 1;
     this.currentProjectId = 1;
+    this.currentSocialVideoId = 1;
     
     // Initialize with default website images
     this.websiteImages = {
@@ -138,6 +145,28 @@ export class MemStorage implements IStorage {
 
   async getWebsiteImages(): Promise<WebsiteImages | undefined> {
     return this.websiteImages;
+  }
+
+  async getSocialVideos(): Promise<SocialVideo[]> {
+    return Array.from(this.socialVideosMap.values())
+      .filter(v => v.isActive === "true")
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async createSocialVideo(video: InsertSocialVideo): Promise<SocialVideo> {
+    const id = this.currentSocialVideoId++;
+    const newVideo: SocialVideo = {
+      ...video,
+      id,
+      isActive: "true",
+      createdAt: new Date(),
+    };
+    this.socialVideosMap.set(id, newVideo);
+    return newVideo;
+  }
+
+  async deleteSocialVideo(id: number): Promise<boolean> {
+    return this.socialVideosMap.delete(id);
   }
 
   async updateWebsiteImages(images: InsertWebsiteImages): Promise<WebsiteImages> {

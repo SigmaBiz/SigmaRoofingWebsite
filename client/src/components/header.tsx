@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, Phone } from "lucide-react";
-import sigmaLogo from "@assets/Untitled design.png";
+import { Link } from "wouter";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,15 +15,15 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gray-50 shadow-lg sticky top-0 z-50">
+    <header className="bg-[#f4efe6] shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between gap-x-4">
           {/* Company Logo and Name */}
-          <div className="flex items-center space-x-3">
-            <img 
-              src={sigmaLogo} 
-              alt="Sigma Roofing LLC Logo" 
-              className="w-16 h-16 object-contain"
+          <div className="flex shrink-0 items-center space-x-3">
+            <img
+              src="/sigma-logo.png"
+              alt="Sigma Roofing LLC Logo"
+              className="w-20 h-20 object-contain"
             />
             <div>
               <h1 className="font-bold text-xl text-sigma-charcoal">Sigma Roofing LLC</h1>
@@ -32,7 +32,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex md:space-x-4 lg:space-x-5">
             <button
               onClick={() => scrollToSection("home")}
               className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
@@ -57,6 +57,22 @@ export default function Header() {
             >
               Projects
             </button>
+            {/* "Watch" / SocHub nav link — DISABLED until the SocHub page has videos (Antonio, 2026-06-16). Re-enable when ready:
+            <Link
+              href="/social"
+              className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors flex items-center gap-1"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-sigma-emerald animate-pulse" />
+              Watch
+            </Link>
+            */}
+            <Link
+              href="/estimate"
+              className="font-semibold text-sigma-gold hover:text-sigma-charcoal transition-colors flex items-center gap-1"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-sigma-gold animate-pulse" />
+              Instant Estimate
+            </Link>
             <button
               onClick={() => scrollToSection("faq")}
               className="font-medium text-sigma-charcoal hover:text-sigma-emerald transition-colors"
@@ -72,14 +88,14 @@ export default function Header() {
           </nav>
 
           {/* Contact Info */}
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-4">
             <div className="text-right">
               <p className="font-semibold text-sigma-charcoal">(405) 902-5266</p>
               <p className="text-sm text-sigma-light-gray">Free Estimates</p>
             </div>
-            <Button 
+            <Button
               onClick={() => scrollToSection("contact")}
-              className="bg-sigma-emerald text-white hover:bg-emerald-600"
+              className="bg-sigma-emerald text-white hover:bg-primary/90"
             >
               Get Quote
             </Button>
@@ -122,6 +138,24 @@ export default function Header() {
               >
                 Projects
               </button>
+              {/* "Watch" / SocHub nav link — DISABLED until the SocHub page has videos (Antonio, 2026-06-16). Re-enable when ready:
+              <Link
+                href="/social"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors flex items-center gap-1"
+              >
+                <span className="inline-block w-2 h-2 rounded-full bg-sigma-emerald animate-pulse" />
+                Watch
+              </Link>
+              */}
+              <Link
+                href="/estimate"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="font-semibold text-sigma-gold hover:text-sigma-dark transition-colors flex items-center gap-1 text-left"
+              >
+                <span className="inline-block w-2 h-2 rounded-full bg-sigma-gold animate-pulse" />
+                Instant Estimate
+              </Link>
               <button
                 onClick={() => scrollToSection("faq")}
                 className="font-medium text-sigma-dark hover:text-sigma-gold transition-colors text-left"
@@ -138,7 +172,7 @@ export default function Header() {
                 <p className="font-semibold text-sigma-dark">(405) 902-5266</p>
                 <Button 
                   onClick={() => scrollToSection("contact")}
-                  className="bg-sigma-gold text-white mt-2 w-full hover:bg-yellow-600"
+                  className="bg-sigma-emerald text-white mt-2 w-full hover:bg-primary/90"
                 >
                   Get Quote
                 </Button>

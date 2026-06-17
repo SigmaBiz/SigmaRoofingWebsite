@@ -80,7 +80,7 @@ export default function Hero() {
         <div className="max-w-4xl mx-auto text-white text-center">
           <h1 className="font-bold text-4xl lg:text-6xl mb-6 leading-tight">
             <span className="text-white">Stand firm.</span>{" "}
-            <span className="text-sigma-emerald">Brave the storm.</span>{" "}
+            <span className="text-sigma-gold">Brave the storm.</span>{" "}
             <span className="text-white">Serve with heart.</span>
           </h1>
           <p className="text-lg lg:text-xl mb-6 leading-relaxed text-gray-200 max-w-3xl mx-auto">
@@ -94,7 +94,7 @@ export default function Hero() {
           <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 max-w-3xl mx-auto">
             <Button
               size="lg"
-              className="bg-sigma-emerald text-white hover:bg-emerald-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform w-full sm:w-64"
+              className="bg-sigma-emerald text-white hover:bg-primary/90 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform w-full sm:w-64"
               onClick={() => window.open("tel:(405)902-1826")}
             >
               <Phone className="mr-2 h-5 w-5" />
@@ -102,7 +102,7 @@ export default function Hero() {
             </Button>
             <Button
               size="lg"
-              className="bg-sigma-emerald text-white hover:bg-emerald-600 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform w-full sm:w-64 flex items-center justify-center"
+              className="bg-sigma-emerald text-white hover:bg-primary/90 text-lg px-8 py-4 shadow-lg transform hover:scale-105 transition-transform w-full sm:w-64 flex items-center justify-center"
               onClick={scrollToContact}
             >
               Free Estimate

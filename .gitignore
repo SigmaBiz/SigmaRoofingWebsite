@@ -118,4 +118,11 @@ generated-icon.png
 noaa_storm_events_cache.json
 trending_phrases.json
 mock_trending_phrases.json
-EOF < /dev/null
+# Community design skills (installed via `npx skills add`; re-installable, not committed)
+.agents/
+skills-lock.json
+.claude/skills/impeccable
+.claude/skills/design-taste-frontend
+.claude/skills/ui-ux-pro-max
+# quote-funnel leads (PII) — never commit
+data/

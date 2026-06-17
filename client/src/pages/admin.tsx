@@ -6,13 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Plus, Eye, Image, Home, Wrench, Users, Award } from "lucide-react";
+import { Upload, Plus, Eye, Image, Home, Wrench, Users, Award, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import CloudinaryPhotoManager from "@/components/cloudinary-photo-manager";
 import DataSync from "@/components/data-sync";
 import TrademarkUpdater from "@/components/trademark-updater";
+import SocialVideoManager from "@/components/social-video-manager";
 
 interface ProjectForm {
   title: string;
@@ -360,7 +361,7 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="images" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="images" className="flex items-center">
               <Image className="w-4 h-4 mr-2" />
               Website Images
@@ -372,6 +373,10 @@ export default function Admin() {
             <TabsTrigger value="upload" className="flex items-center">
               <Upload className="w-4 h-4 mr-2" />
               Photo Manager
+            </TabsTrigger>
+            <TabsTrigger value="sochub" className="flex items-center">
+              <Video className="w-4 h-4 mr-2" />
+              SocHub Videos
             </TabsTrigger>
           </TabsList>
 
@@ -698,6 +703,11 @@ export default function Admin() {
           {/* Photo Manager Tab */}
           <TabsContent value="upload">
             <CloudinaryPhotoManager />
+          </TabsContent>
+
+          {/* SocHub Videos Tab */}
+          <TabsContent value="sochub">
+            <SocialVideoManager />
           </TabsContent>
         </Tabs>
         
